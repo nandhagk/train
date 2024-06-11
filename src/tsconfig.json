@@ -3,7 +3,10 @@
 	"compilerOptions": {
 		"outDir": "../dist",
 		"rootDir": ".",
-		"baseUrl": "."
+		"baseUrl": ".",
+		"paths": {
+			"#db": ["../dbschema/edgeql-js"]
+		}
 	},
 	"include": ["."],
 	"exclude": ["./tsconfig.json"]
