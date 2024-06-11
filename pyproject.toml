@@ -1,9 +1,9 @@
 [tool.poetry]
-name = "starter"
+name = "train"
 version = "0.1.0"
-description = "A Starter Project"
+description = "A train Project"
 license = "MIT"
-authors = ["nandhagk <nandhagopi@gmail.com>"]
+authors = ["nandhagk <nandhagopi@gmail.com>", "kkk1234 <kaushikg.iyer@gmail.com"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -22,7 +22,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.taskipy.tasks]
 lint = "pre-commit run --all-files"
-start = "python -m starter"
+start = "python -m train"
 precommit = "pre-commit install"
 
 [tool.isort]
@@ -55,4 +55,4 @@ ignore = [
 select = ["ALL"]
 
 [tool.pyright]
-include = ["starter"]
+include = ["train"]
