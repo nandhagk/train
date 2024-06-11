@@ -1,0 +1,48 @@
+{
+	"name": "typescript-train",
+	"version": "0.0.1",
+	"description": "Typescript train",
+	"author": "nandhagk <nandhagopi@gmail.com>, Dragon-kk <kaushikg.iyer@gmail.com",
+	"private": true,
+	"license": "MIT",
+	"type": "module",
+	"scripts": {
+		"build": "tsup",
+		"start:prod": "node --enable-source-maps dist/index.js",
+		"start": "pnpm run build && pnpm run start:prod",
+		"start:dev": "tsup --watch --onSuccess \"pnpm start:prod\"",
+		"format": "prettier --write \"src/**/*.ts\"",
+		"lint": "eslint src --fix",
+		"typecheck": "tsc -b src",
+		"prepare": "husky install"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^19.3.0",
+		"@commitlint/config-conventional": "^19.2.2",
+		"@sapphire/eslint-config": "^5.0.5",
+		"@sapphire/prettier-config": "^2.0.0",
+		"@sapphire/ts-config": "^5.0.1",
+		"@swc/core": "^1.5.28",
+		"@types/node": "^20.14.2",
+		"@typescript-eslint/eslint-plugin": "^7.13.0",
+		"@typescript-eslint/parser": "^7.13.0",
+		"eslint": "^9.4.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.1.3",
+		"husky": "^9.0.11",
+		"lint-staged": "^15.2.5",
+		"prettier": "^3.3.2",
+		"tsup": "^8.1.0",
+		"typescript": "^5.4.5"
+	},
+	"lint-staged": {
+		"*": "prettier --ignore-unknown --write",
+		"*.ts": "eslint --fix"
+	},
+	"commitlint": {
+		"extends": [
+			"@commitlint/config-conventional"
+		]
+	},
+	"prettier": "@sapphire/prettier-config"
+}

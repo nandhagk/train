@@ -1,0 +1,18 @@
+{
+	"extends": ["config:base", "helpers:pinGitHubActionDigests", "group:allNonMajor"],
+	"schedule": ["before 12pm on Sunday"],
+	"npm": {
+		"rangeStrategy": "bump",
+		"packageRules": [
+			{
+				"matchUpdateTypes": ["minor", "patch"],
+				"matchCurrentVersion": "!/^0/",
+				"automerge": true
+			},
+			{
+				"matchDepTypes": ["engines"],
+				"enabled": false
+			}
+		]
+	}
+}
