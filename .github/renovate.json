@@ -1,0 +1,10 @@
+{
+  "extends": ["config:base", "helpers:pinGitHubActionDigests", "group:allNonMajor"],
+  "schedule": ["before 12pm on Sunday"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
+  ]
+}

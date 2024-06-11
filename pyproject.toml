@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "starter"
+version = "0.1.0"
+description = "A Starter Project"
+license = "MIT"
+authors = ["nandhagk <nandhagopi@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+[tool.poetry.group.dev.dependencies]
+taskipy = "^1.9.0"
+
+[tool.poetry.group.lint.dependencies]
+ruff = "^0.4.0"
+shed = "^2024.0.0"
+pre-commit = "^3.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.taskipy.tasks]
+lint = "pre-commit run --all-files"
+start = "python -m starter"
+precommit = "pre-commit install"
+
+[tool.isort]
+profile = "black"
+case_sensitive = true
+
+[tool.ruff]
+ignore = [
+  # Missing Docstrings
+  "D100",
+  "D101",
+  "D102",
+  "D104",
+  "D105",
+  "D106",
+  "D107",
+  # Docstring Whitespace
+  "D203",
+  "D212",
+  "D214",
+  "D215",
+  # Type Annotations
+  "ANN002",
+  "ANN003",
+  "ANN101",
+  "ANN102",
+  # Print statement
+  "T201"
+]
+select = ["ALL"]
+
+[tool.pyright]
+include = ["starter"]
