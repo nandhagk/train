@@ -1,0 +1,7 @@
+General:
+    - Figure out what all blocks exist (Just use the blocks from the excel sheet till we figure this out)
+    - There are atleast 100 more sections that are used in the excel sheet, figure that out
+
+__main__.py:
+    - Write function to put dummy data in database
+    - Make the actual algorithm lmao
