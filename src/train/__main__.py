@@ -3,6 +3,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime, timedelta
 
+from heapq import heapify, heappush, heappop
 import click
 
 con = sqlite3.connect("train.db")
@@ -186,13 +187,16 @@ def sft(data: str, length: int, clear: bool):
             ln, st, et = line.split()
             st = timedelta(hours=int(st[:2]), minutes=int(st[2:]))
             et = timedelta(hours=int(et[:2]), minutes=int(et[2:]))
+
+            if et < st:
+                et += timedelta(hours=24)
             bid = get_block_id(block_name, ln)
             cur.executemany("INSERT INTO free_time VALUES (NULL, ?, ?, ?)",
                 [
                     (
-                        bid,
                         datetime.strftime(datetime.now().replace(hour = 0, second = 0, minute = 0) + timedelta(days=days) + st, "%Y-%m-%d %H:%M:%S"),
-                        datetime.strftime(datetime.now().replace(hour = 0, second = 0, minute = 0) + timedelta(days=days) + et, "%Y-%m-%d %H:%M:%S")
+                        datetime.strftime(datetime.now().replace(hour = 0, second = 0, minute = 0) + timedelta(days=days) + et, "%Y-%m-%d %H:%M:%S"),
+                        bid,
                     )
                     for days in range(length)
             ])
@@ -207,7 +211,7 @@ def sft(data: str, length: int, clear: bool):
 def insert(duration: int, priority: int, section: str) -> None:
     """Section: STN-STN or STN YD."""
     if section.endswith("YD"):
-        from_stn = to_stn = section.split()[0]
+        from_stn = to_stn = section.split()[0] + "_YD"
     else:
         from_stn, _, to_stn = section.partition("-")
 
@@ -236,87 +240,116 @@ def insert(duration: int, priority: int, section: str) -> None:
 
     block_id = get_block_id(from_stn)
     section_id = get_section_id(from_stn, to_stn)
+    
+    tasks_to_place_queue = [
+        (-priority, duration)
+    ]
+    heapify(tasks_to_place_queue)
 
-    res = cur.execute(
-        """
-        SELECT f.starts_at FROM free_time AS f
-        WHERE f.block_id = :block_id
-        AND f.starts_at >= DATETIME('now', '+30 minutes')
-        AND CAST((JULIANDAY(f.ends_at) - JULIANDAY(f.starts_at)) * 1440 AS REAL)
-            >= :duration
-        AND NOT EXISTS(
-            SELECT NULL FROM task AS q
-            WHERE q.section_id = :section_id
-            AND f.starts_at <= q.starts_at
-            AND q.ends_at <= f.ends_at
+    while tasks_to_place_queue:
+        task = heappop(tasks_to_place_queue)
+        print(task)
+        res = cur.execute(
+            """
+            SELECT f.starts_at FROM free_time AS f
+            WHERE f.block_id = :block_id
+            AND f.starts_at >= DATETIME('now', '+30 minutes')
+            AND ROUND(CAST((JULIANDAY(f.ends_at) - JULIANDAY(f.starts_at)) * 1440 AS REAL), 0)
+                >= :duration
+            AND NOT EXISTS(
+                SELECT NULL FROM task AS q
+                WHERE q.section_id = :section_id
+                AND f.starts_at <= q.starts_at
+                AND q.ends_at <= f.ends_at
+                AND q.priority >= :priority
+            )
+            ORDER BY f.starts_at ASC
+            LIMIT 1
+            """,
+            {
+                "duration": task[1],
+                "priority": -task[0],
+                "section_id": section_id,
+                "block_id": block_id,
+            },
         )
-        ORDER BY f.starts_at ASC
-        LIMIT 1
-        """,
-        {"section_id": section_id, "block_id": block_id, "duration": duration},
-    )
 
-    try:
-        starts_at = res.fetchone()[0]
-    except TypeError:
-        print("NO TIME SLOT FOR DURATION :(")
-        return
+        try:
+            starts_at = res.fetchone()[0]
+        except TypeError:
+            print("NO TIME SLOT FOR DURATION :(")
+            return
 
-    res = cur.execute(
-        """
-        SELECT MIN((SELECT IFNULL(
-            (
-                SELECT t.ends_at FROM task AS t CROSS JOIN free_time AS f
-                WHERE t.section_id = :section_id
-                AND f.block_id = :block_id
-                AND t.ends_at >= DATETIME('now', '+30 minutes')
-                AND f.starts_at <= t.starts_at
-                AND f.ends_at >= t.ends_at
-                AND CAST((JULIANDAY(f.ends_at) - JULIANDAY(t.ends_at)) * 1440 AS REAL)
-                    >= :duration
-                AND NOT EXISTS(
-                    SELECT NULL FROM task AS q
-                    WHERE q.section_id = :section_id
-                    AND t.ends_at <= q.starts_at
-                    AND q.ends_at <= f.ends_at
-                )
-                ORDER BY t.ends_at ASC
-                LIMIT 1
-            ),
-            :starts_at
-        )), :starts_at)
-        """,
-        {
-            "section_id": section_id,
-            "block_id": block_id,
-            "duration": duration,
-            "starts_at": starts_at,
-        },
-    )
+        res = cur.execute(
+            """
+            SELECT MIN((SELECT IFNULL(
+                (
+                    SELECT t.ends_at FROM task AS t CROSS JOIN free_time AS f
+                    WHERE t.section_id = :section_id
+                    AND f.block_id = :block_id
+                    AND t.ends_at >= DATETIME('now', '+30 minutes')
+                    AND f.starts_at <= t.starts_at
+                    AND f.ends_at >= t.ends_at
+                    AND ROUND(CAST((JULIANDAY(f.ends_at) - JULIANDAY(t.ends_at)) * 1440 AS REAL), 0)
+                        >= :duration
+                    AND NOT EXISTS(
+                        SELECT NULL FROM task AS q
+                        WHERE q.section_id = :section_id
+                        AND t.ends_at <= q.starts_at
+                        AND q.ends_at <= f.ends_at
+                        AND q.priority >= :priority
+                    )
+                    ORDER BY t.ends_at ASC
+                    LIMIT 1
+                ),
+                :starts_at
+            )), :starts_at)
+            """,
+            {
+                "duration": task[1],
+                "priority": -task[0],
+                "starts_at": starts_at, 
+                "section_id": section_id,
+                "block_id": block_id
+            },
+        )
+        
+        starts_at = datetime.strptime(res.fetchone()[0], "%Y-%m-%d %H:%M:%S")
+        ends_at = starts_at + timedelta(minutes=task[1])
 
-    starts_at = datetime.strptime(res.fetchone()[0], "%Y-%m-%d %H:%M:%S")
-    ends_at = starts_at + timedelta(minutes=duration)
-    print(starts_at, ends_at)
+        cur.execute(
+            """
+            DELETE FROM task
+            WHERE
+            section_id = ? AND
+            starts_at >= ? AND starts_at < ?
+            RETURNING requested_duration, priority
+            """,
+            (section_id, datetime.strftime(starts_at, "%Y-%m-%d %H:%M:%S"), datetime.strftime(ends_at, "%Y-%m-%d %H:%M:%S"))
+        )
+        for dur, pr in cur.fetchall():
+            heappush(tasks_to_place_queue, (-pr, dur))
+        print(starts_at, ends_at)
 
-    cur.execute(
-        """
-        INSERT INTO task VALUES (
-            NULL,
-            :starts_at,
-            :ends_at,
-            :duration,
-            :priority,
-            :section_id
-        );
-        """,
-        {
-            "starts_at": datetime.strftime(starts_at, "%Y-%m-%d %H:%M:%S"),
-            "ends_at": datetime.strftime(ends_at, "%Y-%m-%d %H:%M:%S"),
-            "duration": duration,
-            "priority": priority,
-            "section_id": section_id,
-        },
-    )
+        cur.execute(
+            """
+            INSERT INTO task VALUES (
+                NULL,
+                :starts_at,
+                :ends_at,
+                :duration,
+                :priority,
+                :section_id
+            );
+            """,
+            {
+                "starts_at": datetime.strftime(starts_at, "%Y-%m-%d %H:%M:%S"),
+                "ends_at": datetime.strftime(ends_at, "%Y-%m-%d %H:%M:%S"),
+                "duration": task[1],
+                "priority": -task[0],
+                "section_id": section_id,
+            },
+        )
 
     con.commit()
 
