@@ -78,6 +78,11 @@ def main() -> None:
 
 
 @main.command()
+@click.argument("data", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
+def init(data: str):
+    print(data)
+
+@main.command()
 @click.argument("requested_duration", type=int)
 @click.argument("priority", type=int)
 @click.argument("section")
