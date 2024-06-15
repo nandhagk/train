@@ -76,3 +76,14 @@ class Station:
             )
             """,
         )
+
+    @staticmethod
+    def insert_many(stations: list[str], block_id: int) -> None:
+        cur.executemany(
+            """
+            INSERT INTO station (id, name, block_id)
+            VALUES (NULL, ?, ?)
+            ON CONFLICT DO NOTHING
+            """,
+            [(station, block_id) for station in stations]
+        )

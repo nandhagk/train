@@ -91,3 +91,14 @@ class Section:
             )
             """,
         )
+
+    @staticmethod
+    def insert_many(sections: list[tuple[str, int, int]]) -> None:
+        cur.executemany(
+            """
+            INSERT INTO section (id, line, from_id, to_id)
+            vALUES (NULL, :line, :from_id, :to_id)
+            ON CONFLICT DO NOTHING
+            """,
+            sections,
+        )

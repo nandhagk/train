@@ -3,6 +3,9 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pprint import pprint
+from pathlib import Path
+import json
+import sys
 
 import click
 
@@ -31,65 +34,30 @@ def init(data: str):
     """
     Put some dummy data in the database.
 
-    NOTE: Does not populate free time table.
-    """
-
-    def init_block(block_name: str) -> int:
-        cur.execute(
-            """
-            INSERT INTO block (id, name)
-            VALUES (NULL, :name)
-            ON CONFLICT DO NOTHING
-            """,
-            {"name": block_name},
-        )
-        con.commit()
-
-        block = Block.find_by_name(block_name)
-        assert block is not None
-
-        return block.id
-
-    def init_station(station_name: str, block_id: int) -> int:
-        cur.execute(
-            """
-            INSERT INTO station (id, name, block_id)
-            VALUES (NULL, :name, :block_id)
-            ON CONFLICT DO NOTHING
-            """,
-            {"name": station_name, "block_id": block_id},
-        )
-        con.commit()
-
-        station = Station.find_by_name(station_name)
-        assert station is not None
-
-        return station.id
-
-    def init_section(id1: int, id2: int) -> None:
-        cur.execute(
-            """
-            INSERT INTO section (id, line, from_id, to_id)
-            vALUES (NULL, :line, :from_id, :to_id)
-            ON CONFLICT DO NOTHING
-            """,
-            {"line": "UP", "from_id": id1, "to_id": id2},
-        )
-        con.commit()
-
-    import json
-    from pathlib import Path
-
+    NOTE: Does not populate maintenance_window table.
+    """    
     blocks = json.loads(Path(data).read_text())
+    Block.insert_many(blocks)
+    
     for block in blocks:
-        block_id = init_block(block)
+        block_id = Block.find_by_name(block).id
+
+        stations = set()
         for section in blocks[block]:
             if section[0] == section[1]:
                 section[0] = section[1] = section[0] + "_YD"
-            s1 = init_station(section[0], block_id)
-            s2 = init_station(section[1], block_id)
-            init_section(s1, s2)
+            stations.add(section[0])
+            stations.add(section[1])
 
+        Station.insert_many(stations, block_id)
+        Section.insert_many(
+            [
+                ("UP", Station.find_by_name(section[0]).id, Station.find_by_name(section[1]).id)
+                for section in blocks[block]
+            ]
+        )
+
+    con.commit()
 
 @main.command()
 @click.argument("data", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
@@ -97,25 +65,16 @@ def init(data: str):
 @click.option("--clear", is_flag=True, default=False)
 def sft(data: str, length: int, clear: bool):
     """Populate the maintenance_window table."""
-    import sys
-
     def get_block_id(block_name: str) -> int:
         block = Block.find_by_name(block_name)
         if block is None:
-            print(block_name)
-            print("ERROR! Block does not exist", file=sys.stderr)
+            print(f"ERROR! Invalid time data file, Block `{block_name}` does not exist", file=sys.stderr)
             sys.exit(1)
-
         return block.id
 
-    if clear:
-        cur.execute("DELETE FROM maintenance_window")
-        con.commit()
-
-    from pathlib import Path
-
-    raw = Path(data)
-    res = cur.execute(
+    if clear: MaintenanceWindow.clear()
+    
+    cur.execute(
         """
         SELECT section.id, section.line, block_id from section
         JOIN station ON
@@ -125,12 +84,13 @@ def sft(data: str, length: int, clear: bool):
         """,
     )
 
-    ids = res.fetchall()
+    ids = cur.fetchall()
     grouped = defaultdict(list)
+
     for section_id, line, block_id in ids:
         grouped[(block_id, line)].append(section_id)
 
-    for block_data in raw.read_text().split("\n\n"):
+    for block_data in Path(data).read_text().split("\n\n"):
         lines = block_data.splitlines()
         block_name = lines[0][1:]
         for line in lines[1:]:
@@ -138,12 +98,11 @@ def sft(data: str, length: int, clear: bool):
             st = timedelta(hours=int(st[:2]), minutes=int(st[2:]))
             et = timedelta(hours=int(et[:2]), minutes=int(et[2:]))
 
-            if et < st:
-                et += timedelta(hours=24)
+            if et < st: et += timedelta(hours=24)
+            
             bid = get_block_id(block_name)
             for section_id in grouped[(bid, ln)]:
-                cur.executemany(
-                    "INSERT INTO maintenance_window VALUES (NULL, ?, ?, ?)",
+                MaintenanceWindow.insert_many(
                     [
                         (
                             datetime.now().replace(hour=0, second=0, minute=0)
@@ -152,12 +111,12 @@ def sft(data: str, length: int, clear: bool):
                             datetime.now().replace(hour=0, second=0, minute=0)
                             + timedelta(days=days)
                             + et,
-                            section_id,
                         )
                         for days in range(length)
-                    ],
+                    ], section_id
                 )
-            con.commit()
+                  
+    con.commit()
 
 
 @main.command()

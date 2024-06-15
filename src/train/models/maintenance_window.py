@@ -70,3 +70,14 @@ class MaintenanceWindow:
             )
             """,
         )
+
+    @staticmethod
+    def clear() -> None:
+        cur.execute("DELETE FROM maintenance_window")
+
+    @staticmethod
+    def insert_many(windows: list[tuple[datetime, datetime]], section_id: int) -> None:
+        cur.executemany(
+            "INSERT INTO maintenance_window (id, starts_at, ends_at, section_id) VALUES (NULL, ?, ?, ?)",
+            [(*window, section_id) for window in windows]
+        )  

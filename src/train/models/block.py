@@ -63,3 +63,14 @@ class Block:
             )
             """,
         )
+
+    @staticmethod
+    def insert_many(blocks: list[str]) -> None:
+        cur.executemany(
+            """
+            INSERT INTO block (id, name)
+            VALUES (NULL, ?)
+            ON CONFLICT DO NOTHING
+            """,
+            [(name,) for name in blocks]
+        )
