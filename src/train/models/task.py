@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Self, TypeAlias
 from train.db import cur
 
 if TYPE_CHECKING:
-
     from train.models.maintenance_window import MaintenanceWindow
 
 RawTask: TypeAlias = tuple[int, str, str, int, int, int]
@@ -57,7 +56,7 @@ class Task:
         payload = {
             "starts_at": starts_at,
             "ends_at": ends_at,
-            "requested_duration": requestion_duration.total_seconds() // 60,
+            "requested_duration": requestion_duration,
             "priority": priority,
             "maintenance_window_id": maintenance_window_id,
         }
@@ -100,6 +99,12 @@ class Task:
         while queue:
             taskq = heappop(queue)
 
+            payload = {
+                "requested_duration": taskq.requested_duration,
+                "priority": taskq.priority,
+                "section_id": section_id,
+            }
+
             res = cur.execute(
                 """
                 SELECT IFNULL(
@@ -119,20 +124,17 @@ class Task:
                     maintenance_window.section_id = :section_id
                     AND maintenance_window.starts_at >= DATETIME('now', '+30 minutes')
                     AND ROUND(
-                            CAST((JULIANDAY(maintenance_window.ends_at) - JULIANDAY(k))
-                                     * 1440 AS REAL),
+                            CAST(
+                                (JULIANDAY(maintenance_window.ends_at) - JULIANDAY(k))
+                                * 1440 AS REAL
+                            ),
                             0
                         ) >= :requested_duration
                 ORDER BY
                     maintenance_window.starts_at ASC
                 LIMIT 1
                 """,
-                {
-                    "requested_duration": taskq.requested_duration.total_seconds()
-                    // 60,
-                    "priority": taskq.priority,
-                    "section_id": section_id,
-                },
+                payload,
             )
 
             x = res.fetchone()
@@ -144,6 +146,12 @@ class Task:
             starts_at = datetime.fromisoformat(starts_at)
             ends_at = starts_at + taskq.requested_duration
 
+            payload = {
+                "maintenance_window_id": maintenance_window_id,
+                "starts_at": starts_at,
+                "ends_at": ends_at,
+            }
+
             res = cur.execute(
                 """
                 DELETE FROM task
@@ -153,11 +161,7 @@ class Task:
                     AND starts_at < :ends_at
                 RETURNING requested_duration, priority, starts_at
                 """,
-                {
-                    "maintenance_window_id": maintenance_window_id,
-                    "starts_at": starts_at,
-                    "ends_at": ends_at,
-                },
+                payload,
             )
 
             for dur, pr, st in res.fetchall():
