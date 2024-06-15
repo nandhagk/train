@@ -85,5 +85,5 @@ class Station:
             VALUES (NULL, ?, ?)
             ON CONFLICT DO NOTHING
             """,
-            [(station, block_id) for station in stations]
+            [(station, block_id) for station in stations],
         )

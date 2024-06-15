@@ -97,7 +97,7 @@ class Section:
         cur.executemany(
             """
             INSERT INTO section (id, line, from_id, to_id)
-            vALUES (NULL, :line, :from_id, :to_id)
+            vALUES (NULL, ?, ?, ?)
             ON CONFLICT DO NOTHING
             """,
             sections,

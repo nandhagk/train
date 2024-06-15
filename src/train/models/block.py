@@ -72,5 +72,5 @@ class Block:
             VALUES (NULL, ?)
             ON CONFLICT DO NOTHING
             """,
-            [(name,) for name in blocks]
+            [(name,) for name in blocks],
         )
