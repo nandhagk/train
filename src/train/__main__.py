@@ -135,14 +135,14 @@ def sft(data: str, length: int, clear: bool):
 @click.argument("name")
 @click.argument("line")
 def defrag(name: str, line: str) -> None:
-    """Reschedules all tasks inorder to remove gaps."""
+    """Reschedules all future tasks inorder to remove gaps."""
     section = Section.find_by_name_and_line(name, line)
     if section is None:
         print("Section not found")
         return
 
     tasks = sorted(
-        Task.pop_tasks(section.id),
+        Task.delete_future_tasks(section.id),
         key=lambda task: (task.priority, task.requested_duration),
         reverse=True,
     )
