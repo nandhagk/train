@@ -130,6 +130,26 @@ def sft(data: str, length: int, clear: bool):
 
     con.commit()
 
+@main.command()
+@click.argument("name")
+@click.argument("line")
+def defrag(name: str, line: str) -> None:
+    """Reschedules all tasks inorder to remove gaps"""
+    section = Section.find_by_name_and_line(name, line)
+    if section is None:
+        print("Section not found")
+        return
+
+    tasks = sorted(Task.pop_tasks(section), key=lambda task: (task.priority, task.requested_duration), reverse=True)
+    for task in tasks:
+        Task.insert_greedy(task.requested_duration, task.priority, section.id)
+    
+    pprint(tasks)
+
+
+    con.commit()
+
+
 
 @main.command()
 @click.argument("duration", type=int)
