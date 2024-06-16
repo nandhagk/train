@@ -5,12 +5,10 @@ from datetime import datetime, timedelta
 from heapq import heapify, heappop, heappush
 from typing import TYPE_CHECKING, Self, TypeAlias
 
-
 from train.db import cur
 
 if TYPE_CHECKING:
     from train.models.maintenance_window import MaintenanceWindow
-    from train.models.section import Section
 
 RawTask: TypeAlias = tuple[int, str, str, int, int, int]
 
@@ -240,24 +238,25 @@ class Task:
         )
 
     @classmethod
-    def pop_tasks(cls, section: Section) -> list[Task]:
+    def pop_tasks(cls, section_id: int) -> list[Self]:
+        payload = {"section_id": section_id}
+
         cur.execute(
             """
-            DELETE FROM task WHERE id in
-            (
-                SELECT task.id FROM task
-                JOIN maintenance_window ON maintenance_window.id = task.maintenance_window_id
-                JOIN section ON section.id = maintenance_window.section_id
-                WHERE section.id = :id
-            )
+            DELETE FROM task
+            WHERE
+                id in (
+                    SELECT task.id FROM task
+                    JOIN maintenance_window ON
+                        maintenance_window.id = task.maintenance_window_id
+                    JOIN section ON
+                        section.id = maintenance_window.section_id
+                    WHERE
+                        section.id = :section_id
+                )
             RETURNING *
             """,
-            {
-                "id": section.id
-            }
+            payload,
         )
-        return [
-            cls.decode(raw) for raw in cur.fetchall()
-        ]
 
-
+        return [cls.decode(raw) for raw in cur.fetchall()]  # type: ignore ()
