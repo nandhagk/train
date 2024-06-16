@@ -84,7 +84,7 @@ def sft(data: str, length: int, clear: bool):
     if clear:
         MaintenanceWindow.clear()
 
-    cur.execute(
+    res = cur.execute(
         """
         SELECT section.id, section.line, block_id from section
         JOIN station ON
@@ -94,7 +94,7 @@ def sft(data: str, length: int, clear: bool):
         """,
     )
 
-    ids = cur.fetchall()
+    ids = res.fetchall()
     grouped = defaultdict(list)
 
     for section_id, line, block_id in ids:

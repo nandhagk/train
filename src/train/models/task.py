@@ -253,7 +253,7 @@ class Task:
                         section.id = maintenance_window.section_id
                     WHERE
                         section.id = :section_id
-                        AND task.starts_at >= DATETIME('now', '+30 minutes)
+                        AND task.starts_at >= DATETIME('now', '+30 minutes')
                 )
             RETURNING *
             """,
