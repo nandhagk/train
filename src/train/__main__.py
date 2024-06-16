@@ -48,7 +48,7 @@ def init(data: str):
         Block.insert_many(blocks)
 
         for block in blocks:
-            block_id = Block.find_by_name(block).id
+            block_id = Block.find_by_name(block).id # type: ignore (reportOptional)
 
             stations: set[str] = set()
             for section in blocks[block]:
@@ -62,8 +62,8 @@ def init(data: str):
                 [
                     (
                         "UP",
-                        Station.find_by_name(section[0]).id,
-                        Station.find_by_name(section[1]).id,
+                        Station.find_by_name(section[0]).id, # type: ignore (reportOptional)
+                        Station.find_by_name(section[1]).id, # type: ignore (reportOptional)
                     )
                     for section in blocks[block]
                 ],
