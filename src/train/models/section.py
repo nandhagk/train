@@ -40,7 +40,7 @@ class Section:
         cls,
         name: str,
         line: str,
-    ) -> Self | None:
+    ) -> Section | None:
         if "-" in name:
             f, _, t = name.partition("-")
         else:

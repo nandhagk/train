@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from pathlib import Path
 from pprint import pprint
+
 
 import click
 
@@ -227,4 +228,9 @@ def insert(duration: int, priority: int, name: str, line: str) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    section = Section.find_by_name_and_line("AKM-ELR", "UP")
+    assert section is not None
+    
+    Task.insert_preferred(time(hour=23, minute=45), time(hour=0, minute=45), 1, section.id)
+    con.commit()
