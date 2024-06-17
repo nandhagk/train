@@ -29,7 +29,11 @@ class Section:
             payload,
         )
 
-        return cls.decode(res.fetchone())
+        raw = res.fetchone()
+        if raw is None:
+            return None
+
+        return cls.decode(raw)
 
     @classmethod
     def find_by_name_and_line(
@@ -63,13 +67,14 @@ class Section:
             payload,
         )
 
-        return cls.decode(res.fetchone())
-
-    @classmethod
-    def decode(cls, raw: RawSection | None) -> Self | None:
+        raw = res.fetchone()
         if raw is None:
             return None
 
+        return cls.decode(raw)
+
+    @classmethod
+    def decode(cls, raw: RawSection) -> Self:
         id, line, from_id, to_id = raw
         return cls(id, line, from_id, to_id)
 

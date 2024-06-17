@@ -195,13 +195,14 @@ class Task:
             payload,
         )
 
-        return cls.decode(res.fetchone())
-
-    @classmethod
-    def decode(cls, raw: RawTask | None) -> Self | None:
+        raw = res.fetchone()
         if raw is None:
             return None
 
+        return cls.decode(res.fetchone())
+
+    @classmethod
+    def decode(cls, raw: RawTask) -> Self:
         (
             id,
             starts_at,
@@ -241,7 +242,7 @@ class Task:
     def delete_future_tasks(cls, section_id: int) -> list[Self]:
         payload = {"section_id": section_id}
 
-        cur.execute(
+        res = cur.execute(
             """
             DELETE FROM task
             WHERE
@@ -260,4 +261,4 @@ class Task:
             payload,
         )
 
-        return [cls.decode(raw) for raw in cur.fetchall()]  # type: ignore ()
+        return [cls.decode(raw) for raw in res.fetchall()]

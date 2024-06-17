@@ -40,12 +40,14 @@ class MaintenanceWindow:
             payload,
         )
 
-        return cls.decode(res.fetchone())
-
-    @classmethod
-    def decode(cls, raw: RawMaintenaceWindow | None) -> Self | None:
+        raw = res.fetchone()
         if raw is None:
             return None
+
+        return cls.decode(raw)
+
+    @classmethod
+    def decode(cls, raw: RawMaintenaceWindow) -> Self:
 
         id, starts_at, ends_at, section_id = raw
         return cls(

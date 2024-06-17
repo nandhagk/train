@@ -38,7 +38,11 @@ class Station:
             payload,
         )
 
-        return cls.decode(res.fetchone())
+        raw = res.fetchone()
+        if raw is None:
+            return None
+
+        return cls.decode(raw)
 
     @classmethod
     def find_by_name(cls, name: str) -> Self | None:
@@ -51,13 +55,14 @@ class Station:
             {"name": name},
         )
 
-        return cls.decode(res.fetchone())
-
-    @classmethod
-    def decode(cls, raw: RawStation | None) -> Self | None:
+        raw = res.fetchone()
         if raw is None:
             return None
 
+        return cls.decode(raw)
+
+    @classmethod
+    def decode(cls, raw: RawStation) -> Self:
         id, name, block_id = raw
         return cls(id, name, block_id)
 

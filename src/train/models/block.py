@@ -26,7 +26,11 @@ class Block:
             payload,
         )
 
-        return cls.decode(res.fetchone())
+        raw = res.fetchone()
+        if raw is None:
+            return None
+
+        return cls.decode(raw)
 
     @classmethod
     def find_by_name(cls, name: str) -> Self | None:
@@ -41,13 +45,14 @@ class Block:
             payload,
         )
 
-        return cls.decode(res.fetchone())
-
-    @classmethod
-    def decode(cls, raw: RawBlock | None) -> Self | None:
+        raw = res.fetchone()
         if raw is None:
             return None
 
+        return cls.decode(raw)
+
+    @classmethod
+    def decode(cls, raw: RawBlock) -> Self:
         id, name = raw
         return cls(id, name)
 

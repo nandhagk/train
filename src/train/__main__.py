@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 from pprint import pprint
-import logging
 
 import click
 
@@ -16,12 +16,13 @@ from train.models.section import Section
 from train.models.station import Station
 from train.models.task import Task
 
-#Logger config; Create directory if it doesnt already exist
-log_folder = Path(__file__).resolve().parent / 'log'
-log_folder.mkdir(parents=True, exist_ok=True)
-log_file = log_folder / 'errors.log'
-logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)    
+logging.basicConfig(
+    filename=Path.cwd() / "train.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
+
+logger = logging.getLogger()
 
 Block.init()
 Station.init()
@@ -48,7 +49,7 @@ def init(data: str):
         Block.insert_many(blocks)
 
         for block in blocks:
-            block_id = Block.find_by_name(block).id # type: ignore (reportOptional)
+            block_id = Block.find_by_name(block).id  # type: ignore ()
 
             stations: set[str] = set()
             for section in blocks[block]:
@@ -62,8 +63,8 @@ def init(data: str):
                 [
                     (
                         "UP",
-                        Station.find_by_name(section[0]).id, # type: ignore (reportOptional)
-                        Station.find_by_name(section[1]).id, # type: ignore (reportOptional)
+                        Station.find_by_name(section[0]).id,  # type: ignore ()
+                        Station.find_by_name(section[1]).id,  # type: ignore ()
                     )
                     for section in blocks[block]
                 ],
@@ -73,8 +74,10 @@ def init(data: str):
         logger.info("Initialized database with dummy data from file: %s", data)
 
     except Exception as e:
-        logger.error("Failed to initialize database with dummy data: %s", str(e))
-        raise click.ClickException(f"Failed to initialize database with dummy data: {e}")
+        logger.exception("Failed to initialize database with dummy data")
+
+        msg = f"Failed to initialize database with dummy data: {e}"
+        raise click.ClickException(msg) from e
 
 
 @main.command()
@@ -87,8 +90,13 @@ def sft(data: str, length: int, clear: bool):
     def get_block_id(block_name: str) -> int:
         block = Block.find_by_name(block_name)
         if block is None:
-            logger.error("Invalid time data file. Block `%s` does not exist", block_name)
-            raise click.ClickException(f"Invalid time data file. Block `{block_name}` does not exist")
+            logger.error(
+                "Invalid time data file. Block `%s` does not exist",
+                block_name,
+            )
+            msg = f"Invalid time data file. Block `{block_name}` does not exist"
+            raise click.ClickException(msg)
+
         return block.id
 
     try:
@@ -136,16 +144,17 @@ def sft(data: str, length: int, clear: bool):
                             )
                             for days in range(length)
                         ],
-                        section_id,# Configure logging
-logging.basicConfig(filename='train_app.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+                        section_id,
                     )
 
         con.commit()
         logger.info("Populated maintenance_window table from data file: %s", data)
 
     except Exception as e:
-        logger.error("Failed to populate maintenance_window table: %s", str(e))
-        raise click.ClickException(f"Failed to populate maintenance_window table: {e}")
+        logger.exception("Failed to populate maintenance_window table")
+
+        msg = f"Failed to populate maintenance_window table: {e}"
+        raise click.ClickException(msg) from e
 
 
 @main.command()
@@ -157,7 +166,9 @@ def defrag(name: str, line: str) -> None:
         section = Section.find_by_name_and_line(name, line)
         if section is None:
             logger.error("Section not found: %s - %s", name, line)
-            raise click.ClickException(f"Section not found: {name} - {line}")
+
+            msg = f"Section not found: {name} - {line}"
+            raise click.ClickException(msg)  # noqa: TRY301
 
         tasks = sorted(
             Task.delete_future_tasks(section.id),
@@ -175,8 +186,10 @@ def defrag(name: str, line: str) -> None:
         pprint(newtasks)
 
     except Exception as e:
-        logger.error("Failed to defragment tasks: %s", str(e))
-        raise click.ClickException(f"Failed to defragment tasks: {e}")
+        logger.exception("Failed to defragment tasks")
+
+        msg = f"Failed to defragment tasks: {e}"
+        raise click.ClickException(msg) from e
 
 
 @main.command()
@@ -190,17 +203,27 @@ def insert(duration: int, priority: int, name: str, line: str) -> None:
         section = Section.find_by_name_and_line(name, line)
         if section is None:
             logger.error("Section not found: %s - %s", name, line)
-            raise click.ClickException(f"Section not found: {name} - {line}")
+
+            msg = f"Section not found: {name} - {line}"
+            raise click.ClickException(msg)  # noqa: TRY301
 
         tasks = Task.insert_greedy(timedelta(minutes=duration), priority, section.id)
         con.commit()
 
-        logger.info("Inserted new task with duration %d and priority %d for Section: %s - %s", duration, priority, name, line)
+        logger.info(
+            "Inserted new task with duration %d and priority %d for Section: %s - %s",
+            duration,
+            priority,
+            name,
+            line,
+        )
         pprint(tasks)
 
     except Exception as e:
-        logger.error("Failed to insert task: %s", str(e))
-        raise click.ClickException(f"Failed to insert task: {e}")
+        logger.exception("Failed to insert task")
+
+        msg = f"Failed to insert task: {e}"
+        raise click.ClickException(msg) from e
 
 
 if __name__ == "__main__":
