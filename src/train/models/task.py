@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
 from typing import TYPE_CHECKING, Self, TypeAlias
 
@@ -123,15 +123,10 @@ class Task:
                 WHERE
                     maintenance_window.section_id = :section_id
                     AND maintenance_window.starts_at >= DATETIME('now', '+30 minutes')
-                    AND ROUND(
-                            CAST(
-                                (JULIANDAY(maintenance_window.ends_at) - JULIANDAY(k))
-                                * 1440 AS REAL
-                            ),
-                            0
-                        ) >= :requested_duration
+                    AND UNIXEPOCH(maintenance_window.ends_at) - UNIXEPOCH(k)
+                        >= :requested_duration
                 ORDER BY
-                    maintenance_window.starts_at ASC
+                    K ASC
                 LIMIT 1
                 """,
                 payload,
@@ -181,6 +176,74 @@ class Task:
             tasks.append(task)
 
         return tasks
+
+    @classmethod
+    def insert_preferred(
+        cls,
+        preferred_starts_at: time,
+        preferred_ends_at: time,
+        priority: int,
+        section_id: int,
+    ) -> list[Self]:
+        requested_duration = (
+            datetime.combine(date.min, preferred_ends_at)
+            - datetime.combine(date.min, preferred_starts_at)
+            + (preferred_ends_at < preferred_starts_at) * timedelta(hours=24)
+        )
+
+        payload = {
+            "requested_duration": requested_duration,
+            "priority": priority,
+            "section_id": section_id,
+        }
+
+        cur.execute(
+            """
+                SELECT IFNULL(
+                    (
+                        SELECT task.ends_at FROM task
+                        WHERE
+                            task.maintenance_window_id = maintenance_window.id
+                            AND task.priority >= :priority
+                        ORDER BY
+                            task.ends_at DESC
+                        LIMIT 1
+                    ),
+                    maintenance_window.starts_at
+                ) AS k,
+                UNIXEPOCH(:preferred_starts_at) -
+                    86400 * (:preferred_ends_at < preferred_starts_at)
+                    AS p_starts,
+                UNIXEPOCH(:preferred_ends_at) AS p_ends,
+                UNIXEPOCH(TIME(k)) -
+                    86400 * (TIME(maintenance_window.ends_at) < TIME(k))
+                    AS m_starts,
+                UNIXEPOCH(TIME(maintenance_window.ends_at)) AS m_ends,
+                maintenance_window.id
+                FROM maintenance_window
+                WHERE
+                    maintenance_window.section_id = :section_id
+                    AND maintenance_window.starts_at >= DATETIME('now', '+30 minutes')
+                    AND UNIXEPOCH(maintenance_window.ends_at) - UNIXEPOCH(k)
+                        >= :requested_duration
+                ORDER BY
+                    MAX(
+                        (p_ends - p_starts)
+                        - MAX(p_ends - m_ends, 0)
+                        - MAX(m_starts - p_starts, 0),
+                        (p_ends - p_starts)
+                        - MAX(p_ends - m_ends + 86400, 0)
+                        - MAX(m_starts - p_starts - 86400, 0),
+                        (p_ends - p_starts)
+                        - MAX(p_ends - m_ends - 86400, 0)
+                        - MAX(m_starts - p_starts + 86400, 0)
+                    )
+                LIMIT 1
+                """,
+            payload,
+        )
+
+        return []
 
     @classmethod
     def find_by_id(cls, id: int) -> Self | None:

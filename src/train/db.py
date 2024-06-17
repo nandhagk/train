@@ -12,8 +12,8 @@ def encode_datetime(val: datetime) -> str:
     return val.replace(microsecond=0).isoformat()
 
 
-def encode_timedelta(val: timedelta) -> int:
-    return int(val.total_seconds()) // 60
+def encode_timedelta(val: timedelta) -> float:
+    return val.total_seconds()
 
 
 sqlite3.register_adapter(datetime, encode_datetime)
