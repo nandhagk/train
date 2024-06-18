@@ -189,13 +189,10 @@ class Task:
     ) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
-            "preferred_starts_at": taskq.preferred_starts_at.isoformat(),
-            "preferred_ends_at": taskq.preferred_ends_at.isoformat(),
             "priority": taskq.priority,
             "section_id": section_id,
         }
 
-        print(taskq)
         res = cur.execute(
             """
             SELECT
@@ -219,15 +216,15 @@ class Task:
                 SELECT
                     maintenance_window.starts_at AS window_start,
                     maintenance_window.ends_at AS m_window_end,
-                    maintenance_window.id as window_id,
-                    maintenance_window.section_id as section_id
+                    maintenance_window.id AS window_id,
+                    maintenance_window.section_id AS section_id
                 FROM maintenance_window
                 UNION
                 SELECT
                     task.ends_at AS window_start,
                     maintenance_window.ends_at AS m_window_end,
-                    maintenance_window.id as window_id,
-                    maintenance_window.section_id as section_id
+                    maintenance_window.id AS window_id,
+                    maintenance_window.section_id AS section_id
                 FROM task
                 JOIN maintenance_window
                     ON maintenance_window.id = task.maintenance_window_id
@@ -279,13 +276,7 @@ class Task:
         y: list[tuple[str, str, int]] = res.fetchall()
         x = max([key(z) for z in y], key=lambda z: (z[0], datetime.now() - z[1]))
 
-        (
-            intersection,
-            window_start,
-            window_end,
-            window_id,
-        ) = x
-
+        (intersection, window_start, window_end, window_id) = x
         possible_preferred_dates = (
             window_start - timedelta(days=1),
             window_start,
@@ -405,15 +396,15 @@ class Task:
                 SELECT
                     maintenance_window.starts_at AS window_start,
                     maintenance_window.ends_at AS m_window_end,
-                    maintenance_window.id as window_id,
-                    maintenance_window.section_id as section_id
+                    maintenance_window.id AS window_id,
+                    maintenance_window.section_id AS section_id
                 FROM maintenance_window
                 UNION
                 SELECT
                     task.ends_at AS window_start,
                     maintenance_window.ends_at AS m_window_end,
-                    maintenance_window.id as window_id,
-                    maintenance_window.section_id as section_id
+                    maintenance_window.id AS window_id,
+                    maintenance_window.section_id AS section_id
                 FROM task
                 JOIN maintenance_window
                     ON maintenance_window.id = task.maintenance_window_id
