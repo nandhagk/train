@@ -6,6 +6,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from pprint import pprint
+from time import perf_counter
 
 import click
 
@@ -197,8 +198,8 @@ def create_windows(data: str, length: int, clear: bool):
 @click.argument("line")
 @click.option("--priority", type=int, default=1)
 @click.option("--duration", type=int)
-@click.option("--pref_start", type=click.DateTime(("%H:%M:%S",)))
-@click.option("--pref_end", type=click.DateTime(("%H:%M:%S",)))
+@click.option("--pref_start", type=click.DateTime(("%H:%M",)))
+@click.option("--pref_end", type=click.DateTime(("%H:%M",)))
 def insert(  # noqa: PLR0913
     name: str,
     line: str,
@@ -228,14 +229,21 @@ def insert(  # noqa: PLR0913
             preferred_starts_time = pref_start.time()
             preferred_ends_time = pref_end.time()
 
+            preferred_window = requested_duration = (
+                datetime.combine(date.min, preferred_ends_time)
+                - datetime.combine(date.min, preferred_starts_time)
+                + (preferred_ends_time <= preferred_starts_time) * timedelta(hours=24)
+            )
             if duration is None:
-                requested_duration = (
-                    datetime.combine(date.min, preferred_ends_time)
-                    - datetime.combine(date.min, preferred_starts_time)
-                    + (preferred_ends_time <= preferred_starts_time)
-                    * timedelta(hours=24)
-                )
+                requested_duration = preferred_window
+
             assert requested_duration is not None
+
+            if requested_duration > preferred_window:
+                msg = "Requested duration is greater than preference window."
+                raise click.BadParameter(msg)  # noqa: TRY301
+
+            t0 = perf_counter()
             tasks = Task.insert_pref(
                 preferred_starts_time,
                 preferred_ends_time,
@@ -243,13 +251,18 @@ def insert(  # noqa: PLR0913
                 section.id,
                 requested_duration,
             )
+            t1 = perf_counter()
+            print(t1 - t0)
 
         else:
             assert requested_duration is not None
             preferred_starts_time = None
             preferred_ends_time = None
 
+            t0 = perf_counter()
             tasks = Task.insert_nopref(priority, section.id, requested_duration)
+            t1 = perf_counter()
+            print(t1 - t0)
 
         con.commit()
 
