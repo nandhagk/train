@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from pprint import pprint
 
 import click
 
-from pprint import pprint
 from train.db import con, cur
 from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
@@ -199,34 +199,50 @@ def create_windows(data: str, length: int, clear: bool):
 @click.option("--duration", type=int)
 @click.option("--pref_start", type=click.DateTime(("%H:%M:%S",)))
 @click.option("--pref_end", type=click.DateTime(("%H:%M:%S",)))
-def insert(name: str, line: str, priority: int, duration: int | None, pref_start: datetime | None, pref_end: datetime | None) -> None:
+def insert(  # noqa: PLR0913
+    name: str,
+    line: str,
+    priority: int,
+    duration: int | None,
+    pref_start: datetime | None,
+    pref_end: datetime | None,
+) -> None:
     """Section: STN-STN or STN YD."""
     if duration is None and (pref_start is None or pref_end is None):
-        raise click.UsageError("Please either set duration or (pref_start and pref_end)")
+        msg = "Please either set duration or (pref_start and pref_end)"
+        raise click.UsageError(msg)
+
     try:
         section = Section.find_by_name_and_line(name, line)
         if section is None:
             logger.error("Section not found: %s - %s", name, line)
 
             msg = f"Section not found: {name} - {line}"
-            raise click.ClickException(msg)
+            raise click.ClickException(msg)  # noqa: TRY301
 
         requested_duration: timedelta | None = None
         if duration is not None:
             requested_duration = timedelta(minutes=duration)
 
-        if pref_start is not None and pref_end is not None:            
+        if pref_start is not None and pref_end is not None:
             preferred_starts_time = pref_start.time()
             preferred_ends_time = pref_end.time()
 
-            if duration is None:     
+            if duration is None:
                 requested_duration = (
                     datetime.combine(date.min, preferred_ends_time)
                     - datetime.combine(date.min, preferred_starts_time)
-                    + (preferred_ends_time <= preferred_starts_time) * timedelta(hours=24)
+                    + (preferred_ends_time <= preferred_starts_time)
+                    * timedelta(hours=24)
                 )
             assert requested_duration is not None
-            tasks = Task.insert_pref(preferred_starts_time, preferred_ends_time, priority, section.id, requested_duration)
+            tasks = Task.insert_pref(
+                preferred_starts_time,
+                preferred_ends_time,
+                priority,
+                section.id,
+                requested_duration,
+            )
 
         else:
             assert requested_duration is not None
@@ -234,7 +250,6 @@ def insert(name: str, line: str, priority: int, duration: int | None, pref_start
             preferred_ends_time = None
 
             tasks = Task.insert_nopref(priority, section.id, requested_duration)
-        
 
         con.commit()
 
@@ -256,4 +271,3 @@ def insert(name: str, line: str, priority: int, duration: int | None, pref_start
 
 if __name__ == "__main__":
     main()
-

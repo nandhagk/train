@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
-from typing import TYPE_CHECKING, Self, TypeAlias, TypeVar, Generic
+from typing import TYPE_CHECKING, Generic, Self, TypeAlias, TypeVar
 
 from train.db import cur
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 RawTask: TypeAlias = tuple[int, str, str, str | None, str | None, int, int, int]
 
 T = TypeVar("T", None, time)
+
 
 @dataclass
 class TaskQ(Generic[T]):
@@ -48,6 +49,7 @@ class TaskQ(Generic[T]):
                 return self.preferred_range < other.preferred_range
             return self.requested_duration > other.requested_duration
         return self.priority > other.priority
+
 
 @dataclass(frozen=True)
 class Task:
@@ -117,18 +119,22 @@ class Task:
         assert task is not None
 
         return task
-    
 
     @staticmethod
-    def _insert(tasks: list[TaskQ], tasks_to_insert: list[Task], section_id: int) -> list[Task]:
-        if not tasks: return tasks_to_insert
+    def _insert(
+        tasks: list[TaskQ],
+        tasks_to_insert: list[Task],
+        section_id: int,
+    ) -> list[Task]:
+        if not tasks:
+            return tasks_to_insert
 
         taskq = heappop(tasks)
         if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
             window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
         else:
             window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
-        
+
         payload = {
             "window_id": window_id,
             "starts_at": starts_at,
@@ -162,17 +168,23 @@ class Task:
 
         tasks_to_insert.append(
             Task.insert_one(
-                starts_at, ends_at,
-                taskq.requested_duration, taskq.priority,
-                window_id, taskq.preferred_starts_at, taskq.preferred_ends_at
-            )
+                starts_at,
+                ends_at,
+                taskq.requested_duration,
+                taskq.priority,
+                window_id,
+                taskq.preferred_starts_at,
+                taskq.preferred_ends_at,
+            ),
         )
 
         return Task._insert(tasks, tasks_to_insert, section_id)
 
-
     @staticmethod
-    def _insert_pref(taskq: TaskQ[time], section_id: int) -> tuple[int, datetime, datetime]:
+    def _insert_pref(
+        taskq: TaskQ[time],
+        section_id: int,
+    ) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
             "preferred_starts_at": taskq.preferred_starts_at.isoformat(),
@@ -321,9 +333,7 @@ class Task:
                 )
                 + timedelta(
                     days=(
-                        1
-                        if taskq.preferred_starts_at >= taskq.preferred_ends_at
-                        else 0
+                        1 if taskq.preferred_starts_at >= taskq.preferred_ends_at else 0
                     ),
                 ),
             )
@@ -351,7 +361,7 @@ class Task:
             # W P W P
             # P W W P
             # P W P W
-            
+
             if window_start >= closest_preferred_start:
                 # P W W P
                 # P W P W
@@ -375,21 +385,25 @@ class Task:
                 starts_at = window_end - taskq.requested_duration
                 ends_at = window_end
         elif closest_preferred_start >= window_end:
-            # There is no intersection, and the preferred window is on the right of maintenance window
+            # There is no intersection, and the preferred window
+            # is on the right of maintenance window
             # W W P P
             starts_at = window_end - taskq.requested_duration
             ends_at = window_end
         else:
-            # There is no intersection, and the preferred window is on the left of maintenance window
+            # There is no intersection, and the preferred window
+            # is on the left of maintenance window
             # P P W W
             starts_at = window_start
             ends_at = window_start + taskq.requested_duration
 
         return window_id, starts_at, ends_at
-        
 
     @staticmethod
-    def _insert_nopref(taskq: TaskQ[None], section_id: int) -> tuple[int, datetime, datetime]:
+    def _insert_nopref(
+        taskq: TaskQ[None],
+        section_id: int,
+    ) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
             "priority": taskq.priority,
@@ -451,7 +465,7 @@ class Task:
             tuple[
                 str,
                 str,
-                int
+                int,
             ]
             | None
         ) = res.fetchone()
@@ -461,17 +475,20 @@ class Task:
         (
             starts_at,
             _ends_at,
-            window_id
+            window_id,
         ) = x
 
-        return window_id, datetime.fromisoformat(starts_at), datetime.fromisoformat(starts_at) + taskq.requested_duration
-
+        return (
+            window_id,
+            datetime.fromisoformat(starts_at),
+            datetime.fromisoformat(starts_at) + taskq.requested_duration,
+        )
 
     @staticmethod
     def insert_nopref(
         priority: int,
         section_id: int,
-        requested_duration: timedelta
+        requested_duration: timedelta,
     ) -> list[Task]:
         queue: list[TaskQ] = [
             TaskQ[None](
@@ -486,13 +503,13 @@ class Task:
         return Task._insert(queue, [], section_id)
 
     @classmethod
-    def insert_pref(  # noqa: PLR0913, PLR0912, C901
+    def insert_pref(  # noqa: PLR0913
         cls,
         preferred_starts_at: time,
         preferred_ends_at: time,
         priority: int,
         section_id: int,
-        requested_duration: timedelta
+        requested_duration: timedelta,
     ) -> list[Task]:
         queue: list[TaskQ] = [
             TaskQ[time](
@@ -505,7 +522,6 @@ class Task:
 
         heapify(queue)
         return Task._insert(queue, [], section_id)
-    
 
     @classmethod
     def find_by_id(cls, id: int) -> Self | None:
@@ -543,8 +559,16 @@ class Task:
             id,
             datetime.fromisoformat(starts_at),
             datetime.fromisoformat(ends_at),
-            time.fromisoformat(preferred_starts_at) if preferred_starts_at is not None else None,
-            time.fromisoformat(preferred_ends_at) if preferred_ends_at is not None else None,
+            (
+                time.fromisoformat(preferred_starts_at)
+                if preferred_starts_at is not None
+                else None
+            ),
+            (
+                time.fromisoformat(preferred_ends_at)
+                if preferred_ends_at is not None
+                else None
+            ),
             timedelta(seconds=requested_duration),
             priority,
             maintenance_window_id,
