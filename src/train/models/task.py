@@ -424,28 +424,15 @@ class Task:
             payload,
         )
 
-        x: (
-            tuple[
-                str,
-                str,
-                int,
-            ]
-            | None
-        ) = res.fetchone()
+        x: tuple[str, str, int] | None = res.fetchone()
         if x is None:
             raise Exception  # noqa: TRY002
 
-        (
-            starts_at,
-            _ends_at,
-            window_id,
-        ) = x
+        (starts_at_, _, window_id) = x
+        starts_at = datetime.fromisoformat(starts_at_)
+        ends_at = starts_at + taskq.requested_duration
 
-        return (
-            window_id,
-            datetime.fromisoformat(starts_at),
-            datetime.fromisoformat(starts_at) + taskq.requested_duration,
-        )
+        return (window_id, starts_at, ends_at)
 
     @staticmethod
     def insert_nopref(
@@ -453,14 +440,7 @@ class Task:
         section_id: int,
         requested_duration: timedelta,
     ) -> list[Task]:
-        queue: list[TaskQ] = [
-            TaskQ[None](
-                priority,
-                requested_duration,
-                None,
-                None,
-            ),
-        ]
+        queue: list[TaskQ] = [TaskQ[None](priority, requested_duration, None, None)]
 
         heapify(queue)
         return Task._insert(queue, [], section_id)
