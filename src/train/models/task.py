@@ -149,6 +149,8 @@ class Task:
                     (task.starts_at > :starts_at AND task.starts_at < :ends_at)
                     OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
                     OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
+                    OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
+                    OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
                 )
             RETURNING *
             """,
@@ -181,7 +183,7 @@ class Task:
         return Task._insert(tasks, tasks_to_insert, section_id)
 
     @staticmethod
-    def _insert_pref(
+    def _insert_pref(  # noqa: C901
         taskq: TaskQ[time],
         section_id: int,
     ) -> tuple[int, datetime, datetime]:
@@ -197,128 +199,98 @@ class Task:
         res = cur.execute(
             """
             SELECT
-            UNIXEPOCH(:preferred_starts_at) -
-                86400 * (:preferred_ends_at <= :preferred_starts_at)
-                AS p_starts,
-            UNIXEPOCH(:preferred_ends_at) AS p_ends,
-            UNIXEPOCH(TIME(window_start)) -
-                86400 * (TIME(window_end) <= TIME(window_start))
-                AS m_starts,
-            UNIXEPOCH(TIME(window_end)) AS m_ends,
-            window_id,
-            window_start,
-            window_end
+                window_start,
+                COALESCE(
+                    (
+                        SELECT task.starts_at FROM task
+                        JOIN maintenance_window
+                            ON task.maintenance_window_id = window_id
+                        WHERE
+                            task.priority >= :priority
+                            AND task.starts_at >= window_start
+                        ORDER BY
+                            task.starts_at ASC
+                        LIMIT 1
+                    ),
+                    m_window_end
+                ) AS window_end,
+                window_id
             FROM (
                 SELECT
-                    window_start,
-                    COALESCE(
-                        (
-                            SELECT task.starts_at FROM task
-                            JOIN maintenance_window
-                                ON task.maintenance_window_id = window_id
-                            WHERE
-                                task.priority >= :priority
-                                AND task.starts_at >= window_start
-                            ORDER BY
-                                task.starts_at ASC
-                            LIMIT 1
-                        ),
-                        m_window_end
-                    ) AS window_end,
-                    window_id
-                FROM (
-                    SELECT
-                        maintenance_window.starts_at AS window_start,
-                        maintenance_window.ends_at AS m_window_end,
-                        maintenance_window.id as window_id,
-                        maintenance_window.section_id as section_id
-                    FROM maintenance_window
-                    UNION
-                    SELECT
-                        task.ends_at AS window_start,
-                        maintenance_window.ends_at AS m_window_end,
-                        maintenance_window.id as window_id,
-                        maintenance_window.section_id as section_id
-                    FROM task
-                    JOIN maintenance_window
-                        ON maintenance_window.id = task.maintenance_window_id
-                    WHERE
-                        task.priority >= :priority
-                )
+                    maintenance_window.starts_at AS window_start,
+                    maintenance_window.ends_at AS m_window_end,
+                    maintenance_window.id as window_id,
+                    maintenance_window.section_id as section_id
+                FROM maintenance_window
+                UNION
+                SELECT
+                    task.ends_at AS window_start,
+                    maintenance_window.ends_at AS m_window_end,
+                    maintenance_window.id as window_id,
+                    maintenance_window.section_id as section_id
+                FROM task
+                JOIN maintenance_window
+                    ON maintenance_window.id = task.maintenance_window_id
                 WHERE
-                    section_id = :section_id
-                    AND window_start >= DATETIME('now', '+30 minutes')
-                    AND UNIXEPOCH(window_end) - UNIXEPOCH(window_start)
-                        >= :requested_duration
+                    task.priority >= :priority
             )
-            ORDER BY
-                MIN(
-                    MAX(
-                        (p_ends - p_starts)
-                        - MAX(p_ends - m_ends, 0)
-                        - MAX(m_starts - p_starts, 0),
-                        (p_ends - p_starts)
-                        - MAX(p_ends - m_ends + 86400, 0)
-                        - MAX(m_starts - p_starts - 86400, 0),
-                        (p_ends - p_starts)
-                        - MAX(p_ends - m_ends - 86400, 0)
-                        - MAX(m_starts - p_starts + 86400, 0)
-                    ),
-                    :requested_duration
-                ) DESC,
-                window_start ASC
-            LIMIT
-                1
+            WHERE
+                section_id = :section_id
+                AND window_start >= DATETIME('now', '+1 day')
+                AND UNIXEPOCH(window_end) - UNIXEPOCH(window_start)
+                    >= :requested_duration
             """,
             payload,
         )
 
-        x: (
-            tuple[
-                int,
-                int,
-                int,
-                int,
-                int,
-                str,
-                str,
-            ]
-            | None
-        ) = res.fetchone()
-        if x is None:
-            raise Exception  # noqa: TRY002
+        def unixepoch(t: time) -> timedelta:
+            return timedelta(hours=t.hour, minutes=t.minute)
+
+        p_starts = unixepoch(taskq.preferred_starts_at)
+        p_ends = unixepoch(taskq.preferred_ends_at)
+        if p_ends <= p_starts:
+            p_starts -= timedelta(days=1)
+
+        def key(z: tuple[str, str, int]) -> tuple[timedelta, datetime, datetime, int]:
+            window_start_, window_end_, window_id = z
+
+            window_start = datetime.fromisoformat(window_start_)
+            window_end = datetime.fromisoformat(window_end_)
+
+            m_starts = unixepoch(window_start.time())
+            m_ends = unixepoch(window_end.time())
+            if m_ends <= m_starts:
+                m_starts -= timedelta(days=1)
+
+            intersection = max(
+                (p_ends - p_starts)
+                - max(p_ends - m_ends, timedelta())
+                - max(m_starts - p_starts, timedelta()),
+                (p_ends - p_starts)
+                - max(p_ends - m_ends + timedelta(days=1), timedelta())
+                - max(m_starts - p_starts - timedelta(days=1), timedelta()),
+                (p_ends - p_starts)
+                - max(p_ends - m_ends - timedelta(days=1), timedelta())
+                - max(m_starts - p_starts + timedelta(days=1), timedelta()),
+            )
+
+            return (intersection, window_start, window_end, window_id)
+
+        y: list[tuple[str, str, int]] = res.fetchall()
+        x = max([key(z) for z in y], key=lambda z: (z[0], datetime.now() - z[1]))
 
         (
-            p_starts,
-            p_ends,
-            m_starts,
-            m_ends,
-            window_id,
+            intersection,
             window_start,
             window_end,
+            window_id,
         ) = x
 
-        window_start = datetime.fromisoformat(window_start)
-        window_end = datetime.fromisoformat(window_end)
-        intersection = timedelta(
-            seconds=max(
-                (p_ends - p_starts)
-                - max(p_ends - m_ends, 0)
-                - max(m_starts - p_starts, 0),
-                (p_ends - p_starts)
-                - max(p_ends - m_ends + 86400, 0)
-                - max(m_starts - p_starts - 86400, 0),
-                (p_ends - p_starts)
-                - max(p_ends - m_ends - 86400, 0)
-                - max(m_starts - p_starts + 86400, 0),
-            ),
-        )
-
         possible_preferred_dates = (
-            window_start + timedelta(days=-1),
+            window_start - timedelta(days=1),
             window_start,
             window_end,
-            window_end + timedelta(days=+1),
+            window_end + timedelta(days=1),
         )
 
         possible_preferred_windows = (
@@ -450,7 +422,7 @@ class Task:
             )
             WHERE
                 section_id = :section_id
-                AND window_start >= DATETIME('now', '+30 minutes')
+                AND window_start >= DATETIME('now', '+1 day')
                 AND UNIXEPOCH(window_end) - UNIXEPOCH(window_start)
                     >= :requested_duration
             ORDER BY
@@ -609,7 +581,7 @@ class Task:
                         section.id = maintenance_window.section_id
                     WHERE
                         section.id = :section_id
-                        AND task.starts_at >= DATETIME('now', '+30 minutes')
+                        AND task.starts_at >= DATETIME('now', '+1 day')
                 )
             RETURNING *
             """,
