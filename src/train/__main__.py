@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, time, timedelta
+from datetime import datetime, date, timedelta
 from pathlib import Path
 
 import click
 
+from pprint import pprint
 from train.db import con, cur
 from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
@@ -83,7 +84,7 @@ def init(data: str):
 @click.argument("data", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
 @click.argument("length", type=int)
 @click.option("--clear", is_flag=True, default=False)
-def sft(data: str, length: int, clear: bool):
+def create_windows(data: str, length: int, clear: bool):
     """Populate the maintenance_window table."""
 
     def get_block_id(block_name: str) -> int:
@@ -191,59 +192,68 @@ def sft(data: str, length: int, clear: bool):
 #         raise click.ClickException(msg) from e
 
 
-# @main.command()
-# @click.argument("duration", type=int)
-# @click.argument("priority", type=int)
-# @click.argument("name")
-# @click.argument("line")
-# def insert(duration: int, priority: int, name: str, line: str) -> None:
-#     """Section: STN-STN or STN YD."""
-#     try:
-#         section = Section.find_by_name_and_line(name, line)
-#         if section is None:
-#             logger.error("Section not found: %s - %s", name, line)
+@main.command()
+@click.argument("name")
+@click.argument("line")
+@click.option("--priority", type=int, default=1)
+@click.option("--duration", type=int)
+@click.option("--pref_start", type=click.DateTime(("%H:%M:%S",)))
+@click.option("--pref_end", type=click.DateTime(("%H:%M:%S",)))
+def insert(name: str, line: str, priority: int, duration: int | None, pref_start: datetime | None, pref_end: datetime | None) -> None:
+    """Section: STN-STN or STN YD."""
+    if duration is None and (pref_start is None or pref_end is None):
+        raise click.UsageError("Please either set duration or (pref_start and pref_end)")
+    try:
+        section = Section.find_by_name_and_line(name, line)
+        if section is None:
+            logger.error("Section not found: %s - %s", name, line)
 
-#             msg = f"Section not found: {name} - {line}"
-#             raise click.ClickException(msg)
+            msg = f"Section not found: {name} - {line}"
+            raise click.ClickException(msg)
 
-#         tasks = Task.insert_greedy(timedelta(minutes=duration), priority, section.id)
-#         con.commit()
+        requested_duration: timedelta | None = None
+        if duration is not None:
+            requested_duration = timedelta(minutes=duration)
 
-#         logger.info(
-#             "Inserted new task with duration %d and priority %d for Section: %s - %s",
-#             duration,
-#             priority,
-#             name,
-#             line,
-#         )
-#         pprint(tasks)
+        if pref_start is not None and pref_end is not None:            
+            preferred_starts_time = pref_start.time()
+            preferred_ends_time = pref_end.time()
 
-#     except Exception as e:
-#         logger.exception("Failed to insert task")
+            if duration is None:     
+                requested_duration = (
+                    datetime.combine(date.min, preferred_ends_time)
+                    - datetime.combine(date.min, preferred_starts_time)
+                    + (preferred_ends_time <= preferred_starts_time) * timedelta(hours=24)
+                )
+            assert requested_duration is not None
+            tasks = Task.insert_pref(preferred_starts_time, preferred_ends_time, priority, section.id, requested_duration)
 
-#         msg = f"Failed to insert task: {e}"
-#         raise click.ClickException(msg) from e
+        else:
+            assert requested_duration is not None
+            preferred_starts_time = None
+            preferred_ends_time = None
+
+            tasks = Task.insert_nopref(priority, section.id, requested_duration)
+        
+
+        con.commit()
+
+        logger.info(
+            "Inserted new task with duration %d and priority %d for Section: %s - %s",
+            requested_duration.total_seconds(),
+            priority,
+            name,
+            line,
+        )
+        pprint(tasks)
+
+    except Exception as e:
+        logger.exception("Failed to insert task")
+
+        msg = f"Failed to insert task: {e}"
+        raise click.ClickException(msg) from e
 
 
 if __name__ == "__main__":
-    # main()
+    main()
 
-    for _ in range(3):
-        Task.insert_preferred(
-            time(),
-            time(),
-            1,
-            1,
-            requested_duration=timedelta(hours=1),
-        )
-        con.commit()
-
-    print("HELLo")
-    Task.insert_preferred(
-        time(hour=23, minute=30),
-        time(),
-        2,
-        1,
-        requested_duration=timedelta(minutes=30),
-    )
-    con.commit()
