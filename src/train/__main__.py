@@ -158,6 +158,7 @@ def create_windows(data: str, length: int, clear: bool):
         msg = f"Failed to populate maintenance_window table: {e}"
         raise click.ClickException(msg) from e
 
+
 """
 @main.command()
 @click.argument("name")
@@ -193,6 +194,7 @@ def defrag(name: str, line: str) -> None:
         msg = f"Failed to defragment tasks: {e}"
         raise click.ClickException(msg) from e
 """
+
 
 @main.command()
 @click.argument("name")
@@ -300,16 +302,35 @@ def populate_from_excel(file_path: str):
             line = row["line"]
             duration = int(row["duration"])
             priority = int(row["priority"])
-            demanded_time_from = datetime.strptime(row["demanded_time_from"], "%H:%M").time()
-            demanded_time_to = datetime.strptime(row["demanded_time_to"], "%H:%M").time()
-            print(line,duration,priority,demanded_time_from,demanded_time_to,section_name)
+            demanded_time_from = datetime.strptime(
+                row["demanded_time_from"],
+                "%H:%M",
+            ).time()
+            demanded_time_to = datetime.strptime(
+                row["demanded_time_to"],
+                "%H:%M",
+            ).time()
+            print(
+                line,
+                duration,
+                priority,
+                demanded_time_from,
+                demanded_time_to,
+                section_name,
+            )
             section = Section.find_by_name_and_line(section_name, line)
             if section is None:
                 logger.error("Section not found: %s - %s", section_name, line)
                 msg = f"Section not found: {section_name} - {line}"
                 raise click.ClickException(msg)  # noqa: TRY301
 
-            Task.insert_pref(demanded_time_from, demanded_time_to, priority, section.id, timedelta(minutes=duration))
+            Task.insert_pref(
+                demanded_time_from,
+                demanded_time_to,
+                priority,
+                section.id,
+                timedelta(minutes=duration),
+            )
 
         con.commit()
         logger.info("Populated database from Excel file: %s", file_path)

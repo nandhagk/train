@@ -91,6 +91,7 @@ class Task:
             "priority": priority,
             "maintenance_window_id": maintenance_window_id,
         }
+        print(payload)
 
         res = cur.execute(
             """
@@ -156,18 +157,19 @@ class Task:
             """,
             payload,
         )
-        for taskq in [Task.decode(x) for x in res.fetchall()]:
+        for taskq_ in [Task.decode(x) for x in res.fetchall()]:
             heappush(
                 tasks,
                 TaskQ(
-                    taskq.priority,
-                    taskq.requested_duration,
-                    taskq.preferred_starts_at,
-                    taskq.preferred_ends_at,
-                    taskq.starts_at,
+                    taskq_.priority,
+                    taskq_.requested_duration,
+                    taskq_.preferred_starts_at,
+                    taskq_.preferred_ends_at,
+                    taskq_.starts_at,
                 ),
             )
 
+        print(taskq.requested_duration)
         tasks_to_insert.append(
             Task.insert_one(
                 starts_at,
