@@ -229,7 +229,7 @@ def insert(  # noqa: PLR0913
             preferred_starts_time = pref_start.time()
             preferred_ends_time = pref_end.time()
 
-            preferred_window = requested_duration = (
+            preferred_window = (
                 datetime.combine(date.min, preferred_ends_time)
                 - datetime.combine(date.min, preferred_starts_time)
                 + (preferred_ends_time <= preferred_starts_time) * timedelta(days=1)
