@@ -227,14 +227,23 @@ def sft(data: str, length: int, clear: bool):
 
 if __name__ == "__main__":
     # main()
-    section = Section.find_by_name_and_line("AKM-ELR", "UP")
-    assert section is not None
 
+    for _ in range(3):
+        Task.insert_preferred(
+            time(),
+            time(),
+            1,
+            1,
+            requested_duration=timedelta(hours=1),
+        )
+        con.commit()
+
+    print("HELLo")
     Task.insert_preferred(
-        time(hour=1),
-        time(hour=2),
+        time(hour=23, minute=30),
+        time(),
+        2,
         1,
-        section.id,
         requested_duration=timedelta(minutes=30),
     )
     con.commit()
