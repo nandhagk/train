@@ -9,6 +9,7 @@ from pprint import pprint
 from time import perf_counter
 
 import click
+import pandas as pd
 
 from train.db import con, cur
 from train.models.block import Block
@@ -157,41 +158,41 @@ def create_windows(data: str, length: int, clear: bool):
         msg = f"Failed to populate maintenance_window table: {e}"
         raise click.ClickException(msg) from e
 
+"""
+@main.command()
+@click.argument("name")
+@click.argument("line")
+def defrag(name: str, line: str) -> None:
+    # Reschedules all future tasks inorder to remove gaps.
+    try:
+        section = Section.find_by_name_and_line(name, line)
+        if section is None:
+            logger.error("Section not found: %s - %s", name, line)
 
-# @main.command()
-# @click.argument("name")
-# @click.argument("line")
-# def defrag(name: str, line: str) -> None:
-#     """Reschedules all future tasks inorder to remove gaps."""
-#     try:
-#         section = Section.find_by_name_and_line(name, line)
-#         if section is None:
-#             logger.error("Section not found: %s - %s", name, line)
+            msg = f"Section not found: {name} - {line}"
+            raise click.ClickException(msg)
 
-#             msg = f"Section not found: {name} - {line}"
-#             raise click.ClickException(msg)
+        tasks = sorted(
+            Task.delete_future_tasks(section.id),
+            key=lambda task: (task.priority, task.requested_duration),
+            reverse=True,
+        )
 
-#         tasks = sorted(
-#             Task.delete_future_tasks(section.id),
-#             key=lambda task: (task.priority, task.requested_duration),
-#             reverse=True,
-#         )
+        newtasks = []
+        for task in tasks:
+           ts = Task.insert_greedy(task.requested_duration, task.priority, section.id)
+           newtasks.extend(ts)
 
-#         newtasks = []
-#         for task in tasks:
-#            ts = Task.insert_greedy(task.requested_duration, task.priority, section.id)
-#            newtasks.extend(ts)
+        con.commit()
+        logger.info("Defragmented tasks for Section: %s - %s", name, line)
+        pprint(newtasks)
 
-#         con.commit()
-#         logger.info("Defragmented tasks for Section: %s - %s", name, line)
-#         pprint(newtasks)
+    except Exception as e:
+        logger.exception("Failed to defragment tasks")
 
-#     except Exception as e:
-#         logger.exception("Failed to defragment tasks")
-
-#         msg = f"Failed to defragment tasks: {e}"
-#         raise click.ClickException(msg) from e
-
+        msg = f"Failed to defragment tasks: {e}"
+        raise click.ClickException(msg) from e
+"""
 
 @main.command()
 @click.argument("name")
@@ -279,6 +280,45 @@ def insert(  # noqa: PLR0913
         logger.exception("Failed to insert task")
 
         msg = f"Failed to insert task: {e}"
+        raise click.ClickException(msg) from e
+
+
+@main.command()
+@click.argument(
+    "file_path",
+    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
+)
+def populate_from_excel(file_path: str):
+    """Populate the database with data from an Excel sheet."""
+    try:
+        # Load the Excel file
+        df = pd.read_excel(file_path)  # noqa: PD901
+
+        # Process the data from the Excel file
+        for _, row in df.iterrows():
+            section_name = row["section_name"]
+            line = row["line"]
+            duration = int(row["duration"])
+            priority = int(row["priority"])
+            demanded_time_from = datetime.strptime(row["demanded_time_from"], "%H:%M").time()
+            demanded_time_to = datetime.strptime(row["demanded_time_to"], "%H:%M").time()
+            print(line,duration,priority,demanded_time_from,demanded_time_to,section_name)
+            section = Section.find_by_name_and_line(section_name, line)
+            if section is None:
+                logger.error("Section not found: %s - %s", section_name, line)
+                msg = f"Section not found: {section_name} - {line}"
+                raise click.ClickException(msg)  # noqa: TRY301
+
+            Task.insert_pref(demanded_time_from, demanded_time_to, priority, section.id, timedelta(minutes=duration))
+
+        con.commit()
+        logger.info("Populated database from Excel file: %s", file_path)
+        print(f"Populated database from Excel file: {file_path}")
+
+    except Exception as e:
+        logger.exception("Failed to populate database from Excel file")
+
+        msg = f"Failed to populate database from Excel file: {e}"
         raise click.ClickException(msg) from e
 
 
