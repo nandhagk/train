@@ -61,6 +61,7 @@ ignore = [
   "FBT001",
   "DTZ005",
   "A003",
+  "ERA001",
   # Print statement
   "T201",
   "T203"

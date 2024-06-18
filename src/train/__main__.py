@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from pathlib import Path
-from pprint import pprint
 
 import click
 
@@ -157,74 +156,85 @@ def sft(data: str, length: int, clear: bool):
         raise click.ClickException(msg) from e
 
 
-@main.command()
-@click.argument("name")
-@click.argument("line")
-def defrag(name: str, line: str) -> None:
-    """Reschedules all future tasks inorder to remove gaps."""
-    try:
-        section = Section.find_by_name_and_line(name, line)
-        if section is None:
-            logger.error("Section not found: %s - %s", name, line)
+# @main.command()
+# @click.argument("name")
+# @click.argument("line")
+# def defrag(name: str, line: str) -> None:
+#     """Reschedules all future tasks inorder to remove gaps."""
+#     try:
+#         section = Section.find_by_name_and_line(name, line)
+#         if section is None:
+#             logger.error("Section not found: %s - %s", name, line)
 
-            msg = f"Section not found: {name} - {line}"
-            raise click.ClickException(msg)  # noqa: TRY301
+#             msg = f"Section not found: {name} - {line}"
+#             raise click.ClickException(msg)
 
-        tasks = sorted(
-            Task.delete_future_tasks(section.id),
-            key=lambda task: (task.priority, task.requested_duration),
-            reverse=True,
-        )
+#         tasks = sorted(
+#             Task.delete_future_tasks(section.id),
+#             key=lambda task: (task.priority, task.requested_duration),
+#             reverse=True,
+#         )
 
-        newtasks = []
-        for task in tasks:
-            ts = Task.insert_greedy(task.requested_duration, task.priority, section.id)
-            newtasks.extend(ts)
+#         newtasks = []
+#         for task in tasks:
+#            ts = Task.insert_greedy(task.requested_duration, task.priority, section.id)
+#            newtasks.extend(ts)
 
-        con.commit()
-        logger.info("Defragmented tasks for Section: %s - %s", name, line)
-        pprint(newtasks)
+#         con.commit()
+#         logger.info("Defragmented tasks for Section: %s - %s", name, line)
+#         pprint(newtasks)
 
-    except Exception as e:
-        logger.exception("Failed to defragment tasks")
+#     except Exception as e:
+#         logger.exception("Failed to defragment tasks")
 
-        msg = f"Failed to defragment tasks: {e}"
-        raise click.ClickException(msg) from e
+#         msg = f"Failed to defragment tasks: {e}"
+#         raise click.ClickException(msg) from e
 
 
-@main.command()
-@click.argument("duration", type=int)
-@click.argument("priority", type=int)
-@click.argument("name")
-@click.argument("line")
-def insert(duration: int, priority: int, name: str, line: str) -> None:
-    """Section: STN-STN or STN YD."""
-    try:
-        section = Section.find_by_name_and_line(name, line)
-        if section is None:
-            logger.error("Section not found: %s - %s", name, line)
+# @main.command()
+# @click.argument("duration", type=int)
+# @click.argument("priority", type=int)
+# @click.argument("name")
+# @click.argument("line")
+# def insert(duration: int, priority: int, name: str, line: str) -> None:
+#     """Section: STN-STN or STN YD."""
+#     try:
+#         section = Section.find_by_name_and_line(name, line)
+#         if section is None:
+#             logger.error("Section not found: %s - %s", name, line)
 
-            msg = f"Section not found: {name} - {line}"
-            raise click.ClickException(msg)  # noqa: TRY301
+#             msg = f"Section not found: {name} - {line}"
+#             raise click.ClickException(msg)
 
-        tasks = Task.insert_greedy(timedelta(minutes=duration), priority, section.id)
-        con.commit()
+#         tasks = Task.insert_greedy(timedelta(minutes=duration), priority, section.id)
+#         con.commit()
 
-        logger.info(
-            "Inserted new task with duration %d and priority %d for Section: %s - %s",
-            duration,
-            priority,
-            name,
-            line,
-        )
-        pprint(tasks)
+#         logger.info(
+#             "Inserted new task with duration %d and priority %d for Section: %s - %s",
+#             duration,
+#             priority,
+#             name,
+#             line,
+#         )
+#         pprint(tasks)
 
-    except Exception as e:
-        logger.exception("Failed to insert task")
+#     except Exception as e:
+#         logger.exception("Failed to insert task")
 
-        msg = f"Failed to insert task: {e}"
-        raise click.ClickException(msg) from e
+#         msg = f"Failed to insert task: {e}"
+#         raise click.ClickException(msg) from e
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    section = Section.find_by_name_and_line("AKM-ELR", "UP")
+    assert section is not None
+
+    Task.insert_preferred(
+        time(hour=1),
+        time(hour=2),
+        1,
+        section.id,
+        requested_duration=timedelta(minutes=30),
+    )
+    con.commit()
