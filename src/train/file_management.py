@@ -222,11 +222,11 @@ class ExcelManager(FileManager):
             fmt = FileManager.get_file_fmt_type(headers)
 
         data = []
-        for row in sheet.iter_rows(min_col=1, max_col=col_count):
+        for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_count):
             if not row[0].value:
                 break
 
-            data.append({headers[i]: row[i].value} for i in range(col_count))
+            data.append({headers[i]: row[i].value for i in range(col_count)})
 
         wb.close()
         return fmt, [FileManager.decode(item, fmt) for item in data]
@@ -243,7 +243,7 @@ class ExcelManager(FileManager):
 
         sheet.append(headers)
         for row in data:
-            sheet.append(row)
+            sheet.append(list(row.values()))
 
         wb.save(path)
         wb.close()
