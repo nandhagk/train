@@ -6,7 +6,6 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from pprint import pprint
-from time import perf_counter
 
 import click
 import pandas as pd
@@ -246,7 +245,6 @@ def insert(  # noqa: PLR0913
                 msg = "Requested duration is greater than preference window."
                 raise click.BadParameter(msg)  # noqa: TRY301
 
-            t0 = perf_counter()
             tasks = Task.insert_pref(
                 preferred_starts_time,
                 preferred_ends_time,
@@ -254,18 +252,11 @@ def insert(  # noqa: PLR0913
                 section.id,
                 requested_duration,
             )
-            t1 = perf_counter()
-            print(t1 - t0)
 
         else:
             assert requested_duration is not None
-            preferred_starts_time = None
-            preferred_ends_time = None
 
-            t0 = perf_counter()
             tasks = Task.insert_nopref(priority, section.id, requested_duration)
-            t1 = perf_counter()
-            print(t1 - t0)
 
         con.commit()
 
@@ -295,12 +286,10 @@ def insert(  # noqa: PLR0913
     type=click.Path(exists=False, dir_okay=False, resolve_path=True),
 )
 def populate_from_excel(file_path: str, output_path: str):
-#def populate_from_excel(file_path: str):
     """Populate the database with data from an Excel sheet."""
     try:
         df = pd.read_excel(file_path)  # noqa: PD901
 
-        output_data = []
         for _, row in df.iterrows():
             section_name = row["section_name"]
             line = row["line"]
@@ -314,21 +303,13 @@ def populate_from_excel(file_path: str, output_path: str):
                 row["demanded_time_to"],
                 "%H:%M",
             ).time()
-            print(
-                line,
-                duration,
-                priority,
-                demanded_time_from,
-                demanded_time_to,
-                section_name,
-            )
             section = Section.find_by_name_and_line(section_name, line)
             if section is None:
                 logger.error("Section not found: %s - %s", section_name, line)
                 msg = f"Section not found: {section_name} - {line}"
                 raise click.ClickException(msg)  # noqa: TRY301
 
-            tasks = Task.insert_pref(
+            Task.insert_pref(
                 demanded_time_from,
                 demanded_time_to,
                 priority,
@@ -336,24 +317,61 @@ def populate_from_excel(file_path: str, output_path: str):
                 timedelta(minutes=duration),
             )
 
-            for task in tasks:
-                output_data.append({
-                    "section_name": section_name,
-                    "line": line,
-                    "duration": duration,
-                    "priority": priority,
-                    "demanded_time_from": demanded_time_from,
-                    "demanded_time_to": demanded_time_to,
-                    "allotted_time_from": task.allotted_time_from,
-                    "allotted_time_to": task.allotted_time_to,
-                })
-
         con.commit()
+
+        res = cur.execute(
+            """
+            SELECT
+                DATE(task.starts_at),
+                (SELECT station.name FROM station WHERE station.id = section.from_id),
+                (SELECT station.name FROM station WHERE station.id = section.to_id),
+                block.name,
+                section.line,
+                task.preferred_starts_at,
+                task.preferred_ends_at,
+                task.requested_duration / 60,
+                TIME(task.starts_at),
+                TIME(task.ends_at)
+            FROM task
+            JOIN maintenance_window ON
+                maintenance_window.id = task.maintenance_window_id
+            JOIN section ON
+                section.id = maintenance_window.section_id
+            JOIN station ON
+                station.id = section.from_id
+            JOIN block ON
+                block.id = station.block_id
+            ORDER BY
+                task.starts_at ASC
+            """,
+        )
+
+        output_data = [
+            {
+                "date": x[0],
+                "department": "ENGG",
+                "block_section_or_yard": (
+                    f"{x[1]} YD" if x[1] == x[2] else f"{x[1]}-{x[2]}"
+                ),
+                "corridor_block": x[3],
+                "line": x[4],
+                "demanded_time_from": x[5],
+                "demanded_time_to": x[6],
+                "block_demanded": x[7],
+                "permitted_time_from": x[8],
+                "permitted_time_to": x[9],
+                "block_permitted": x[7],
+            }
+            for x in res.fetchall()
+        ]
 
         output_df = pd.DataFrame(output_data)
         output_df.to_excel(output_path, index=False)
 
-        logger.info("Populated database and saved output to Excel file: %s", output_path)
+        logger.info(
+            "Populated database and saved output to Excel file: %s",
+            output_path,
+        )
         print(f"Populated database and saved output to Excel file: {output_path}")
 
     except Exception as e:
@@ -361,6 +379,7 @@ def populate_from_excel(file_path: str, output_path: str):
 
         msg = f"Failed to populate database from Excel file: {e}"
         raise click.ClickException(msg) from e
+
 
 if __name__ == "__main__":
     main()

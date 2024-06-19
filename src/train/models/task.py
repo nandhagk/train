@@ -121,55 +121,55 @@ class Task:
         return task
 
     @staticmethod
-    def _insert(
-        tasks: list[TaskQ],
-        tasks_to_insert: list[Task],
-        section_id: int,
-    ) -> list[Task]:
-        if not tasks:
-            return tasks_to_insert
+    def _insert(taskq: TaskQ, section_id: int) -> list[Task]:
+        tasks = []
 
-        taskq = heappop(tasks)
-        if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
-            window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
-        else:
-            window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
+        queue = [taskq]
+        heapify(queue)
+        while queue:
+            taskq = heappop(queue)
+            if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
+                window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
+            else:
+                window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
 
-        payload = {
-            "window_id": window_id,
-            "starts_at": starts_at,
-            "ends_at": ends_at,
-        }
-        res = cur.execute(
-            """
-            DELETE FROM task
-            WHERE
-                task.maintenance_window_id = :window_id
-                AND (
-                    (task.starts_at > :starts_at AND task.starts_at < :ends_at)
-                    OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
-                    OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
-                    OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
-                    OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
-                )
-            RETURNING *
-            """,
-            payload,
-        )
-        for taskq_ in [Task.decode(x) for x in res.fetchall()]:
-            heappush(
-                tasks,
-                TaskQ(
-                    taskq_.priority,
-                    taskq_.requested_duration,
-                    taskq_.preferred_starts_at,
-                    taskq_.preferred_ends_at,
-                    taskq_.starts_at,
-                ),
+            payload = {
+                "window_id": window_id,
+                "starts_at": starts_at,
+                "ends_at": ends_at,
+            }
+
+            res = cur.execute(
+                """
+                DELETE FROM task
+                WHERE
+                    task.maintenance_window_id = :window_id
+                    AND (
+                        (task.starts_at > :starts_at AND task.starts_at < :ends_at)
+                        OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
+                        OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
+                        OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
+                        OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
+                    )
+                RETURNING *
+                """,
+                payload,
             )
 
-        tasks_to_insert.append(
-            Task.insert_one(
+            for x in res.fetchall():
+                task_to_remove = Task.decode(x)
+                heappush(
+                    queue,
+                    TaskQ(
+                        task_to_remove.priority,
+                        task_to_remove.requested_duration,
+                        task_to_remove.preferred_starts_at,
+                        task_to_remove.preferred_ends_at,
+                        task_to_remove.starts_at,
+                    ),
+                )
+
+            task = Task.insert_one(
                 starts_at,
                 ends_at,
                 taskq.requested_duration,
@@ -177,10 +177,11 @@ class Task:
                 window_id,
                 taskq.preferred_starts_at,
                 taskq.preferred_ends_at,
-            ),
-        )
+            )
 
-        return Task._insert(tasks, tasks_to_insert, section_id)
+            tasks.append(task)
+
+        return tasks
 
     @staticmethod
     def _insert_pref(  # noqa: C901
@@ -237,7 +238,7 @@ class Task:
         )
 
         def unixepoch(t: time) -> timedelta:
-            return timedelta(hours=t.hour, minutes=t.minute)
+            return datetime.combine(date.min, t) - datetime.min
 
         p_starts = unixepoch(taskq.preferred_starts_at)
         p_ends = unixepoch(taskq.preferred_ends_at)
@@ -430,10 +431,8 @@ class Task:
         section_id: int,
         requested_duration: timedelta,
     ) -> list[Task]:
-        queue: list[TaskQ] = [TaskQ[None](priority, requested_duration, None, None)]
-
-        heapify(queue)
-        return Task._insert(queue, [], section_id)
+        taskq = TaskQ[None](priority, requested_duration, None, None)
+        return Task._insert(taskq, section_id)
 
     @classmethod
     def insert_pref(  # noqa: PLR0913
@@ -444,17 +443,14 @@ class Task:
         section_id: int,
         requested_duration: timedelta,
     ) -> list[Task]:
-        queue: list[TaskQ] = [
-            TaskQ[time](
-                priority,
-                requested_duration,
-                preferred_starts_at,
-                preferred_ends_at,
-            ),
-        ]
+        taskq = TaskQ[time](
+            priority,
+            requested_duration,
+            preferred_starts_at,
+            preferred_ends_at,
+        )
 
-        heapify(queue)
-        return Task._insert(queue, [], section_id)
+        return Task._insert(taskq, section_id)
 
     @classmethod
     def find_by_id(cls, id: int) -> Self | None:
