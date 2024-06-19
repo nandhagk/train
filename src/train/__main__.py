@@ -299,31 +299,35 @@ def populate_from_excel(file_path: str, output_path: str):
         df = pd.read_excel(file_path)  # noqa: PD901
 
         for _, row in df.iterrows():
-            section_name = row["section_name"]
-            line = row["line"]
-            duration = int(row["duration"])
-            priority = int(row["priority"])
-            demanded_time_from = datetime.strptime(
-                row["demanded_time_from"],
-                "%H:%M",
-            ).time()
-            demanded_time_to = datetime.strptime(
-                row["demanded_time_to"],
-                "%H:%M",
-            ).time()
-            section = Section.find_by_name_and_line(section_name, line)
-            if section is None:
-                logger.error("Section not found: %s - %s", section_name, line)
-                msg = f"Section not found: {section_name} - {line}"
-                raise click.ClickException(msg)  # noqa: TRY301
+            try:
+                section_name = row["section_name"]
+                line = row["line"]
+                duration = int(row["duration"])
+                priority = int(row["priority"])
+                demanded_time_from = datetime.strptime(
+                    str(row["demanded_time_from"]),
+                    "%H:%M:%S",
+                ).time()
+                demanded_time_to = datetime.strptime(
+                    str(row["demanded_time_to"]),
+                    "%H:%M:%S",
+                ).time()
+                section = Section.find_by_name_and_line(section_name, line)
+                print(section)
+                if section is None:
+                    logger.error("Section not found: %s - %s", section_name, line)
+                    msg = f"Section not found: {section_name} - {line}"
+                    print(click.ClickException(msg))  # noqa: TRY301
+                    continue
 
-            Task.insert_pref(
-                demanded_time_from,
-                demanded_time_to,
-                priority,
-                section.id,
-                timedelta(minutes=duration),
-            )
+                Task.insert_pref(
+                    demanded_time_from,
+                    demanded_time_to,
+                    priority,
+                    section.id,
+                    timedelta(minutes=duration),
+                )
+            except: ...
 
         con.commit()
 

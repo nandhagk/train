@@ -41,10 +41,15 @@ class Section:
         name: str,
         line: str,
     ) -> Section | None:
-        if "-" in name:
-            f, _, t = name.partition("-")
+        if name.endswith("YD"):
+            f = t = name.removesuffix("YD").replace("-", "").strip() + "_YD"
+
         else:
-            f = t = name.replace(" ", "_")
+            f, _, t = name.partition("-")
+            f = f.strip()
+            t = t.strip()
+
+
 
         payload = {"f": f, "t": t, "line": line}
 
