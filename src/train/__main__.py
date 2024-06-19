@@ -272,7 +272,11 @@ def pfe(input_file: str, output_file: str):
 
         tasks = []
         for section_id, taskqs in taskqs_per_section.items():
-            tasks.extend(Task.insert_many(taskqs, section_id))
+            print("scheduling", section_id)
+            try:
+                tasks.extend(Task.insert_many(taskqs, section_id))
+            except Exception:
+                print("ignoring", section_id)
 
         con.commit()
         FileManager.get_manager(output_path).write(output_path, tasks, fmt)
@@ -280,6 +284,7 @@ def pfe(input_file: str, output_file: str):
         print(f"Populated database and saved output file: {output_path}")
 
     except Exception as e:
+        
         logger.exception("Failed to populate database from file")
 
         msg = f"Failed to populate database from file: {e}"

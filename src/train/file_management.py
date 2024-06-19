@@ -120,13 +120,15 @@ class FileManager(ABC):
         raise Exception(msg)
 
     @staticmethod
-    def decode(item: dict, fmt: Format) -> tuple[TaskQ, int]:
+    def decode(item: dict, fmt: Format) -> tuple[TaskQ, int] | None:
         if fmt == FileManager.Format.bare_minimum:
             preferred_ends_at = FileManager._get_time(item["demanded_time_to"])
             preferred_starts_at = FileManager._get_time(item["demanded_time_from"])
 
-            section = Section.find_by_name_and_line(item["section_name"], item["line"])
+            section = Section.find_by_name_and_line(item["section_name"],"UP")
             if section is None:
+                print("WARNING: Could not find section", item['section_name'], item['line'])
+                return None
                 msg = f"Invalid section `{item['section_name'], item['line']}`"
                 raise Exception(msg)
 
@@ -187,7 +189,7 @@ class CSVManager(FileManager):
         if fmt is None:
             fmt = FileManager.get_file_fmt_type([*data[0].keys()])
 
-        return fmt, [FileManager.decode(item, fmt) for item in data]
+        return fmt, [thing for thing in (FileManager.decode(item, fmt) for item in data) if thing is not None]
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
@@ -230,7 +232,7 @@ class ExcelManager(FileManager):
             data.append({headers[i]: row[i].value for i in range(col_count)})
 
         wb.close()
-        return fmt, [FileManager.decode(item, fmt) for item in data]
+        return fmt, [thing for thing in (FileManager.decode(item, fmt) for item in data) if thing is not None]
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:

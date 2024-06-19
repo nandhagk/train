@@ -244,7 +244,7 @@ class Task:
         if p_ends <= p_starts:
             p_starts -= timedelta(days=1)
 
-        def key(z: tuple[str, str, int]) -> tuple[timedelta, datetime, datetime, int]:
+        def mapper(z: tuple[str, str, int]) -> tuple[timedelta, datetime, datetime, int]:
             window_start_, window_end_, window_id = z
 
             window_start = datetime.fromisoformat(window_start_)
@@ -270,7 +270,7 @@ class Task:
             return (intersection, window_start, window_end, window_id)
 
         y: list[tuple[str, str, int]] = res.fetchall()
-        x = max([key(z) for z in y], key=lambda z: (z[0], datetime.now() - z[1]))
+        x = max([mapper(z) for z in y], key=lambda z: (min(z[0], taskq.requested_duration), datetime.now() - z[1]))
 
         (intersection, window_start, window_end, window_id) = x
         possible_preferred_dates = (
