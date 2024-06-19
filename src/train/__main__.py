@@ -68,8 +68,8 @@ def init(data: str):
                         Station.find_by_name(section[1]).id,  # type: ignore ()
                     )
                     for section in blocks[block]
-                ] + 
-                [
+                ]
+                + [
                     (
                         "DN",
                         Station.find_by_name(section[0]).id,  # type: ignore ()
@@ -317,7 +317,7 @@ def populate_from_excel(file_path: str, output_path: str):
                 if section is None:
                     logger.error("Section not found: %s - %s", section_name, line)
                     msg = f"Section not found: {section_name} - {line}"
-                    print(click.ClickException(msg))  # noqa: TRY301
+                    print(click.ClickException(msg))
                     continue
 
                 Task.insert_pref(
@@ -327,7 +327,8 @@ def populate_from_excel(file_path: str, output_path: str):
                     section.id,
                     timedelta(minutes=duration),
                 )
-            except: ...
+            except:  # noqa: E722
+                ...
 
         con.commit()
 
@@ -363,7 +364,7 @@ def populate_from_excel(file_path: str, output_path: str):
                 "date": x[0],
                 "department": "ENGG",
                 "block_section_or_yard": (
-                    f"{x[1]} YD" if x[1] == x[2] else f"{x[1]}-{x[2]}"
+                    f"{x[1].replace("_", " ")}" if x[1] == x[2] else f"{x[1]}-{x[2]}"
                 ),
                 "corridor_block": x[3],
                 "line": x[4],
