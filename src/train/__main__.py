@@ -252,15 +252,17 @@ def insert(  # noqa: PLR0913
 
 @main.command()
 @click.argument(
-    "input_path",
+    "input_file",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
 @click.argument(
-    "output_path",
+    "output_file",
     type=click.Path(exists=False, dir_okay=False, resolve_path=True),
 )
-def pfe(input_path: str, output_path: str):
+def pfe(input_file: str, output_file: str):
     """Populate the database with data from an Excel sheet."""
+    input_path = Path(input_file)
+    output_path = Path(output_file)
     try:
         taskqs_per_section: dict[int, list[TaskQ]] = defaultdict(list)
 

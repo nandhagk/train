@@ -1,0 +1,3 @@
+date,block_section_or_yard,corridor_block,line,demanded_time_from,demanded_time_to,block_demanded,permitted_time_from,permitted_time_to,block_permitted
+2024-06-26,MCN-THL,TRL-KPD,UP,13:35:00,14:35:00,60,22:30:00,23:30:00,60
+2024-07-01,MDVE-SHU,TRL-KPD,UP,10:00:00,13:00:00,180,22:30:00,01:30:00,180

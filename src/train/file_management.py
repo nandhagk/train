@@ -79,7 +79,7 @@ class FileManager(ABC):
                     station.id = section.from_id
                 JOIN block ON
                     block.id = station.block_id
-                WHERE task.id in ({' '.join(str(task.id) for task in tasks)})
+                WHERE task.id in ({', '.join(str(task.id) for task in tasks)})
                 ORDER BY
                     task.starts_at ASC
                 """,  # noqa: S608
@@ -109,14 +109,14 @@ class FileManager(ABC):
         return {}
 
     @staticmethod
-    def get_manager(path: str) -> type[FileManager]:
-        if path.endswith(".csv"):
+    def get_manager(path: Path) -> type[FileManager]:
+        if path.suffix == ".csv":
             return CSVManager
 
-        if path.endswith(".xlsx"):
+        if path.suffix == ".xlsx":
             return ExcelManager
 
-        msg = f"Unsupported file extension `{path.split(".")[-1]}`"
+        msg = f"Unsupported file extension `{path.suffix}`"
         raise Exception(msg)
 
     @staticmethod
@@ -159,24 +159,24 @@ class FileManager(ABC):
     @staticmethod
     @abstractmethod
     def read(
-        path: str,
+        path: Path,
         fmt: Format | None = None,
     ) -> tuple[Format, list[tuple[TaskQ, int]]]: ...
 
     @staticmethod
     @abstractmethod
-    def write(path: str, tasks: list[Task], fmt: Format) -> None: ...
+    def write(path: Path, tasks: list[Task], fmt: Format) -> None: ...
 
 
 class CSVManager(FileManager):
     @staticmethod
     def read(
-        path: str,
+        path: Path,
         fmt: FileManager.Format | None = None,
     ) -> tuple[FileManager.Format, list[tuple[TaskQ, int]]]:
         import csv
 
-        with Path(path).open() as fd:
+        with path.open(newline='') as fd:
             reader = csv.DictReader(fd)
             data = [*reader]
 
@@ -190,20 +190,21 @@ class CSVManager(FileManager):
         return fmt, [FileManager.decode(item, fmt) for item in data]
 
     @staticmethod
-    def write(path: str, tasks: list[Task], fmt: FileManager.Format) -> None:
+    def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
         import csv
 
         data = FileManager.encode_tasks(tasks, fmt)
 
-        with Path(path).open() as fd:
+        with path.open(mode='w', newline='') as fd:
             writer = csv.DictWriter(fd, FileManager.get_headers(fmt))
+            writer.writeheader()
             writer.writerows(data)
 
 
 class ExcelManager(FileManager):
     @staticmethod
     def read(
-        path: str,
+        path: Path,
         fmt: FileManager.Format | None = None,
     ) -> tuple[FileManager.Format, list[tuple[TaskQ, int]]]:
         import openpyxl
@@ -232,7 +233,7 @@ class ExcelManager(FileManager):
         return fmt, [FileManager.decode(item, fmt) for item in data]
 
     @staticmethod
-    def write(path: str, tasks: list[Task], fmt: FileManager.Format) -> None:
+    def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
         import openpyxl
 
         data = FileManager.encode_tasks(tasks, fmt)
@@ -245,5 +246,5 @@ class ExcelManager(FileManager):
         for row in data:
             sheet.append(list(row.values()))
 
-        wb.save(path)
+        wb.save(path.as_posix())
         wb.close()
