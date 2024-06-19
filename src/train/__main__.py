@@ -275,7 +275,7 @@ def pfe(input_file: str, output_file: str):
             print("scheduling", section_id)
             try:
                 tasks.extend(Task.insert_many(taskqs, section_id))
-            except Exception:
+            except Exception:  # noqa: BLE001
                 print("ignoring", section_id)
 
         con.commit()
@@ -284,7 +284,7 @@ def pfe(input_file: str, output_file: str):
         print(f"Populated database and saved output file: {output_path}")
 
     except Exception as e:
-        
+
         logger.exception("Failed to populate database from file")
 
         msg = f"Failed to populate database from file: {e}"

@@ -4,11 +4,14 @@ from abc import ABC, abstractmethod
 from contextlib import suppress
 from datetime import datetime, time, timedelta
 from enum import IntEnum, auto
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from train.db import cur
 from train.models.section import Section
 from train.models.task import Task, TaskQ
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class FileManager(ABC):
@@ -125,9 +128,13 @@ class FileManager(ABC):
             preferred_ends_at = FileManager._get_time(item["demanded_time_to"])
             preferred_starts_at = FileManager._get_time(item["demanded_time_from"])
 
-            section = Section.find_by_name_and_line(item["section_name"],"UP")
+            section = Section.find_by_name_and_line(item["section_name"], "UP")
             if section is None:
-                print("WARNING: Could not find section", item['section_name'], item['line'])
+                print(
+                    "WARNING: Could not find section",
+                    item["section_name"],
+                    item["line"],
+                )
                 return None
                 msg = f"Invalid section `{item['section_name'], item['line']}`"
                 raise Exception(msg)
@@ -178,7 +185,7 @@ class CSVManager(FileManager):
     ) -> tuple[FileManager.Format, list[tuple[TaskQ, int]]]:
         import csv
 
-        with path.open(newline='') as fd:
+        with path.open(newline="") as fd:
             reader = csv.DictReader(fd)
             data = [*reader]
 
@@ -189,7 +196,11 @@ class CSVManager(FileManager):
         if fmt is None:
             fmt = FileManager.get_file_fmt_type([*data[0].keys()])
 
-        return fmt, [thing for thing in (FileManager.decode(item, fmt) for item in data) if thing is not None]
+        return fmt, [
+            thing
+            for thing in (FileManager.decode(item, fmt) for item in data)
+            if thing is not None
+        ]
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
@@ -197,7 +208,7 @@ class CSVManager(FileManager):
 
         data = FileManager.encode_tasks(tasks, fmt)
 
-        with path.open(mode='w', newline='') as fd:
+        with path.open(mode="w", newline="") as fd:
             writer = csv.DictWriter(fd, FileManager.get_headers(fmt))
             writer.writeheader()
             writer.writerows(data)
@@ -232,7 +243,11 @@ class ExcelManager(FileManager):
             data.append({headers[i]: row[i].value for i in range(col_count)})
 
         wb.close()
-        return fmt, [thing for thing in (FileManager.decode(item, fmt) for item in data) if thing is not None]
+        return fmt, [
+            thing
+            for thing in (FileManager.decode(item, fmt) for item in data)
+            if thing is not None
+        ]
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
