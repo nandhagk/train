@@ -68,6 +68,14 @@ def init(data: str):
                         Station.find_by_name(section[1]).id,  # type: ignore ()
                     )
                     for section in blocks[block]
+                ] + 
+                [
+                    (
+                        "DN",
+                        Station.find_by_name(section[0]).id,  # type: ignore ()
+                        Station.find_by_name(section[1]).id,  # type: ignore ()
+                    )
+                    for section in blocks[block]
                 ],
             )
 
