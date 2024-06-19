@@ -91,7 +91,6 @@ class Task:
             "priority": priority,
             "maintenance_window_id": maintenance_window_id,
         }
-        print(payload)
 
         res = cur.execute(
             """
@@ -169,7 +168,6 @@ class Task:
                 ),
             )
 
-        print(taskq.requested_duration)
         tasks_to_insert.append(
             Task.insert_one(
                 starts_at,
@@ -201,15 +199,11 @@ class Task:
                 window_start,
                 COALESCE(
                     (
-                        SELECT task.starts_at FROM task
-                        JOIN maintenance_window
-                            ON task.maintenance_window_id = window_id
+                        SELECT MIN(task.starts_at) FROM task
                         WHERE
                             task.priority >= :priority
                             AND task.starts_at >= window_start
-                        ORDER BY
-                            task.starts_at ASC
-                        LIMIT 1
+                            AND task.maintenance_window_id = window_id
                     ),
                     m_window_end
                 ) AS window_end,
@@ -297,9 +291,7 @@ class Task:
                     taskq.preferred_ends_at,
                 )
                 + timedelta(
-                    days=(
-                        1 if taskq.preferred_starts_at >= taskq.preferred_ends_at else 0
-                    ),
+                    days=int(taskq.preferred_starts_at >= taskq.preferred_ends_at),
                 ),
             )
             for possible_preferred_date in possible_preferred_dates
@@ -381,15 +373,11 @@ class Task:
                 window_start,
                 COALESCE(
                     (
-                        SELECT task.starts_at FROM task
-                        JOIN maintenance_window
-                            ON task.maintenance_window_id = window_id
+                        SELECT MIN(task.starts_at) FROM task
                         WHERE
                             task.priority >= :priority
                             AND task.starts_at >= window_start
-                        ORDER BY
-                            task.starts_at ASC
-                        LIMIT 1
+                            AND task.maintenance_window_id = window_id
                     ),
                     m_window_end
                 ) AS window_end,
