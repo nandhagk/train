@@ -15,7 +15,9 @@ from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
 from train.models.section import Section
 from train.models.station import Station
-from train.models.task import Task
+from train.models.task import Task, TaskQ
+
+from train.file_management import FileManager
 
 logging.basicConfig(
     filename=Path.cwd() / "train.log",
@@ -166,43 +168,6 @@ def create_windows(data: str, length: int, clear: bool):
         raise click.ClickException(msg) from e
 
 
-"""
-@main.command()
-@click.argument("name")
-@click.argument("line")
-def defrag(name: str, line: str) -> None:
-    Reschedules all future tasks inorder to remove gaps.
-    try:
-        section = Section.find_by_name_and_line(name, line)
-        if section is None:
-            logger.error("Section not found: %s - %s", name, line)
-
-            msg = f"Section not found: {name} - {line}"
-            raise click.ClickException(msg)
-
-        tasks = sorted(
-            Task.delete_future_tasks(section.id),
-            key=lambda task: (task.priority, task.requested_duration),
-            reverse=True,
-        )
-
-        newtasks = []
-        for task in tasks:
-           ts = Task.insert_greedy(task.requested_duration, task.priority, section.id)
-           newtasks.extend(ts)
-
-        con.commit()
-        logger.info("Defragmented tasks for Section: %s - %s", name, line)
-        pprint(newtasks)
-
-    except Exception as e:
-        logger.exception("Failed to defragment tasks")
-
-        msg = f"Failed to defragment tasks: {e}"
-        raise click.ClickException(msg) from e
-"""
-
-
 @main.command()
 @click.argument("name")
 @click.argument("line")
@@ -253,18 +218,18 @@ def insert(  # noqa: PLR0913
                 msg = "Requested duration is greater than preference window."
                 raise click.BadParameter(msg)  # noqa: TRY301
 
-            tasks = Task.insert_pref(
-                preferred_starts_time,
-                preferred_ends_time,
-                priority,
-                section.id,
-                requested_duration,
-            )
-
         else:
             assert requested_duration is not None
 
-            tasks = Task.insert_nopref(priority, section.id, requested_duration)
+            preferred_starts_time = None
+            preferred_ends_time = None
+
+        tasks = Task.insert(
+            TaskQ(
+                priority, requested_duration, preferred_starts_time, preferred_ends_time
+            ),
+            section.id
+        )
 
         con.commit()
 
@@ -286,111 +251,34 @@ def insert(  # noqa: PLR0913
 
 @main.command()
 @click.argument(
-    "file_path",
+    "input_path",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
 @click.argument(
     "output_path",
     type=click.Path(exists=False, dir_okay=False, resolve_path=True),
 )
-def populate_from_excel(file_path: str, output_path: str):
+def pfe(input_path: str, output_path: str):
     """Populate the database with data from an Excel sheet."""
     try:
-        df = pd.read_excel(file_path)  # noqa: PD901
+        taskqs_per_section: dict[int, list[TaskQ]] = defaultdict(list)
+        fmt, data = FileManager.get_manager(input_path).read(input_path)
+        for taskq, section_id in data:
+            taskqs_per_section[section_id].append(taskq)
 
-        for _, row in df.iterrows():
-            try:
-                section_name = row["section_name"]
-                line = row["line"]
-                duration = int(row["duration"])
-                priority = int(row["priority"])
-                demanded_time_from = datetime.strptime(
-                    str(row["demanded_time_from"]),
-                    "%H:%M:%S",
-                ).time()
-                demanded_time_to = datetime.strptime(
-                    str(row["demanded_time_to"]),
-                    "%H:%M:%S",
-                ).time()
-                section = Section.find_by_name_and_line(section_name, line)
-                print(section)
-                if section is None:
-                    logger.error("Section not found: %s - %s", section_name, line)
-                    msg = f"Section not found: {section_name} - {line}"
-                    print(click.ClickException(msg))
-                    continue
-
-                Task.insert_pref(
-                    demanded_time_from,
-                    demanded_time_to,
-                    priority,
-                    section.id,
-                    timedelta(minutes=duration),
-                )
-            except:  # noqa: E722
-                ...
+        tasks = []
+        for section_id, taskqs in taskqs_per_section.items():
+            tasks.extend(Task.insert_many(taskqs, section_id))
 
         con.commit()
-
-        res = cur.execute(
-            """
-            SELECT
-                DATE(task.starts_at),
-                (SELECT station.name FROM station WHERE station.id = section.from_id),
-                (SELECT station.name FROM station WHERE station.id = section.to_id),
-                block.name,
-                section.line,
-                task.preferred_starts_at,
-                task.preferred_ends_at,
-                task.requested_duration / 60,
-                TIME(task.starts_at),
-                TIME(task.ends_at)
-            FROM task
-            JOIN maintenance_window ON
-                maintenance_window.id = task.maintenance_window_id
-            JOIN section ON
-                section.id = maintenance_window.section_id
-            JOIN station ON
-                station.id = section.from_id
-            JOIN block ON
-                block.id = station.block_id
-            ORDER BY
-                task.starts_at ASC
-            """,
-        )
-
-        output_data = [
-            {
-                "date": x[0],
-                "department": "ENGG",
-                "block_section_or_yard": (
-                    f"{x[1].replace("_", " ")}" if x[1] == x[2] else f"{x[1]}-{x[2]}"
-                ),
-                "corridor_block": x[3],
-                "line": x[4],
-                "demanded_time_from": x[5],
-                "demanded_time_to": x[6],
-                "block_demanded": x[7],
-                "permitted_time_from": x[8],
-                "permitted_time_to": x[9],
-                "block_permitted": x[7],
-            }
-            for x in res.fetchall()
-        ]
-
-        output_df = pd.DataFrame(output_data)
-        output_df.to_excel(output_path, index=False)
-
-        logger.info(
-            "Populated database and saved output to Excel file: %s",
-            output_path,
-        )
-        print(f"Populated database and saved output to Excel file: {output_path}")
-
+        FileManager.get_manager(output_path).write(output_path, tasks, fmt)
+    
+        print(f"Populated database and saved output file: {output_path}")
+        
     except Exception as e:
-        logger.exception("Failed to populate database from Excel file")
+        logger.exception("Failed to populate database from file")
 
-        msg = f"Failed to populate database from Excel file: {e}"
+        msg = f"Failed to populate database from file: {e}"
         raise click.ClickException(msg) from e
 
 

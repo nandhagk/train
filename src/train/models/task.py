@@ -22,6 +22,7 @@ class TaskQ(Generic[T]):
     preferred_starts_at: T
     preferred_ends_at: T
     starts_at: datetime = field(default=datetime.now())
+    
 
     @property
     def preferred_range(self) -> timedelta:
@@ -121,10 +122,8 @@ class Task:
         return task
 
     @staticmethod
-    def _insert(taskq: TaskQ, section_id: int) -> list[Task]:
+    def insert_many(queue: list[TaskQ], section_id: int) -> list[Task]:
         tasks = []
-
-        queue = [taskq]
         heapify(queue)
         while queue:
             taskq = heappop(queue)
@@ -426,31 +425,11 @@ class Task:
         return (window_id, starts_at, ends_at)
 
     @staticmethod
-    def insert_nopref(
-        priority: int,
-        section_id: int,
-        requested_duration: timedelta,
+    def insert(
+        taskq: TaskQ[T],
+        section_id
     ) -> list[Task]:
-        taskq = TaskQ[None](priority, requested_duration, None, None)
-        return Task._insert(taskq, section_id)
-
-    @classmethod
-    def insert_pref(  # noqa: PLR0913
-        cls,
-        preferred_starts_at: time,
-        preferred_ends_at: time,
-        priority: int,
-        section_id: int,
-        requested_duration: timedelta,
-    ) -> list[Task]:
-        taskq = TaskQ[time](
-            priority,
-            requested_duration,
-            preferred_starts_at,
-            preferred_ends_at,
-        )
-
-        return Task._insert(taskq, section_id)
+        return Task.insert_many([taskq], section_id)
 
     @classmethod
     def find_by_id(cls, id: int) -> Self | None:
