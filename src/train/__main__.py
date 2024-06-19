@@ -290,12 +290,12 @@ def insert(  # noqa: PLR0913
     "file_path",
     type=click.Path(exists=True, dir_okay=False, resolve_path=True),
 )
-#@click.argument(
-#    "output_path",
-#    type=click.Path(exists=False, dir_okay=False, resolve_path=True),
-#)
-#def populate_from_excel(file_path: str, output_path: str):
-def populate_from_excel(file_path: str):
+@click.argument(
+    "output_path",
+    type=click.Path(exists=False, dir_okay=False, resolve_path=True),
+)
+def populate_from_excel(file_path: str, output_path: str):
+#def populate_from_excel(file_path: str):
     """Populate the database with data from an Excel sheet."""
     try:
         df = pd.read_excel(file_path)  # noqa: PD901
@@ -336,22 +336,22 @@ def populate_from_excel(file_path: str):
                 timedelta(minutes=duration),
             )
 
-#            for task in tasks:
-#                output_data.append({
-#                    "section_name": section_name,
-#                    "line": line,
-#                    "duration": duration,
-#                    "priority": priority,
-#                    "demanded_time_from": demanded_time_from,
-#                    "demanded_time_to": demanded_time_to,
-#                    "allotted_time_from": task.allotted_time_from,
-#                    "allotted_time_to": task.allotted_time_to,
-#                })
+            for task in tasks:
+                output_data.append({
+                    "section_name": section_name,
+                    "line": line,
+                    "duration": duration,
+                    "priority": priority,
+                    "demanded_time_from": demanded_time_from,
+                    "demanded_time_to": demanded_time_to,
+                    "allotted_time_from": task.allotted_time_from,
+                    "allotted_time_to": task.allotted_time_to,
+                })
 
         con.commit()
 
-#        output_df = pd.DataFrame(output_data)
-#        output_df.to_excel(output_path, index=False)
+        output_df = pd.DataFrame(output_data)
+        output_df.to_excel(output_path, index=False)
 
         logger.info("Populated database and saved output to Excel file: %s", output_path)
         print(f"Populated database and saved output to Excel file: {output_path}")
