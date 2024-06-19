@@ -8,16 +8,14 @@ from pathlib import Path
 from pprint import pprint
 
 import click
-import pandas as pd
 
 from train.db import con, cur
+from train.file_management import FileManager
 from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
 from train.models.section import Section
 from train.models.station import Station
 from train.models.task import Task, TaskQ
-
-from train.file_management import FileManager
 
 logging.basicConfig(
     filename=Path.cwd() / "train.log",
@@ -226,9 +224,12 @@ def insert(  # noqa: PLR0913
 
         tasks = Task.insert(
             TaskQ(
-                priority, requested_duration, preferred_starts_time, preferred_ends_time
+                priority,
+                requested_duration,
+                preferred_starts_time,
+                preferred_ends_time,
             ),
-            section.id
+            section.id,
         )
 
         con.commit()
@@ -262,6 +263,7 @@ def pfe(input_path: str, output_path: str):
     """Populate the database with data from an Excel sheet."""
     try:
         taskqs_per_section: dict[int, list[TaskQ]] = defaultdict(list)
+
         fmt, data = FileManager.get_manager(input_path).read(input_path)
         for taskq, section_id in data:
             taskqs_per_section[section_id].append(taskq)
@@ -272,9 +274,9 @@ def pfe(input_path: str, output_path: str):
 
         con.commit()
         FileManager.get_manager(output_path).write(output_path, tasks, fmt)
-    
+
         print(f"Populated database and saved output file: {output_path}")
-        
+
     except Exception as e:
         logger.exception("Failed to populate database from file")
 
