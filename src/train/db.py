@@ -21,7 +21,7 @@ def encode_time(val: time) -> str:
 
 def decode_datetime(raw: str) -> datetime:
     """Decode a ISO format string to `datetime.datetime`."""
-    return datetime.fromisoformat(raw)
+    return datetime.fromisoformat(raw).replace(tzinfo=UTC)
 
 
 def decode_timedelta(raw: int) -> timedelta:
@@ -34,7 +34,7 @@ def decode_time(raw: str) -> time:
     return time.fromisoformat(raw)
 
 
-def now() -> datetime:
+def utcnow() -> datetime:
     """Get current time."""
     return datetime.now(UTC)
 
@@ -48,5 +48,5 @@ sqlite3.register_adapter(datetime, encode_datetime)
 sqlite3.register_adapter(timedelta, encode_timedelta)
 sqlite3.register_adapter(time, encode_time)
 
-con = sqlite3.connect("train.db")
+con = sqlite3.connect("./tmp/train.db")
 cur = con.cursor()

@@ -3,7 +3,11 @@ name = "train"
 version = "0.1.0"
 description = "A train Project"
 license = "MIT"
-authors = ["nandhagk <nandhagopi@gmail.com>"]
+authors = [
+    "nandhagk <nandhagopi@gmail.com>",
+    "Dragon-KK <kaushikg.iyer@gmail.com>",
+    "ArivoliR <>"
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"

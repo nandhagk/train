@@ -68,16 +68,3 @@ class Block:
     def decode(raw: RawBlock) -> Block:
         id, name = raw
         return Block(id, name)
-
-    @staticmethod
-    def init() -> None:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS block (
-                id INTEGER PRIMARY KEY,
-                name VARCHAR(25) NOT NULL,
-
-                UNIQUE(name)
-            )
-            """,
-        )

@@ -92,22 +92,3 @@ class Section:
     def decode(raw: RawSection) -> Section:
         id, line, from_id, to_id = raw
         return Section(id, line, from_id, to_id)
-
-    @staticmethod
-    def init() -> None:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS section (
-                id INTEGER PRIMARY KEY,
-                line VARCHAR(25) NOT NULL,
-
-                from_id INTEGER NOT NULL,
-                to_id INTEGER NOT NULL,
-
-                FOREIGN KEY(from_id) REFERENCES station(id),
-                FOREIGN KEY(to_id) REFERENCES station(id),
-
-                UNIQUE(from_id, to_id, line)
-            )
-            """,
-        )

@@ -70,19 +70,3 @@ class Station:
     def decode(raw: RawStation) -> Station:
         id, name, block_id = raw
         return Station(id, name, block_id)
-
-    @staticmethod
-    def init() -> None:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS station (
-                id INTEGER PRIMARY KEY,
-                name VARCHAR(25) NOT NULL,
-
-                block_id INTEGER NOT NULL,
-                FOREIGN KEY(block_id) REFERENCES block(id),
-
-                UNIQUE(name)
-            )
-            """,
-        )

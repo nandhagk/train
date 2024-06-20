@@ -65,21 +65,5 @@ class MaintenanceWindow:
         )
 
     @staticmethod
-    def init() -> None:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS maintenance_window (
-                id INTEGER PRIMARY KEY,
-
-                starts_at DATETIME NOT NULL,
-                ends_at DATETIME NOT NULL,
-
-                section_id INTEGER NOT NULL,
-                FOREIGN KEY(section_id) REFERENCES section(id)
-            )
-            """,
-        )
-
-    @staticmethod
     def clear() -> None:
         cur.execute("DELETE FROM maintenance_window")

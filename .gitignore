@@ -1,6 +1,7 @@
 # Project specific
 *.db
 **/output.xlsx
+**/output.csv
 
 # Byte-compiled / optimized / DLL files
 .ruff_cache/

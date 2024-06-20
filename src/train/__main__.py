@@ -3,12 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 from pathlib import Path
 
 import click
 
-from train.db import con, cur, now
+from train.db import con, cur, unixepoch, utcnow
 from train.file_management import FileManager
 from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
@@ -24,11 +24,20 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 
-Block.init()
-Station.init()
-Section.init()
-MaintenanceWindow.init()
-Task.init()
+
+class ClickPath(click.Path):
+    def convert(self, value: str, param: click.Parameter, ctx: click.Context):
+        return Path(super().convert(value, param, ctx))  # type: ignore ()
+
+
+class ClickTime(click.ParamType):
+    def convert(
+        self,
+        value: str,
+        _param: click.Parameter | None,
+        _ctx: click.Context | None,
+    ) -> time:
+        return time.fromisoformat(value)
 
 
 @click.group()
@@ -37,15 +46,13 @@ def main() -> None:
 
 
 @main.command()
-@click.argument("data", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
-def init(data: str):
-    """
-    Put some dummy data in the database.
+@click.argument("data", type=ClickPath(exists=True, dir_okay=False))
+def init(data: Path):
+    """Initiliaze the database."""
+    cur.executescript((Path.cwd() / "init.sql").read_text())
 
-    NOTE: Does not populate maintenance_window table.
-    """
     try:
-        blocks = json.loads(Path(data).read_text())
+        blocks = json.loads(data.read_text())
         Block.insert_many(blocks)
 
         for block in blocks:
@@ -127,7 +134,7 @@ def create_windows(data: str, length: int, clear: bool):
         for section_id, line, block_id in ids:
             grouped[(block_id, line)].append(section_id)
 
-        today = datetime.combine(now().date(), time())
+        today = datetime.combine(utcnow().date(), time())
         for block_data in Path(data).read_text().split("\n\n"):
             lines = block_data.splitlines()
             block_name = lines[0][1:]
@@ -167,15 +174,15 @@ def create_windows(data: str, length: int, clear: bool):
 @click.argument("line")
 @click.option("--priority", type=int, default=1)
 @click.option("--duration", type=int)
-@click.option("--pref_start", type=click.DateTime(("%H:%M",)))
-@click.option("--pref_end", type=click.DateTime(("%H:%M",)))
+@click.option("--pref-start", type=ClickTime())
+@click.option("--pref-end", type=ClickTime())
 def insert(  # noqa: PLR0913
     name: str,
     line: str,
     priority: int,
     duration: int | None,
-    pref_start: datetime | None,
-    pref_end: datetime | None,
+    pref_start: time | None,
+    pref_end: time | None,
 ) -> None:
     """Section: STN-STN or STN YD."""
     if duration is None and (pref_start is None or pref_end is None):
@@ -195,14 +202,10 @@ def insert(  # noqa: PLR0913
             requested_duration = timedelta(minutes=duration)
 
         if pref_start is not None and pref_end is not None:
-            preferred_starts_time = pref_start.time()
-            preferred_ends_time = pref_end.time()
+            preferred_window = unixepoch(pref_end) - unixepoch(pref_start)
+            if pref_end <= pref_start:
+                preferred_window += timedelta(days=1)
 
-            preferred_window = (
-                datetime.combine(date.min, preferred_ends_time)
-                - datetime.combine(date.min, preferred_starts_time)
-                + (preferred_ends_time <= preferred_starts_time) * timedelta(days=1)
-            )
             if duration is None:
                 requested_duration = preferred_window
 
@@ -245,22 +248,14 @@ def insert(  # noqa: PLR0913
 
 
 @main.command()
-@click.argument(
-    "input_file",
-    type=click.Path(exists=True, dir_okay=False, resolve_path=True),
-)
-@click.argument(
-    "output_file",
-    type=click.Path(exists=False, dir_okay=False, resolve_path=True),
-)
-def pfe(input_file: str, output_file: str):
-    """Populate the database with data from an Excel sheet."""
-    input_path = Path(input_file)
-    output_path = Path(output_file)
+@click.argument("src", type=ClickPath(exists=True, dir_okay=False))
+@click.argument("dst", type=ClickPath(exists=False, dir_okay=False))
+def schedule(src: Path, dst: Path):
+    """Process tasks from src and dump them into dst."""
     try:
         taskqs_per_section: dict[int, list[TaskQ]] = defaultdict(list)
 
-        fmt, data = FileManager.get_manager(input_path).read(input_path)
+        fmt, data = FileManager.get_manager(src).read(src)
         for taskq, section_id in data:
             taskqs_per_section[section_id].append(taskq)
 
@@ -273,9 +268,9 @@ def pfe(input_file: str, output_file: str):
                 logger.warning("Ignoring section: %d", section_id)
 
         con.commit()
-        FileManager.get_manager(output_path).write(output_path, tasks, fmt)
+        FileManager.get_manager(dst).write(dst, tasks, fmt)
 
-        logger.info("Populated database and saved output file: %s", output_path)
+        logger.info("Populated database and saved output file: %s", dst)
     except Exception as e:
         logger.exception("Failed to populate database from file")
 

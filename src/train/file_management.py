@@ -1,26 +1,26 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 from datetime import time, timedelta
 from enum import IntEnum, auto
-from logging import getLogger
 from typing import TYPE_CHECKING
 
-from train.db import cur
+from train.db import cur, decode_time
 from train.models.section import Section
 from train.models.task import Task, TaskQ
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class FileManager(ABC):
     @staticmethod
     def _get_time(raw: str) -> time | None:
         try:
-            return time.fromisoformat(raw)
+            return decode_time(raw)
         except ValueError:
             return None
 
@@ -124,8 +124,8 @@ class FileManager(ABC):
     @staticmethod
     def decode(item: dict, fmt: Format) -> tuple[TaskQ, int] | None:
         if fmt == FileManager.Format.bare_minimum:
-            preferred_ends_at = FileManager._get_time(item["demanded_time_to"])
-            preferred_starts_at = FileManager._get_time(item["demanded_time_from"])
+            preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
+            preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
 
             section = Section.find_by_name_and_line(item["section_name"], "UP")
             if section is None:
@@ -194,11 +194,7 @@ class CSVManager(FileManager):
         if fmt is None:
             fmt = FileManager.get_file_fmt_type([*data[0].keys()])
 
-        return fmt, [
-            thing
-            for thing in (FileManager.decode(item, fmt) for item in data)
-            if thing is not None
-        ]
+        return fmt, list(filter(None, [FileManager.decode(item, fmt) for item in data]))
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
@@ -241,11 +237,7 @@ class ExcelManager(FileManager):
             data.append({headers[i]: row[i].value for i in range(col_count)})
 
         wb.close()
-        return fmt, [
-            thing
-            for thing in (FileManager.decode(item, fmt) for item in data)
-            if thing is not None
-        ]
+        return fmt, list(filter(None, [FileManager.decode(item, fmt) for item in data]))
 
     @staticmethod
     def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:

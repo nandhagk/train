@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import date, datetime, time, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
 from typing import Generic, TypeAlias, TypeVar
 
-from train.db import cur, decode_datetime, decode_time, decode_timedelta, now, unixepoch
+from train.db import (
+    cur,
+    decode_datetime,
+    decode_time,
+    decode_timedelta,
+    unixepoch,
+    utcnow,
+)
 
 RawTask: TypeAlias = tuple[int, str, str, str | None, str | None, int, int, int]
 
@@ -18,7 +25,7 @@ class TaskQ(Generic[T]):
     requested_duration: timedelta
     preferred_starts_at: T
     preferred_ends_at: T
-    starts_at: datetime = field(default_factory=now)
+    starts_at: datetime = field(default_factory=utcnow)
 
     @property
     def preferred_range(self) -> timedelta:
@@ -198,7 +205,7 @@ class Task:
         y: list[tuple[str, str, int]] = cur.fetchall()
         x = max(
             [mapper(z) for z in y],
-            key=lambda z: (min(z[0], taskq.requested_duration), now() - z[1]),
+            key=lambda z: (min(z[0], taskq.requested_duration), utcnow() - z[1]),
         )
 
         (intersection, window_start, window_end, window_id) = x
@@ -214,10 +221,12 @@ class Task:
                 possible_preferred_date.combine(
                     possible_preferred_date.date(),
                     taskq.preferred_starts_at,
+                    UTC,
                 ),
                 possible_preferred_date.combine(
                     possible_preferred_date.date(),
                     taskq.preferred_ends_at,
+                    UTC,
                 )
                 + timedelta(
                     days=int(taskq.preferred_starts_at >= taskq.preferred_ends_at),
@@ -464,47 +473,3 @@ class Task:
             priority,
             maintenance_window_id,
         )
-
-    @staticmethod
-    def init() -> None:
-        cur.execute(
-            """
-            CREATE TABLE IF NOT EXISTS task (
-                id INTEGER PRIMARY KEY,
-                starts_at DATETIME NOT NULL,
-                ends_at DATETIME NOT NULL,
-                preferred_starts_at TIME,
-                preferred_ends_at TIME,
-                requested_duration INTEGER NOT NULL,
-                priority INTEGER NOT NULL,
-
-                maintenance_window_id INTEGER NOT NULL,
-                FOREIGN KEY(maintenance_window_id) REFERENCES maintenance_window(id)
-            )
-            """,
-        )
-
-    @staticmethod
-    def delete_future_tasks(section_id: int) -> list[Task]:
-        payload = {"section_id": section_id}
-
-        cur.execute(
-            """
-            DELETE FROM task
-            WHERE
-                id IN (
-                    SELECT task.id FROM task
-                    JOIN maintenance_window ON
-                        maintenance_window.id = task.maintenance_window_id
-                    JOIN section ON
-                        section.id = maintenance_window.section_id
-                    WHERE
-                        section.id = :section_id
-                        AND task.starts_at >= DATETIME('now', '+1 day')
-                )
-            RETURNING *
-            """,
-            payload,
-        )
-
-        return [Task.decode(raw) for raw in cur.fetchall()]
