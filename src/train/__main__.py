@@ -3,13 +3,12 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
-from pprint import pprint
 
 import click
 
-from train.db import con, cur
+from train.db import con, cur, now
 from train.file_management import FileManager
 from train.models.block import Block
 from train.models.maintenance_window import MaintenanceWindow
@@ -112,9 +111,9 @@ def create_windows(data: str, length: int, clear: bool):
         if clear:
             MaintenanceWindow.clear()
 
-        res = cur.execute(
+        cur.execute(
             """
-            SELECT section.id, section.line, block_id from section
+            SELECT section.id, section.line, block_id FROM section
             JOIN station ON
                 station.id = section.from_id
             JOIN block ON
@@ -122,12 +121,13 @@ def create_windows(data: str, length: int, clear: bool):
             """,
         )
 
-        ids = res.fetchall()
+        ids = cur.fetchall()
         grouped = defaultdict(list)
 
         for section_id, line, block_id in ids:
             grouped[(block_id, line)].append(section_id)
 
+        today = datetime.combine(now().date(), time())
         for block_data in Path(data).read_text().split("\n\n"):
             lines = block_data.splitlines()
             block_name = lines[0][1:]
@@ -144,12 +144,8 @@ def create_windows(data: str, length: int, clear: bool):
                     MaintenanceWindow.insert_many(
                         [
                             (
-                                datetime.now().replace(hour=0, second=0, minute=0)
-                                + timedelta(days=days)
-                                + st,
-                                datetime.now().replace(hour=0, second=0, minute=0)
-                                + timedelta(days=days)
-                                + et,
+                                today + timedelta(days=days) + st,
+                                today + timedelta(days=days) + et,
                             )
                             for days in range(length)
                         ],
@@ -222,7 +218,7 @@ def insert(  # noqa: PLR0913
             preferred_starts_time = None
             preferred_ends_time = None
 
-        tasks = Task.insert(
+        Task.insert_one(
             TaskQ(
                 priority,
                 requested_duration,
@@ -241,8 +237,6 @@ def insert(  # noqa: PLR0913
             name,
             line,
         )
-        pprint(tasks)
-
     except Exception as e:
         logger.exception("Failed to insert task")
 
@@ -272,19 +266,17 @@ def pfe(input_file: str, output_file: str):
 
         tasks = []
         for section_id, taskqs in taskqs_per_section.items():
-            print("scheduling", section_id)
+            logger.info("Scheduling section: %d", section_id)
             try:
                 tasks.extend(Task.insert_many(taskqs, section_id))
             except Exception:  # noqa: BLE001
-                print("ignoring", section_id)
+                logger.warning("Ignoring section: %d", section_id)
 
         con.commit()
         FileManager.get_manager(output_path).write(output_path, tasks, fmt)
 
-        print(f"Populated database and saved output file: {output_path}")
-
+        logger.info("Populated database and saved output file: %s", output_path)
     except Exception as e:
-
         logger.exception("Failed to populate database from file")
 
         msg = f"Failed to populate database from file: {e}"

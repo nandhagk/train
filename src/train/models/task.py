@@ -3,12 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
-from typing import TYPE_CHECKING, Generic, Self, TypeAlias, TypeVar
+from typing import Generic, TypeAlias, TypeVar
 
-from train.db import cur
-
-if TYPE_CHECKING:
-    from train.models.maintenance_window import MaintenanceWindow
+from train.db import cur, decode_datetime, decode_time, decode_timedelta, now, unixepoch
 
 RawTask: TypeAlias = tuple[int, str, str, str | None, str | None, int, int, int]
 
@@ -21,20 +18,20 @@ class TaskQ(Generic[T]):
     requested_duration: timedelta
     preferred_starts_at: T
     preferred_ends_at: T
-    starts_at: datetime = field(default=datetime.now())
-    
+    starts_at: datetime = field(default_factory=now)
 
     @property
     def preferred_range(self) -> timedelta:
         if self.preferred_starts_at is None or self.preferred_ends_at is None:
             return timedelta(days=1)
+
         return (
             datetime.combine(date.min, self.preferred_ends_at)
             - datetime.combine(date.min, self.preferred_starts_at)
             + timedelta(days=int(self.preferred_starts_at >= self.preferred_ends_at))
         )
 
-    def __lt__(self, other: Self) -> bool:
+    def __lt__(self, other: TaskQ) -> bool:
         """
         Priority Order.
 
@@ -64,17 +61,8 @@ class Task:
 
     maintenance_window_id: int
 
-    def maintenance_window(self) -> MaintenanceWindow:
-        from train.models.maintenance_window import MaintenanceWindow
-
-        maintenance_window = MaintenanceWindow.find_by_id(self.maintenance_window_id)
-        assert maintenance_window is not None
-
-        return maintenance_window
-
-    @classmethod
-    def insert_one(  # noqa: PLR0913
-        cls,
+    @staticmethod
+    def _insert(  # noqa: PLR0913
         starts_at: datetime,
         ends_at: datetime,
         requested_duration: timedelta,
@@ -82,7 +70,7 @@ class Task:
         maintenance_window_id: int,
         preferred_starts_at: time | None = None,
         preferred_ends_at: time | None = None,
-    ) -> Self:
+    ) -> Task:
         payload = {
             "starts_at": starts_at,
             "ends_at": ends_at,
@@ -93,7 +81,7 @@ class Task:
             "maintenance_window_id": maintenance_window_id,
         }
 
-        res = cur.execute(
+        cur.execute(
             """
             INSERT INTO task (
                 starts_at,
@@ -116,71 +104,10 @@ class Task:
             payload,
         )
 
-        task = cls.decode(res.fetchone())
+        task = Task.decode(cur.fetchone())
         assert task is not None
 
         return task
-
-    @staticmethod
-    def insert_many(queue: list[TaskQ], section_id: int) -> list[Task]:
-        tasks = []
-        heapify(queue)
-        while queue:
-            taskq = heappop(queue)
-            if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
-                window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
-            else:
-                window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
-
-            payload = {
-                "window_id": window_id,
-                "starts_at": starts_at,
-                "ends_at": ends_at,
-            }
-
-            res = cur.execute(
-                """
-                DELETE FROM task
-                WHERE
-                    task.maintenance_window_id = :window_id
-                    AND (
-                        (task.starts_at > :starts_at AND task.starts_at < :ends_at)
-                        OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
-                        OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
-                        OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
-                        OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
-                    )
-                RETURNING *
-                """,
-                payload,
-            )
-
-            for x in res.fetchall():
-                task_to_remove = Task.decode(x)
-                heappush(
-                    queue,
-                    TaskQ(
-                        task_to_remove.priority,
-                        task_to_remove.requested_duration,
-                        task_to_remove.preferred_starts_at,
-                        task_to_remove.preferred_ends_at,
-                        task_to_remove.starts_at,
-                    ),
-                )
-
-            task = Task.insert_one(
-                starts_at,
-                ends_at,
-                taskq.requested_duration,
-                taskq.priority,
-                window_id,
-                taskq.preferred_starts_at,
-                taskq.preferred_ends_at,
-            )
-
-            tasks.append(task)
-
-        return tasks
 
     @staticmethod
     def _insert_pref(  # noqa: C901
@@ -193,7 +120,7 @@ class Task:
             "section_id": section_id,
         }
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT
                 window_start,
@@ -236,19 +163,18 @@ class Task:
             payload,
         )
 
-        def unixepoch(t: time) -> timedelta:
-            return datetime.combine(date.min, t) - datetime.min
-
         p_starts = unixepoch(taskq.preferred_starts_at)
         p_ends = unixepoch(taskq.preferred_ends_at)
         if p_ends <= p_starts:
             p_starts -= timedelta(days=1)
 
-        def mapper(z: tuple[str, str, int]) -> tuple[timedelta, datetime, datetime, int]:
+        def mapper(
+            z: tuple[str, str, int],
+        ) -> tuple[timedelta, datetime, datetime, int]:
             window_start_, window_end_, window_id = z
 
-            window_start = datetime.fromisoformat(window_start_)
-            window_end = datetime.fromisoformat(window_end_)
+            window_start = decode_datetime(window_start_)
+            window_end = decode_datetime(window_end_)
 
             m_starts = unixepoch(window_start.time())
             m_ends = unixepoch(window_end.time())
@@ -269,8 +195,11 @@ class Task:
 
             return (intersection, window_start, window_end, window_id)
 
-        y: list[tuple[str, str, int]] = res.fetchall()
-        x = max([mapper(z) for z in y], key=lambda z: (min(z[0], taskq.requested_duration), datetime.now() - z[1]))
+        y: list[tuple[str, str, int]] = cur.fetchall()
+        x = max(
+            [mapper(z) for z in y],
+            key=lambda z: (min(z[0], taskq.requested_duration), now() - z[1]),
+        )
 
         (intersection, window_start, window_end, window_id) = x
         possible_preferred_dates = (
@@ -310,7 +239,7 @@ class Task:
                 closest_preferred_end = pwe
                 break
         else:
-            raise Exception  # noqa: TRY002
+            raise Exception
 
         if intersection >= taskq.requested_duration:
             # There are 4 possible cases
@@ -318,7 +247,6 @@ class Task:
             # W P W P
             # P W W P
             # P W P W
-
             if window_start >= closest_preferred_start:
                 # P W W P
                 # P W P W
@@ -329,7 +257,6 @@ class Task:
                 # W P W P
                 starts_at = closest_preferred_start
                 ends_at = closest_preferred_start + taskq.requested_duration
-
         elif intersection > timedelta():
             # There is some intersection smaller than requested duration
             # i.e two cases possible
@@ -367,7 +294,7 @@ class Task:
             "section_id": section_id,
         }
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT
                 window_start,
@@ -414,28 +341,88 @@ class Task:
             payload,
         )
 
-        x: tuple[str, str, int] | None = res.fetchone()
+        x: tuple[str, str, int] | None = cur.fetchone()
         if x is None:
-            raise Exception  # noqa: TRY002
+            raise Exception
 
-        (starts_at_, _, window_id) = x
-        starts_at = datetime.fromisoformat(starts_at_)
+        starts_at_, _, window_id = x
+
+        starts_at = decode_datetime(starts_at_)
         ends_at = starts_at + taskq.requested_duration
 
         return (window_id, starts_at, ends_at)
 
     @staticmethod
-    def insert(
-        taskq: TaskQ[T],
-        section_id
-    ) -> list[Task]:
+    def insert_many(taskqs: list[TaskQ], section_id: int) -> list[Task]:
+        tasks = []
+
+        heapify(taskqs)
+        while taskqs:
+            taskq = heappop(taskqs)
+            if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
+                window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
+            else:
+                window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
+
+            payload = {
+                "window_id": window_id,
+                "starts_at": starts_at,
+                "ends_at": ends_at,
+            }
+
+            cur.execute(
+                """
+                DELETE FROM task
+                WHERE
+                    task.maintenance_window_id = :window_id
+                    AND (
+                        (task.starts_at > :starts_at AND task.starts_at < :ends_at)
+                        OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
+                        OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
+                        OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
+                        OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
+                    )
+                RETURNING *
+                """,
+                payload,
+            )
+
+            for x in cur.fetchall():
+                task_to_remove = Task.decode(x)
+                heappush(
+                    taskqs,
+                    TaskQ(
+                        task_to_remove.priority,
+                        task_to_remove.requested_duration,
+                        task_to_remove.preferred_starts_at,
+                        task_to_remove.preferred_ends_at,
+                        task_to_remove.starts_at,
+                    ),
+                )
+
+            task = Task._insert(
+                starts_at,
+                ends_at,
+                taskq.requested_duration,
+                taskq.priority,
+                window_id,
+                taskq.preferred_starts_at,
+                taskq.preferred_ends_at,
+            )
+
+            tasks.append(task)
+
+        return tasks
+
+    @staticmethod
+    def insert_one(taskq: TaskQ, section_id: int) -> list[Task]:
         return Task.insert_many([taskq], section_id)
 
-    @classmethod
-    def find_by_id(cls, id: int) -> Self | None:
+    @staticmethod
+    def find_by_id(id: int) -> Task | None:
         payload = {"id": id}
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT task.* FROM task
             WHERE
@@ -444,14 +431,14 @@ class Task:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(res.fetchone())
+        return Task.decode(raw)
 
-    @classmethod
-    def decode(cls, raw: RawTask) -> Self:
+    @staticmethod
+    def decode(raw: RawTask) -> Task:
         (
             id,
             starts_at,
@@ -463,21 +450,17 @@ class Task:
             maintenance_window_id,
         ) = raw
 
-        return cls(
+        return Task(
             id,
-            datetime.fromisoformat(starts_at),
-            datetime.fromisoformat(ends_at),
+            decode_datetime(starts_at),
+            decode_datetime(ends_at),
             (
-                time.fromisoformat(preferred_starts_at)
+                decode_time(preferred_starts_at)
                 if preferred_starts_at is not None
                 else None
             ),
-            (
-                time.fromisoformat(preferred_ends_at)
-                if preferred_ends_at is not None
-                else None
-            ),
-            timedelta(seconds=requested_duration),
+            decode_time(preferred_ends_at) if preferred_ends_at is not None else None,
+            decode_timedelta(requested_duration),
             priority,
             maintenance_window_id,
         )
@@ -501,15 +484,15 @@ class Task:
             """,
         )
 
-    @classmethod
-    def delete_future_tasks(cls, section_id: int) -> list[Self]:
+    @staticmethod
+    def delete_future_tasks(section_id: int) -> list[Task]:
         payload = {"section_id": section_id}
 
-        res = cur.execute(
+        cur.execute(
             """
             DELETE FROM task
             WHERE
-                id in (
+                id IN (
                     SELECT task.id FROM task
                     JOIN maintenance_window ON
                         maintenance_window.id = task.maintenance_window_id
@@ -524,4 +507,4 @@ class Task:
             payload,
         )
 
-        return [cls.decode(raw) for raw in res.fetchall()]
+        return [Task.decode(raw) for raw in cur.fetchall()]

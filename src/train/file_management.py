@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from contextlib import suppress
-from datetime import datetime, time, timedelta
+from datetime import time, timedelta
 from enum import IntEnum, auto
+from logging import getLogger
 from typing import TYPE_CHECKING
 
 from train.db import cur
@@ -13,15 +13,16 @@ from train.models.task import Task, TaskQ
 if TYPE_CHECKING:
     from pathlib import Path
 
+logger = getLogger(__name__)
+
 
 class FileManager(ABC):
     @staticmethod
     def _get_time(raw: str) -> time | None:
-        for fmt in ["%H:%M", "%H:%M:%S"]:
-            with suppress(ValueError):
-                return datetime.strptime(str(raw), fmt).time()
-
-        return None
+        try:
+            return time.fromisoformat(raw)
+        except ValueError:
+            return None
 
     class Format(IntEnum):
         bare_minimum = auto()
@@ -35,7 +36,6 @@ class FileManager(ABC):
         if fmt == FileManager.Format.bare_minimum:
             return [
                 "date",
-                # "department",
                 "block_section_or_yard",
                 "corridor_block",
                 "line",
@@ -82,7 +82,7 @@ class FileManager(ABC):
                     station.id = section.from_id
                 JOIN block ON
                     block.id = station.block_id
-                WHERE task.id in ({', '.join(str(task.id) for task in tasks)})
+                WHERE task.id IN ({', '.join(str(task.id) for task in tasks)})
                 ORDER BY
                     task.starts_at ASC
                 """,  # noqa: S608
@@ -91,7 +91,6 @@ class FileManager(ABC):
             return [
                 {
                     "date": x[0],
-                    # "department": "ENGG",
                     "block_section_or_yard": (
                         f"{x[1].replace("_", " ")}"
                         if x[1] == x[2]
@@ -130,14 +129,13 @@ class FileManager(ABC):
 
             section = Section.find_by_name_and_line(item["section_name"], "UP")
             if section is None:
-                print(
-                    "WARNING: Could not find section",
+                logger.warning(
+                    "Could not find section: %s - %s",
                     item["section_name"],
                     item["line"],
                 )
+
                 return None
-                msg = f"Invalid section `{item['section_name'], item['line']}`"
-                raise Exception(msg)
 
             if preferred_starts_at is None and preferred_ends_at is None:
                 return (

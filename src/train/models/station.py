@@ -1,12 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Self, TypeAlias
+from typing import TypeAlias
 
 from train.db import cur
-
-if TYPE_CHECKING:
-    from train.models.block import Block
 
 RawStation: TypeAlias = tuple[int, str, int]
 
@@ -18,18 +15,11 @@ class Station:
 
     block_id: int
 
-    def block(self) -> Block:
-        from train.models.block import Block
-
-        block = Block.find_by_id(self.block_id)
-        assert block is not None
-
-        return block
-
-    @classmethod
-    def find_by_id(cls, id: int) -> Self | None:
+    @staticmethod
+    def find_by_id(id: int) -> Station | None:
         payload = {"id": id}
-        res = cur.execute(
+
+        cur.execute(
             """
             SELECT station.* FROM station
             WHERE
@@ -38,33 +28,48 @@ class Station:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Station.decode(raw)
 
-    @classmethod
-    def find_by_name(cls, name: str) -> Self | None:
-        res = cur.execute(
+    @staticmethod
+    def find_by_name(name: str) -> Station | None:
+        payload = {"name": name}
+
+        cur.execute(
             """
             SELECT station.* FROM station
             WHERE
                 station.name = :name
             """,
-            {"name": name},
+            payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Station.decode(raw)
 
-    @classmethod
-    def decode(cls, raw: RawStation) -> Self:
+    @staticmethod
+    def insert_many(station_names: list[str], block_id: int) -> None:
+        payload = [{"name": name, "block_id": block_id} for name in station_names]
+
+        cur.executemany(
+            """
+            INSERT INTO station (name, block_id)
+            VALUES (:name, :block_id)
+            ON CONFLICT DO NOTHING
+            """,
+            payload,
+        )
+
+    @staticmethod
+    def decode(raw: RawStation) -> Station:
         id, name, block_id = raw
-        return cls(id, name, block_id)
+        return Station(id, name, block_id)
 
     @staticmethod
     def init() -> None:
@@ -80,15 +85,4 @@ class Station:
                 UNIQUE(name)
             )
             """,
-        )
-
-    @staticmethod
-    def insert_many(stations: list[str], block_id: int) -> None:
-        cur.executemany(
-            """
-            INSERT INTO station (id, name, block_id)
-            VALUES (NULL, ?, ?)
-            ON CONFLICT DO NOTHING
-            """,
-            [(station, block_id) for station in stations],
         )

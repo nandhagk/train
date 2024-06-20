@@ -53,22 +53,12 @@ ignore = [
   "ANN102",
   "ANN201",
 
-
-  "D103",
-  "DTZ007",
+  "FBT001",
+  "S101",
+  "TRY002",
   "A001",
   "A002",
-  "S101",
-  "FBT001",
-  "DTZ005",
   "A003",
-  "ERA001",
-  "PLR0915",
-  "ANN202",
-  "TRY002",
-  # Print statement
-  "T201",
-  "T203",
 ]
 select = ["ALL"]
 

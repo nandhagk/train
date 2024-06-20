@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Self, TypeAlias
+from typing import TypeAlias
 
 from train.db import cur
 
@@ -16,11 +16,11 @@ class Section:
     from_id: int
     to_id: int
 
-    @classmethod
-    def find_by_id(cls, id: int) -> Self | None:
+    @staticmethod
+    def find_by_id(id: int) -> Section | None:
         payload = {"id": id}
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT section.* FROM section
             WHERE
@@ -29,18 +29,14 @@ class Section:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Section.decode(raw)
 
-    @classmethod
-    def find_by_name_and_line(
-        cls,
-        name: str,
-        line: str,
-    ) -> Section | None:
+    @staticmethod
+    def find_by_name_and_line(name: str, line: str) -> Section | None:
         if name.endswith("YD"):
             f = t = name.removesuffix("YD").replace("-", "").strip() + "_YD"
 
@@ -49,11 +45,9 @@ class Section:
             f = f.strip()
             t = t.strip()
 
-
-
         payload = {"f": f, "t": t, "line": line}
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT section.* FROM section
             WHERE
@@ -72,16 +66,32 @@ class Section:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Section.decode(raw)
 
-    @classmethod
-    def decode(cls, raw: RawSection) -> Self:
+    @staticmethod
+    def insert_many(sections: list[tuple[str, int, int]]) -> None:
+        payload = [
+            {"line": line, "from_id": from_id, "to_id": to_id}
+            for line, from_id, to_id in sections
+        ]
+
+        cur.executemany(
+            """
+            INSERT INTO section (line, from_id, to_id)
+            vALUES (:line, :from_id, :to_id)
+            ON CONFLICT DO NOTHING
+            """,
+            payload,
+        )
+
+    @staticmethod
+    def decode(raw: RawSection) -> Section:
         id, line, from_id, to_id = raw
-        return cls(id, line, from_id, to_id)
+        return Section(id, line, from_id, to_id)
 
     @staticmethod
     def init() -> None:
@@ -100,15 +110,4 @@ class Section:
                 UNIQUE(from_id, to_id, line)
             )
             """,
-        )
-
-    @staticmethod
-    def insert_many(sections: list[tuple[str, int, int]]) -> None:
-        cur.executemany(
-            """
-            INSERT INTO section (id, line, from_id, to_id)
-            vALUES (NULL, ?, ?, ?)
-            ON CONFLICT DO NOTHING
-            """,
-            sections,
         )

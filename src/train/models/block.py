@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Self, TypeAlias
+from typing import TypeAlias
 
 from train.db import cur
 
@@ -13,11 +13,11 @@ class Block:
     id: int
     name: str
 
-    @classmethod
-    def find_by_id(cls, id: int) -> Self | None:
+    @staticmethod
+    def find_by_id(id: int) -> Block | None:
         payload = {"id": id}
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT block.* FROM block
             WHERE
@@ -26,17 +26,17 @@ class Block:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Block.decode(raw)
 
-    @classmethod
-    def find_by_name(cls, name: str) -> Self | None:
+    @staticmethod
+    def find_by_name(name: str) -> Block | None:
         payload = {"name": name}
 
-        res = cur.execute(
+        cur.execute(
             """
             SELECT block.* FROM block
             WHERE
@@ -45,16 +45,29 @@ class Block:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return Block.decode(raw)
 
-    @classmethod
-    def decode(cls, raw: RawBlock) -> Self:
+    @staticmethod
+    def insert_many(names: list[str]) -> None:
+        payload = [{"name": name} for name in names]
+
+        cur.executemany(
+            """
+            INSERT INTO block (name)
+            VALUES (:name)
+            ON CONFLICT DO NOTHING
+            """,
+            payload,
+        )
+
+    @staticmethod
+    def decode(raw: RawBlock) -> Block:
         id, name = raw
-        return cls(id, name)
+        return Block(id, name)
 
     @staticmethod
     def init() -> None:
@@ -67,15 +80,4 @@ class Block:
                 UNIQUE(name)
             )
             """,
-        )
-
-    @staticmethod
-    def insert_many(blocks: list[str]) -> None:
-        cur.executemany(
-            """
-            INSERT INTO block (id, name)
-            VALUES (NULL, ?)
-            ON CONFLICT DO NOTHING
-            """,
-            [(name,) for name in blocks],
         )

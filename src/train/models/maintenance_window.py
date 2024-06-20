@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
-from typing import TYPE_CHECKING, Self, TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
-from train.db import cur
+from train.db import cur, decode_datetime
 
 if TYPE_CHECKING:
-    from train.models.section import Section
+    from datetime import datetime
+
 
 RawMaintenaceWindow: TypeAlias = tuple[int, str, str, int]
 
@@ -20,18 +20,11 @@ class MaintenanceWindow:
 
     section_id: int
 
-    def section(self) -> Section:
-        from train.models.section import Section
-
-        section = Section.find_by_id(self.section_id)
-        assert section is not None
-
-        return section
-
-    @classmethod
-    def find_by_id(cls, id: int) -> Self | None:
+    @staticmethod
+    def find_by_id(id: int) -> MaintenanceWindow | None:
         payload = {"id": id}
-        res = cur.execute(
+
+        cur.execute(
             """
             SELECT maintenance_window.* FROM maintenance_window
             WHERE
@@ -40,20 +33,34 @@ class MaintenanceWindow:
             payload,
         )
 
-        raw = res.fetchone()
+        raw = cur.fetchone()
         if raw is None:
             return None
 
-        return cls.decode(raw)
+        return MaintenanceWindow.decode(raw)
 
-    @classmethod
-    def decode(cls, raw: RawMaintenaceWindow) -> Self:
+    @staticmethod
+    def insert_many(windows: list[tuple[datetime, datetime]], section_id: int) -> None:
+        payload = [
+            {"starts_at": starts_at, "ends_at": ends_at, "section_id": section_id}
+            for starts_at, ends_at in windows
+        ]
 
+        cur.executemany(
+            """
+            INSERT INTO maintenance_window (starts_at, ends_at, section_id)
+            VALUES (:starts_at, :ends_at, :section_id)
+            """,
+            payload,
+        )
+
+    @staticmethod
+    def decode(raw: RawMaintenaceWindow) -> MaintenanceWindow:
         id, starts_at, ends_at, section_id = raw
-        return cls(
+        return MaintenanceWindow(
             id,
-            datetime.fromisoformat(starts_at),
-            datetime.fromisoformat(ends_at),
+            decode_datetime(starts_at),
+            decode_datetime(ends_at),
             section_id,
         )
 
@@ -76,13 +83,3 @@ class MaintenanceWindow:
     @staticmethod
     def clear() -> None:
         cur.execute("DELETE FROM maintenance_window")
-
-    @staticmethod
-    def insert_many(windows: list[tuple[datetime, datetime]], section_id: int) -> None:
-        cur.executemany(
-            """
-            INSERT INTO maintenance_window (id, starts_at, ends_at, section_id)
-            VALUES (NULL, ?, ?, ?)
-            """,
-            [(*window, section_id) for window in windows],
-        )
