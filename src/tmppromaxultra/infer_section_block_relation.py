@@ -1,0 +1,197 @@
+# This shit is tooooo bad
+# Just decently give good data na ;-;
+from collections import defaultdict
+import json
+from pathlib import Path
+from runpy import run_path
+from typing import Any, Callable, TypeVar
+import openpyxl
+import sys
+
+import openpyxl.worksheet
+import openpyxl.worksheet.worksheet
+
+ROW_LIMIT = 6600
+
+MAP = {
+    'block': 5,
+    'section': 4
+}
+
+Block = str
+Section = tuple[str, str]
+
+T = TypeVar("T", Block, Section)
+
+SkipHandler = Callable[[str], bool]
+ParseHandler = Callable[[str], T]
+SkipHandlers = list[SkipHandler]
+ParseHandlers = list[ParseHandler[T]]
+
+def get_scope(source: str):
+    glob = {}
+    exec(source, glob)
+    return glob
+
+def get_parser(source: str):
+    scope = get_scope(source)
+    return scope['parser']
+
+def get_skipper(source: str):
+    scope = get_scope(source)
+    return scope['skipper']
+
+def load_source(path: Path) -> tuple[list[str], dict[str, T], tuple[list[str], list[str]]]:
+    dat = json.loads(path.read_text())
+    return (
+        dat['skiplist'],
+        dat['acceptor'],
+        dat['handlers']
+    )
+
+
+def dump(skiplist, acceptor, source_code: tuple[list[str], list[str]], path: Path):
+    path.write_text(json.dumps({
+        'skiplist': skiplist,
+        'acceptor': acceptor,
+        'handlers': source_code
+    }))
+
+def load_handlers(source_code: tuple[list[str], list[str]]) -> tuple[SkipHandlers, ParseHandlers[T]]:
+    ret = ([], [])
+
+    for handler_src in source_code[0]:
+        ret[0].append(get_skipper(handler_src))
+    for handler_src in source_code[1]:
+        ret[1].append(get_parser(handler_src))
+
+    return ret
+
+def should_skip(item: str, skip_handlers: SkipHandlers):
+    return any(func(item) for func in skip_handlers)
+
+def parse(item: str, parse_handlers: ParseHandlers[T]) -> T | None:
+    for handler in parse_handlers:
+        if (res := handler(item)) is not None:
+            return res
+    return None
+
+
+def main(path: Path, block_source: Path, section_source: Path):
+    wb = openpyxl.load_workbook(path, read_only=True)
+    sheet: openpyxl.worksheet.worksheet.Worksheet | None = wb.active  # type: ignore ()
+
+    if sheet is None:
+        msg = f"Could not read excel sheet `{path}`"
+        raise Exception(msg)
+    
+    block_accepts: dict[str, Block]
+    section_accepts: dict[str, Section]
+    block_rejects, block_accepts, block_source_code   = load_source(block_source)
+    section_rejects, section_accepts, section_source_code = load_source(section_source)
+    block_handlers  : tuple[SkipHandlers, ParseHandlers[Block]]   = load_handlers(block_source_code)
+    section_handlers: tuple[SkipHandlers, ParseHandlers[Section]] = load_handlers(section_source_code)
+
+    block_action_file: str = input("Enter file to take BLOCK skipper or parser from: ")
+    section_action_file: str = input("Enter file to take SECTION skipper or parser from: ")
+
+
+    def _parse_generic(item: Any, handlers: tuple[SkipHandlers, ParseHandlers[T]], source_code: tuple[list[str], list[str]], debug_name: str, action_file: str, acceptor: dict[str, T], skiplist: list[str]) -> T | None:
+        if not isinstance(item, str): return None
+        if item in skiplist: return None
+        if should_skip(item, handlers[0]): return None
+
+        if acceptor.get(item) is not None:
+            return acceptor[item]
+
+        result = parse(item, handlers[1])
+        if result is not None: return result
+
+        print(f"Could not handle {debug_name} `{item}`")
+        
+        while True:
+            command, _, value = input("Please give next action (use / skip / acc / rej): ").partition(" ")
+            if command not in ("use", "skip", "acc", "rej"):
+                print("Please give a valid command!")
+                continue
+            
+            if command == "acc" and not value:
+                print("Please provide a value to accept this block as!")
+                continue
+            
+            break
+        
+        if command == "use":
+            try:
+                source_code[1].append(Path(action_file).read_text())
+                handler = get_parser(Path(action_file).read_text())
+                if (r := handler(item)) is not None:
+                    handlers[1].append(handler)
+                    return r
+                print("WARNING! Handler could not handle the data lmao")
+
+            except Exception as e:
+                print(e, file=sys.stderr)
+
+        elif command == "skip":
+            try:
+                source_code[0].append(Path(action_file).read_text())
+                handler = get_skipper(Path(action_file).read_text())
+                if (r := handler(item)) is not None:
+                    handlers[0].append(handler)
+                    return r
+                print("WARNING! Handler could not handle the data lmao")
+
+            except Exception as e:
+                print(e, file=sys.stderr)
+
+        elif command == "acc":
+            acceptor[item] = eval(value)
+
+        elif command == "rej":
+            skiplist.append(item)
+
+        return _parse_generic(item, handlers, source_code, debug_name, action_file, acceptor, skiplist)
+
+    def parse_block_name(block_name: Any) -> str | None:
+        return _parse_generic(block_name, block_handlers, block_source_code, 'block', block_action_file, block_accepts, block_rejects)
+
+    def parse_section_name(section_name: Any) -> tuple[str, str] | None:
+        return _parse_generic(section_name, section_handlers, section_source_code, 'section', section_action_file, section_accepts, section_rejects)
+
+
+    mas = defaultdict(list)
+    
+
+    for row in range(2, ROW_LIMIT):
+        print(row)
+        sheet: openpyxl.worksheet.worksheet.Worksheet
+        
+        section_name = sheet.cell(row = row, column = MAP['section']).value
+        block_name = sheet.cell(row = row, column = MAP['block']).value
+
+        block = parse_block_name(block_name)
+        section = parse_section_name(section_name) if block is not None else None
+
+        if block is None or section is None:
+            print("IGNORING ROW!", row, f"`{block_name}`, `{section_name}`")
+            continue
+
+        mas[block].append(section)
+
+    dump(block_rejects, block_accepts, block_source_code, block_source)
+    dump(section_rejects, section_accepts, section_source_code, section_source)
+    Path("mas.json").write_text(json.dumps(mas))
+
+    return 0
+
+
+if __name__ == '__main__':
+    
+    sys.exit(
+        main(
+            Path(sys.argv[1] if len(sys.argv) > 1 else "SR_Rolling_Block_Programme.xlsx"),
+            Path(sys.argv[2] if len(sys.argv) > 2 else "block_handlers.dat"), 
+            Path(sys.argv[3] if len(sys.argv) > 3 else "section_handlers.dat"), 
+        )
+    )

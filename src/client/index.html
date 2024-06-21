@@ -4,11 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+
+    <link rel="stylesheet" href="reset.css">
+    <style>
+        body{
+            width: 100vw;
+            height: 100vh;
+            background-color: #22345e;
+            display: grid;
+            place-items: center;
+        }
+
+        form{
+            background-color: #0f172a;
+            padding: 3rem;
+            padding-bottom: 5rem;
+            border-radius: 2rem;
+            position: relative;
+        }
+
+        #info{
+            display: block;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        #submit{
+            cursor: pointer;
+            position: absolute;
+            right: 3rem;
+            background-color: slategray;
+            padding: 0.6rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <form action="/request">
-        <input type="file" name="input" id="1">
-        <input type="submit" value="Submit!">
+        <span id="info">
+            Please enter a file that follows a supported format!
+        </span>
+        <div class="relative flex w-full max-w-sm flex-col gap-1 text-slate-700 dark:text-slate-300">
+            <label for="fileInput" class="w-fit pl-0.5 text-sm">Upload File</label>
+            <input id="fileInput" type="file" class="w-full max-w-md overflow-clip rounded-xl border border-slate-300 bg-slate-100/50 text-sm file:mr-4 file:cursor-pointer file:border-none file:bg-slate-100 file:px-4 file:py-2 file:font-medium file:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:cursor-not-allowed disabled:opacity-75 dark:border-slate-700 dark:bg-slate-800/50 dark:file:bg-slate-800 dark:file:text-white dark:focus-visible:outline-blue-600" />
+            <small class="pl-0.75">Excel, CSV</small>
+        </div>
+        
+
+        <input type="submit" value="Submit!" id="submit">
     </form>
 </body>
 </html>
