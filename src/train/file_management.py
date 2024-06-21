@@ -122,7 +122,7 @@ class FileManager(ABC):
         raise Exception(msg)
 
     @staticmethod
-    def decode(item: dict, fmt: Format) -> tuple[PartialTask, int] | None:
+    def decode(item: dict, fmt: Format) -> PartialTask | None:
         if fmt == FileManager.Format.bare_minimum:
             preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
             preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
@@ -138,28 +138,22 @@ class FileManager(ABC):
                 return None
 
             if preferred_starts_at is None and preferred_ends_at is None:
-                return (
-                    PartialTask(
-                        int(item["priority"]),
-                        timedelta(minutes=int(item["duration"])),
-                        preferred_starts_at,
-                        preferred_ends_at,
-                        section.id,
-                    ),
+                return PartialTask(
+                    int(item["priority"]),
+                    timedelta(minutes=int(item["duration"])),
+                    preferred_starts_at,
+                    preferred_ends_at,
                     section.id,
                 )
 
             assert preferred_starts_at is not None
             assert preferred_ends_at is not None
 
-            return (
-                PartialTask(
-                    int(item["priority"]),
-                    timedelta(minutes=int(item["duration"])),
-                    preferred_starts_at,
-                    preferred_ends_at,
-                    section.id,
-                ),
+            return PartialTask(
+                int(item["priority"]),
+                timedelta(minutes=int(item["duration"])),
+                preferred_starts_at,
+                preferred_ends_at,
                 section.id,
             )
 
@@ -170,7 +164,7 @@ class FileManager(ABC):
     def read(
         path: Path,
         fmt: Format | None = None,
-    ) -> tuple[Format, list[tuple[PartialTask, int]]]: ...
+    ) -> tuple[Format, list[PartialTask]]: ...
 
     @staticmethod
     @abstractmethod
@@ -182,7 +176,7 @@ class CSVManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
+    ) -> tuple[FileManager.Format, list[PartialTask]]:
         import csv
 
         with path.open(newline="") as fd:
@@ -215,7 +209,7 @@ class ExcelManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
+    ) -> tuple[FileManager.Format, list[PartialTask]]:
         import openpyxl
 
         wb = openpyxl.load_workbook(path, read_only=True)

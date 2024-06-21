@@ -244,8 +244,8 @@ def schedule(src: Path, dst: Path):
         taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
         fmt, data = FileManager.get_manager(src).read(src)
-        for taskq, section_id in data:
-            taskqs_per_section[section_id].append(taskq)
+        for taskq in data:
+            taskqs_per_section[taskq.section_id].append(taskq)
 
         tasks = []
         for section_id, taskqs in taskqs_per_section.items():
