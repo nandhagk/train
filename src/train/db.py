@@ -44,6 +44,15 @@ def unixepoch(time: time) -> timedelta:
     return datetime.combine(date.min, time) - datetime.min
 
 
+def timediff(start: time, stop: time) -> timedelta:
+    """Get difference between two times."""
+    diff = datetime.combine(date.min, stop) - datetime.combine(date.min, start)
+    if stop <= start:
+        diff += timedelta(days=1)
+
+    return diff
+
+
 sqlite3.register_adapter(datetime, encode_datetime)
 sqlite3.register_adapter(timedelta, encode_timedelta)
 sqlite3.register_adapter(time, encode_time)

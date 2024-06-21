@@ -6,10 +6,19 @@ from typing import TYPE_CHECKING, TypeAlias
 from train.db import cur, decode_datetime
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from datetime import datetime
 
 
 RawMaintenaceWindow: TypeAlias = tuple[int, str, str, int]
+
+
+@dataclass(frozen=True)
+class PartialMaintenanceWindow:
+    starts_at: datetime
+    ends_at: datetime
+
+    section_id: int
 
 
 @dataclass(frozen=True)
@@ -40,10 +49,14 @@ class MaintenanceWindow:
         return MaintenanceWindow.decode(raw)
 
     @staticmethod
-    def insert_many(windows: list[tuple[datetime, datetime]], section_id: int) -> None:
+    def insert_many(windows: Iterable[PartialMaintenanceWindow]) -> None:
         payload = [
-            {"starts_at": starts_at, "ends_at": ends_at, "section_id": section_id}
-            for starts_at, ends_at in windows
+            {
+                "starts_at": window.starts_at,
+                "ends_at": window.ends_at,
+                "section_id": window.section_id,
+            }
+            for window in windows
         ]
 
         cur.executemany(

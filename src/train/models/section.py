@@ -1,11 +1,22 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 from train.db import cur
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
 RawSection: TypeAlias = tuple[int, str, int, int]
+
+
+@dataclass(frozen=True)
+class PartialSection:
+    line: str
+
+    from_id: int
+    to_id: int
 
 
 @dataclass(frozen=True)
@@ -73,10 +84,10 @@ class Section:
         return Section.decode(raw)
 
     @staticmethod
-    def insert_many(sections: list[tuple[str, int, int]]) -> None:
+    def insert_many(sections: Iterable[PartialSection]) -> None:
         payload = [
-            {"line": line, "from_id": from_id, "to_id": to_id}
-            for line, from_id, to_id in sections
+            {"line": section.line, "from_id": section.from_id, "to_id": section.to_id}
+            for section in sections
         ]
 
         cur.executemany(

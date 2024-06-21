@@ -8,13 +8,13 @@ from pathlib import Path
 
 import click
 
-from train.db import con, cur, unixepoch, utcnow
+from train.db import con, cur, timediff, utcnow
 from train.file_management import FileManager
-from train.models.block import Block
-from train.models.maintenance_window import MaintenanceWindow
-from train.models.section import Section
-from train.models.station import Station
-from train.models.task import Task, TaskQ
+from train.models.block import Block, PartialBlock
+from train.models.maintenance_window import MaintenanceWindow, PartialMaintenanceWindow
+from train.models.section import PartialSection, Section
+from train.models.station import PartialStation, Station
+from train.models.task import PartialTask, Task
 
 logging.basicConfig(
     filename=Path.cwd() / "train.log",
@@ -53,7 +53,7 @@ def init(data: Path):
 
     try:
         blocks = json.loads(data.read_text())
-        Block.insert_many(blocks)
+        Block.insert_many([PartialBlock(name) for name in blocks])
 
         for block in blocks:
             block_id = Block.find_by_name(block).id  # type: ignore ()
@@ -65,10 +65,10 @@ def init(data: Path):
                 stations.add(section[0])
                 stations.add(section[1])
 
-            Station.insert_many(list(stations), block_id)
+            Station.insert_many([PartialStation(name, block_id) for name in stations])
             Section.insert_many(
                 [
-                    (
+                    PartialSection(
                         "UP",
                         Station.find_by_name(section[0]).id,  # type: ignore ()
                         Station.find_by_name(section[1]).id,  # type: ignore ()
@@ -76,7 +76,7 @@ def init(data: Path):
                     for section in blocks[block]
                 ]
                 + [
-                    (
+                    PartialSection(
                         "DN",
                         Station.find_by_name(section[0]).id,  # type: ignore ()
                         Station.find_by_name(section[1]).id,  # type: ignore ()
@@ -150,13 +150,13 @@ def create_windows(data: str, length: int, clear: bool):
                 for section_id in grouped[(bid, ln)]:
                     MaintenanceWindow.insert_many(
                         [
-                            (
+                            PartialMaintenanceWindow(
                                 today + timedelta(days=days) + st,
                                 today + timedelta(days=days) + et,
+                                section_id,
                             )
                             for days in range(length)
                         ],
-                        section_id,
                     )
 
         con.commit()
@@ -202,10 +202,7 @@ def insert(  # noqa: PLR0913
             requested_duration = timedelta(minutes=duration)
 
         if pref_start is not None and pref_end is not None:
-            preferred_window = unixepoch(pref_end) - unixepoch(pref_start)
-            if pref_end <= pref_start:
-                preferred_window += timedelta(days=1)
-
+            preferred_window = timediff(pref_start, pref_end)
             if duration is None:
                 requested_duration = preferred_window
 
@@ -218,17 +215,8 @@ def insert(  # noqa: PLR0913
         else:
             assert requested_duration is not None
 
-            preferred_starts_time = None
-            preferred_ends_time = None
-
         Task.insert_one(
-            TaskQ(
-                priority,
-                requested_duration,
-                preferred_starts_time,
-                preferred_ends_time,
-            ),
-            section.id,
+            PartialTask(priority, requested_duration, pref_start, pref_end, section.id),
         )
 
         con.commit()
@@ -253,7 +241,7 @@ def insert(  # noqa: PLR0913
 def schedule(src: Path, dst: Path):
     """Process tasks from src and dump them into dst."""
     try:
-        taskqs_per_section: dict[int, list[TaskQ]] = defaultdict(list)
+        taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
         fmt, data = FileManager.get_manager(src).read(src)
         for taskq, section_id in data:
@@ -263,7 +251,7 @@ def schedule(src: Path, dst: Path):
         for section_id, taskqs in taskqs_per_section.items():
             logger.info("Scheduling section: %d", section_id)
             try:
-                tasks.extend(Task.insert_many(taskqs, section_id))
+                tasks.extend(Task.insert_many(taskqs))
             except Exception:  # noqa: BLE001
                 logger.warning("Ignoring section: %d", section_id)
 

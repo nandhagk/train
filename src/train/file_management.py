@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from train.db import cur, decode_time
 from train.models.section import Section
-from train.models.task import Task, TaskQ
+from train.models.task import PartialTask, Task
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -122,7 +122,7 @@ class FileManager(ABC):
         raise Exception(msg)
 
     @staticmethod
-    def decode(item: dict, fmt: Format) -> tuple[TaskQ, int] | None:
+    def decode(item: dict, fmt: Format) -> tuple[PartialTask, int] | None:
         if fmt == FileManager.Format.bare_minimum:
             preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
             preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
@@ -139,11 +139,12 @@ class FileManager(ABC):
 
             if preferred_starts_at is None and preferred_ends_at is None:
                 return (
-                    TaskQ(
-                        priority=int(item["priority"]),
-                        preferred_ends_at=preferred_ends_at,
-                        preferred_starts_at=preferred_starts_at,
-                        requested_duration=timedelta(minutes=int(item["duration"])),
+                    PartialTask(
+                        int(item["priority"]),
+                        timedelta(minutes=int(item["duration"])),
+                        preferred_starts_at,
+                        preferred_ends_at,
+                        section.id,
                     ),
                     section.id,
                 )
@@ -152,11 +153,12 @@ class FileManager(ABC):
             assert preferred_ends_at is not None
 
             return (
-                TaskQ(
-                    priority=int(item["priority"]),
-                    preferred_ends_at=preferred_ends_at,
-                    preferred_starts_at=preferred_starts_at,
-                    requested_duration=timedelta(minutes=int(item["duration"])),
+                PartialTask(
+                    int(item["priority"]),
+                    timedelta(minutes=int(item["duration"])),
+                    preferred_starts_at,
+                    preferred_ends_at,
+                    section.id,
                 ),
                 section.id,
             )
@@ -168,7 +170,7 @@ class FileManager(ABC):
     def read(
         path: Path,
         fmt: Format | None = None,
-    ) -> tuple[Format, list[tuple[TaskQ, int]]]: ...
+    ) -> tuple[Format, list[tuple[PartialTask, int]]]: ...
 
     @staticmethod
     @abstractmethod
@@ -180,7 +182,7 @@ class CSVManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[TaskQ, int]]]:
+    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
         import csv
 
         with path.open(newline="") as fd:
@@ -213,7 +215,7 @@ class ExcelManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[TaskQ, int]]]:
+    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
         import openpyxl
 
         wb = openpyxl.load_workbook(path, read_only=True)

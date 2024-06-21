@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
 from typing import Generic, TypeAlias, TypeVar
 
@@ -10,6 +10,7 @@ from train.db import (
     decode_datetime,
     decode_time,
     decode_timedelta,
+    timediff,
     unixepoch,
     utcnow,
 )
@@ -19,12 +20,13 @@ RawTask: TypeAlias = tuple[int, str, str, str | None, str | None, int, int, int]
 T = TypeVar("T", None, time)
 
 
-@dataclass
-class TaskQ(Generic[T]):
+@dataclass(frozen=True)
+class PartialTask(Generic[T]):
     priority: int
     requested_duration: timedelta
     preferred_starts_at: T
     preferred_ends_at: T
+    section_id: int
     starts_at: datetime = field(default_factory=utcnow)
 
     @property
@@ -32,13 +34,9 @@ class TaskQ(Generic[T]):
         if self.preferred_starts_at is None or self.preferred_ends_at is None:
             return timedelta(days=1)
 
-        return (
-            datetime.combine(date.min, self.preferred_ends_at)
-            - datetime.combine(date.min, self.preferred_starts_at)
-            + timedelta(days=int(self.preferred_starts_at >= self.preferred_ends_at))
-        )
+        return timediff(self.preferred_starts_at, self.preferred_ends_at)
 
-    def __lt__(self, other: TaskQ) -> bool:
+    def __lt__(self, other: PartialTask) -> bool:
         """
         Priority Order.
 
@@ -57,16 +55,130 @@ class TaskQ(Generic[T]):
 
 
 @dataclass(frozen=True)
-class Task:
+class Task(Generic[T]):
     id: int
     starts_at: datetime
     ends_at: datetime
-    preferred_starts_at: time | None
-    preferred_ends_at: time | None
+    preferred_starts_at: T
+    preferred_ends_at: T
     requested_duration: timedelta
     priority: int
 
     maintenance_window_id: int
+
+    @staticmethod
+    def insert_many(tasks: list[PartialTask]) -> list[Task]:
+        heapify(tasks)
+
+        tasks_: list[Task] = []
+        while tasks:
+            task = heappop(tasks)
+            if task.preferred_ends_at is None and task.preferred_starts_at is None:
+                window_id, starts_at, ends_at = Task._insert_nopref(task)
+            else:
+                window_id, starts_at, ends_at = Task._insert_pref(task)
+
+            payload = {
+                "window_id": window_id,
+                "starts_at": starts_at,
+                "ends_at": ends_at,
+            }
+
+            cur.execute(
+                """
+                DELETE FROM task
+                WHERE
+                    task.maintenance_window_id = :window_id
+                    AND (
+                        (task.starts_at > :starts_at AND task.starts_at < :ends_at)
+                        OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
+                        OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
+                        OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
+                        OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
+                    )
+                RETURNING *
+                """,
+                payload,
+            )
+
+            for x in cur.fetchall():
+                task_to_remove = Task.decode(x)
+                heappush(
+                    tasks,
+                    PartialTask(
+                        task_to_remove.priority,
+                        task_to_remove.requested_duration,
+                        task_to_remove.preferred_starts_at,
+                        task_to_remove.preferred_ends_at,
+                        task.section_id,
+                        task_to_remove.starts_at,
+                    ),
+                )
+
+            task_ = Task._insert(
+                starts_at,
+                ends_at,
+                task.requested_duration,
+                task.priority,
+                window_id,
+                task.preferred_starts_at,
+                task.preferred_ends_at,
+            )
+
+            tasks_.append(task_)
+
+        return tasks_
+
+    @staticmethod
+    def insert_one(taskq: PartialTask) -> list[Task]:
+        return Task.insert_many([taskq])
+
+    @staticmethod
+    def find_by_id(id: int) -> Task | None:
+        payload = {"id": id}
+
+        cur.execute(
+            """
+            SELECT task.* FROM task
+            WHERE
+                task.id = :id
+            """,
+            payload,
+        )
+
+        raw = cur.fetchone()
+        if raw is None:
+            return None
+
+        return Task.decode(raw)
+
+    @staticmethod
+    def decode(raw: RawTask) -> Task:
+        (
+            id,
+            starts_at,
+            ends_at,
+            preferred_starts_at,
+            preferred_ends_at,
+            requested_duration,
+            priority,
+            maintenance_window_id,
+        ) = raw
+
+        return Task(
+            id,
+            decode_datetime(starts_at),
+            decode_datetime(ends_at),
+            (
+                decode_time(preferred_starts_at)
+                if preferred_starts_at is not None
+                else None
+            ),
+            decode_time(preferred_ends_at) if preferred_ends_at is not None else None,
+            decode_timedelta(requested_duration),
+            priority,
+            maintenance_window_id,
+        )
 
     @staticmethod
     def _insert(  # noqa: PLR0913
@@ -118,13 +230,12 @@ class Task:
 
     @staticmethod
     def _insert_pref(  # noqa: C901
-        taskq: TaskQ[time],
-        section_id: int,
+        taskq: PartialTask[time],
     ) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
             "priority": taskq.priority,
-            "section_id": section_id,
+            "section_id": taskq.section_id,
         }
 
         cur.execute(
@@ -229,7 +340,7 @@ class Task:
                     UTC,
                 )
                 + timedelta(
-                    days=int(taskq.preferred_starts_at >= taskq.preferred_ends_at),
+                    days=int(taskq.preferred_ends_at <= taskq.preferred_starts_at),
                 ),
             )
             for possible_preferred_date in possible_preferred_dates
@@ -293,14 +404,11 @@ class Task:
         return window_id, starts_at, ends_at
 
     @staticmethod
-    def _insert_nopref(
-        taskq: TaskQ[None],
-        section_id: int,
-    ) -> tuple[int, datetime, datetime]:
+    def _insert_nopref(taskq: PartialTask[None]) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
             "priority": taskq.priority,
-            "section_id": section_id,
+            "section_id": taskq.section_id,
         }
 
         cur.execute(
@@ -359,117 +467,4 @@ class Task:
         starts_at = decode_datetime(starts_at_)
         ends_at = starts_at + taskq.requested_duration
 
-        return (window_id, starts_at, ends_at)
-
-    @staticmethod
-    def insert_many(taskqs: list[TaskQ], section_id: int) -> list[Task]:
-        tasks = []
-
-        heapify(taskqs)
-        while taskqs:
-            taskq = heappop(taskqs)
-            if taskq.preferred_ends_at is None and taskq.preferred_starts_at is None:
-                window_id, starts_at, ends_at = Task._insert_nopref(taskq, section_id)
-            else:
-                window_id, starts_at, ends_at = Task._insert_pref(taskq, section_id)
-
-            payload = {
-                "window_id": window_id,
-                "starts_at": starts_at,
-                "ends_at": ends_at,
-            }
-
-            cur.execute(
-                """
-                DELETE FROM task
-                WHERE
-                    task.maintenance_window_id = :window_id
-                    AND (
-                        (task.starts_at > :starts_at AND task.starts_at < :ends_at)
-                        OR (task.ends_at > :starts_at AND task.ends_at < :ends_at)
-                        OR (:starts_at > task.starts_at AND :starts_at < task.ends_at)
-                        OR (task.starts_at = :starts_at AND task.ends_at <= :ends_at)
-                        OR (task.ends_at = :ends_at AND task.starts_at >= :starts_at)
-                    )
-                RETURNING *
-                """,
-                payload,
-            )
-
-            for x in cur.fetchall():
-                task_to_remove = Task.decode(x)
-                heappush(
-                    taskqs,
-                    TaskQ(
-                        task_to_remove.priority,
-                        task_to_remove.requested_duration,
-                        task_to_remove.preferred_starts_at,
-                        task_to_remove.preferred_ends_at,
-                        task_to_remove.starts_at,
-                    ),
-                )
-
-            task = Task._insert(
-                starts_at,
-                ends_at,
-                taskq.requested_duration,
-                taskq.priority,
-                window_id,
-                taskq.preferred_starts_at,
-                taskq.preferred_ends_at,
-            )
-
-            tasks.append(task)
-
-        return tasks
-
-    @staticmethod
-    def insert_one(taskq: TaskQ, section_id: int) -> list[Task]:
-        return Task.insert_many([taskq], section_id)
-
-    @staticmethod
-    def find_by_id(id: int) -> Task | None:
-        payload = {"id": id}
-
-        cur.execute(
-            """
-            SELECT task.* FROM task
-            WHERE
-                task.id = :id
-            """,
-            payload,
-        )
-
-        raw = cur.fetchone()
-        if raw is None:
-            return None
-
-        return Task.decode(raw)
-
-    @staticmethod
-    def decode(raw: RawTask) -> Task:
-        (
-            id,
-            starts_at,
-            ends_at,
-            preferred_starts_at,
-            preferred_ends_at,
-            requested_duration,
-            priority,
-            maintenance_window_id,
-        ) = raw
-
-        return Task(
-            id,
-            decode_datetime(starts_at),
-            decode_datetime(ends_at),
-            (
-                decode_time(preferred_starts_at)
-                if preferred_starts_at is not None
-                else None
-            ),
-            decode_time(preferred_ends_at) if preferred_ends_at is not None else None,
-            decode_timedelta(requested_duration),
-            priority,
-            maintenance_window_id,
-        )
+        return window_id, starts_at, ends_at

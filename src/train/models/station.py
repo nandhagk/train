@@ -1,11 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 from train.db import cur
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
 RawStation: TypeAlias = tuple[int, str, int]
+
+
+@dataclass(frozen=True)
+class PartialStation:
+    name: str
+
+    block_id: int
 
 
 @dataclass(frozen=True)
@@ -54,8 +64,10 @@ class Station:
         return Station.decode(raw)
 
     @staticmethod
-    def insert_many(station_names: list[str], block_id: int) -> None:
-        payload = [{"name": name, "block_id": block_id} for name in station_names]
+    def insert_many(stations: Iterable[PartialStation]) -> None:
+        payload = [
+            {"name": station.name, "block_id": station.block_id} for station in stations
+        ]
 
         cur.executemany(
             """
