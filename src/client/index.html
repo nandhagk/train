@@ -7,18 +7,9 @@
 
     <link rel="stylesheet" href="reset.css">
     <style>
-        body{
-            width: 100vw;
-            height: 100vh;
-            background-color: #22345e;
-            display: grid;
-            place-items: center;
-        }
-
         form{
             background-color: #0f172a;
-            padding: 3rem;
-            padding-bottom: 5rem;
+            
             border-radius: 2rem;
             position: relative;
         }
@@ -31,8 +22,6 @@
         
         #submit{
             cursor: pointer;
-            position: absolute;
-            right: 3rem;
             background-color: slategray;
             padding: 0.6rem;
             border-radius: 0.5rem;
@@ -40,8 +29,13 @@
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <form action="/request">
+<body class="
+        grid place-items-center
+        min-h-screen
+        bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500
+    "
+>
+    <form action="/request" class="p-12">
         <span id="info">
             Please enter a file that follows a supported format!
         </span>
@@ -52,7 +46,8 @@
         </div>
         
 
-        <input type="submit" value="Submit!" id="submit">
+        <input type="submit" value="Submit!" id="submit" class="float-right">
     </form>
+    
 </body>
 </html>
