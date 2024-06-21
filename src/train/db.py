@@ -57,5 +57,13 @@ sqlite3.register_adapter(datetime, encode_datetime)
 sqlite3.register_adapter(timedelta, encode_timedelta)
 sqlite3.register_adapter(time, encode_time)
 
-con = sqlite3.connect("./tmp/train.db")
-cur = con.cursor()
+sqlite3.register_converter("DATETIME", lambda raw: decode_datetime(raw.decode()))
+sqlite3.register_converter("TIME", lambda raw: decode_time(raw.decode()))
+
+
+def get_db() -> sqlite3.Connection:
+    """Create db connection."""
+    con = sqlite3.connect("./tmp/train.db", detect_types=sqlite3.PARSE_DECLTYPES)
+    con.row_factory = sqlite3.Row
+
+    return con

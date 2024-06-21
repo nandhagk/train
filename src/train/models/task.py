@@ -3,19 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
-from typing import Generic, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from train.db import (
-    cur,
-    decode_datetime,
-    decode_time,
-    decode_timedelta,
-    timediff,
-    unixepoch,
-    utcnow,
-)
+from train.db import decode_timedelta, timediff, unixepoch, utcnow
 
-RawTask: TypeAlias = tuple[int, str, str, str | None, str | None, int, int, int]
+if TYPE_CHECKING:
+    from sqlite3 import Cursor, Row
+
 
 T = TypeVar("T", None, time)
 
@@ -67,16 +61,16 @@ class Task(Generic[T]):
     maintenance_window_id: int
 
     @staticmethod
-    def insert_many(tasks: list[PartialTask]) -> list[Task]:
+    def insert_many(cur: Cursor, tasks: list[PartialTask]) -> list[Task]:
         heapify(tasks)
 
         tasks_: list[Task] = []
         while tasks:
             task = heappop(tasks)
             if task.preferred_ends_at is None and task.preferred_starts_at is None:
-                window_id, starts_at, ends_at = Task._insert_nopref(task)
+                window_id, starts_at, ends_at = Task._insert_nopref(cur, task)
             else:
-                window_id, starts_at, ends_at = Task._insert_pref(task)
+                window_id, starts_at, ends_at = Task._insert_pref(cur, task)
 
             payload = {
                 "window_id": window_id,
@@ -101,8 +95,8 @@ class Task(Generic[T]):
                 payload,
             )
 
-            for x in cur.fetchall():
-                task_to_remove = Task.decode(x)
+            for row in cur.fetchall():
+                task_to_remove = Task.decode(row)
                 heappush(
                     tasks,
                     PartialTask(
@@ -116,6 +110,7 @@ class Task(Generic[T]):
                 )
 
             task_ = Task._insert(
+                cur,
                 starts_at,
                 ends_at,
                 task.requested_duration,
@@ -130,11 +125,11 @@ class Task(Generic[T]):
         return tasks_
 
     @staticmethod
-    def insert_one(taskq: PartialTask) -> list[Task]:
-        return Task.insert_many([taskq])
+    def insert_one(cur: Cursor, taskq: PartialTask) -> list[Task]:
+        return Task.insert_many(cur, [taskq])
 
     @staticmethod
-    def find_by_id(id: int) -> Task | None:
+    def find_by_id(cur: Cursor, id: int) -> Task | None:
         payload = {"id": id}
 
         cur.execute(
@@ -146,42 +141,28 @@ class Task(Generic[T]):
             payload,
         )
 
-        raw = cur.fetchone()
-        if raw is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             return None
 
-        return Task.decode(raw)
+        return Task.decode(row)
 
     @staticmethod
-    def decode(raw: RawTask) -> Task:
-        (
-            id,
-            starts_at,
-            ends_at,
-            preferred_starts_at,
-            preferred_ends_at,
-            requested_duration,
-            priority,
-            maintenance_window_id,
-        ) = raw
-
+    def decode(row: Row) -> Task:
         return Task(
-            id,
-            decode_datetime(starts_at),
-            decode_datetime(ends_at),
-            (
-                decode_time(preferred_starts_at)
-                if preferred_starts_at is not None
-                else None
-            ),
-            decode_time(preferred_ends_at) if preferred_ends_at is not None else None,
-            decode_timedelta(requested_duration),
-            priority,
-            maintenance_window_id,
+            row["id"],
+            row["starts_at"],
+            row["ends_at"],
+            row["preferred_starts_at"],
+            row["preferred_ends_at"],
+            decode_timedelta(row["requested_duration"]),
+            row["priority"],
+            row["maintenance_window_id"],
         )
 
     @staticmethod
     def _insert(  # noqa: PLR0913
+        cur: Cursor,
         starts_at: datetime,
         ends_at: datetime,
         requested_duration: timedelta,
@@ -230,6 +211,7 @@ class Task(Generic[T]):
 
     @staticmethod
     def _insert_pref(  # noqa: C901
+        cur: Cursor,
         taskq: PartialTask[time],
     ) -> tuple[int, datetime, datetime]:
         payload = {
@@ -286,13 +268,10 @@ class Task(Generic[T]):
         if p_ends <= p_starts:
             p_starts -= timedelta(days=1)
 
-        def mapper(
-            z: tuple[str, str, int],
-        ) -> tuple[timedelta, datetime, datetime, int]:
-            window_start_, window_end_, window_id = z
-
-            window_start = decode_datetime(window_start_)
-            window_end = decode_datetime(window_end_)
+        def mapper(row: Row) -> tuple[timedelta, datetime, datetime, int]:
+            window_start = row["window_start"]
+            window_end = row["window_end"]
+            window_id = row["window_id"]
 
             m_starts = unixepoch(window_start.time())
             m_ends = unixepoch(window_end.time())
@@ -313,13 +292,11 @@ class Task(Generic[T]):
 
             return (intersection, window_start, window_end, window_id)
 
-        y: list[tuple[str, str, int]] = cur.fetchall()
-        x = max(
-            [mapper(z) for z in y],
+        intersection, window_start, window_end, window_id = max(
+            [mapper(row) for row in cur.fetchall()],
             key=lambda z: (min(z[0], taskq.requested_duration), utcnow() - z[1]),
         )
 
-        (intersection, window_start, window_end, window_id) = x
         possible_preferred_dates = (
             window_start - timedelta(days=1),
             window_start,
@@ -404,7 +381,10 @@ class Task(Generic[T]):
         return window_id, starts_at, ends_at
 
     @staticmethod
-    def _insert_nopref(taskq: PartialTask[None]) -> tuple[int, datetime, datetime]:
+    def _insert_nopref(
+        cur: Cursor,
+        taskq: PartialTask[None],
+    ) -> tuple[int, datetime, datetime]:
         payload = {
             "requested_duration": taskq.requested_duration,
             "priority": taskq.priority,
@@ -458,13 +438,14 @@ class Task(Generic[T]):
             payload,
         )
 
-        x: tuple[str, str, int] | None = cur.fetchone()
-        if x is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             raise Exception
 
-        starts_at_, _, window_id = x
+        window_start = row["window_start"]
+        window_id = row["window_id"]
 
-        starts_at = decode_datetime(starts_at_)
+        starts_at = window_start
         ends_at = starts_at + taskq.requested_duration
 
         return window_id, starts_at, ends_at

@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeAlias
-
-from train.db import cur
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-RawBlock: TypeAlias = tuple[int, str]
+    from sqlite3 import Cursor, Row
 
 
 @dataclass(frozen=True)
@@ -22,7 +19,7 @@ class Block:
     name: str
 
     @staticmethod
-    def find_by_id(id: int) -> Block | None:
+    def find_by_id(cur: Cursor, id: int) -> Block | None:
         payload = {"id": id}
 
         cur.execute(
@@ -41,7 +38,7 @@ class Block:
         return Block.decode(raw)
 
     @staticmethod
-    def find_by_name(name: str) -> Block | None:
+    def find_by_name(cur: Cursor, name: str) -> Block | None:
         payload = {"name": name}
 
         cur.execute(
@@ -53,14 +50,14 @@ class Block:
             payload,
         )
 
-        raw = cur.fetchone()
-        if raw is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             return None
 
-        return Block.decode(raw)
+        return Block.decode(row)
 
     @staticmethod
-    def insert_many(blocks: Iterable[PartialBlock]) -> None:
+    def insert_many(cur: Cursor, blocks: Iterable[PartialBlock]) -> None:
         payload = [{"name": block.name} for block in blocks]
 
         cur.executemany(
@@ -73,6 +70,5 @@ class Block:
         )
 
     @staticmethod
-    def decode(raw: RawBlock) -> Block:
-        id, name = raw
-        return Block(id, name)
+    def decode(row: Row) -> Block:
+        return Block(row["id"], row["name"])
