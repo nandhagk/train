@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import click
 
+from train.app import app
 from train.db import get_db, timediff, utcnow
 from train.file_management import FileManager
 from train.models.block import Block, PartialBlock
@@ -292,6 +293,13 @@ def schedule(src: Path, dst: Path):
 
         msg = f"Failed to populate database from file: {e}"
         raise click.ClickException(msg) from e
+
+
+@main.command()
+@click.option("--port", type=click.IntRange(1000, 10000), default=5432)
+def server(port: int):
+    """Spins up a flask server."""
+    app.run(port=port, debug=True)
 
 
 if __name__ == "__main__":
