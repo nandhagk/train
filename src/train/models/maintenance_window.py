@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeAlias
-
-from train.db import cur, decode_datetime
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from datetime import datetime
-
-
-RawMaintenaceWindow: TypeAlias = tuple[int, str, str, int]
+    from sqlite3 import Cursor, Row
 
 
 @dataclass(frozen=True)
@@ -30,7 +26,7 @@ class MaintenanceWindow:
     section_id: int
 
     @staticmethod
-    def find_by_id(id: int) -> MaintenanceWindow | None:
+    def find_by_id(cur: Cursor, id: int) -> MaintenanceWindow | None:
         payload = {"id": id}
 
         cur.execute(
@@ -42,14 +38,14 @@ class MaintenanceWindow:
             payload,
         )
 
-        raw = cur.fetchone()
-        if raw is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             return None
 
-        return MaintenanceWindow.decode(raw)
+        return MaintenanceWindow.decode(row)
 
     @staticmethod
-    def insert_many(windows: Iterable[PartialMaintenanceWindow]) -> None:
+    def insert_many(cur: Cursor, windows: Iterable[PartialMaintenanceWindow]) -> None:
         payload = [
             {
                 "starts_at": window.starts_at,
@@ -68,15 +64,14 @@ class MaintenanceWindow:
         )
 
     @staticmethod
-    def decode(raw: RawMaintenaceWindow) -> MaintenanceWindow:
-        id, starts_at, ends_at, section_id = raw
+    def decode(row: Row) -> MaintenanceWindow:
         return MaintenanceWindow(
-            id,
-            decode_datetime(starts_at),
-            decode_datetime(ends_at),
-            section_id,
+            row["id"],
+            row["starts_at"],
+            row["ends_at"],
+            row["section_id"],
         )
 
     @staticmethod
-    def clear() -> None:
+    def clear(cur: Cursor) -> None:
         cur.execute("DELETE FROM maintenance_window")

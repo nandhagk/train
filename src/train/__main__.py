@@ -8,7 +8,7 @@ from pathlib import Path
 
 import click
 
-from train.db import con, cur, timediff, utcnow
+from train.db import get_db, timediff, utcnow
 from train.file_management import FileManager
 from train.models.block import Block, PartialBlock
 from train.models.maintenance_window import MaintenanceWindow, PartialMaintenanceWindow
@@ -49,14 +49,17 @@ def main() -> None:
 @click.argument("data", type=ClickPath(exists=True, dir_okay=False))
 def init(data: Path):
     """Initiliaze the database."""
+    con = get_db()
+    cur = con.cursor()
+
     cur.executescript((Path.cwd() / "init.sql").read_text())
 
     try:
         blocks = json.loads(data.read_text())
-        Block.insert_many([PartialBlock(name) for name in blocks])
+        Block.insert_many(cur, [PartialBlock(name) for name in blocks])
 
         for block in blocks:
-            block_id = Block.find_by_name(block).id  # type: ignore ()
+            block_id = Block.find_by_name(cur, block).id  # type: ignore ()
 
             stations: set[str] = set()
             for section in blocks[block]:
@@ -65,21 +68,26 @@ def init(data: Path):
                 stations.add(section[0])
                 stations.add(section[1])
 
-            Station.insert_many([PartialStation(name, block_id) for name in stations])
+            Station.insert_many(
+                cur,
+                [PartialStation(name, block_id) for name in stations],
+            )
+
             Section.insert_many(
+                cur,
                 [
                     PartialSection(
                         "UP",
-                        Station.find_by_name(section[0]).id,  # type: ignore ()
-                        Station.find_by_name(section[1]).id,  # type: ignore ()
+                        Station.find_by_name(cur, section[0]).id,  # type: ignore ()
+                        Station.find_by_name(cur, section[1]).id,  # type: ignore ()
                     )
                     for section in blocks[block]
                 ]
                 + [
                     PartialSection(
                         "DN",
-                        Station.find_by_name(section[0]).id,  # type: ignore ()
-                        Station.find_by_name(section[1]).id,  # type: ignore ()
+                        Station.find_by_name(cur, section[0]).id,  # type: ignore ()
+                        Station.find_by_name(cur, section[1]).id,  # type: ignore ()
                     )
                     for section in blocks[block]
                 ],
@@ -101,9 +109,11 @@ def init(data: Path):
 @click.option("--clear", is_flag=True, default=False)
 def create_windows(data: str, length: int, clear: bool):
     """Populate the maintenance_window table."""
+    con = get_db()
+    cur = con.cursor()
 
     def get_block_id(block_name: str) -> int:
-        block = Block.find_by_name(block_name)
+        block = Block.find_by_name(cur, block_name)
         if block is None:
             logger.error(
                 "Invalid time data file. Block `%s` does not exist",
@@ -116,7 +126,7 @@ def create_windows(data: str, length: int, clear: bool):
 
     try:
         if clear:
-            MaintenanceWindow.clear()
+            MaintenanceWindow.clear(cur)
 
         cur.execute(
             """
@@ -149,6 +159,7 @@ def create_windows(data: str, length: int, clear: bool):
                 bid = get_block_id(block_name)
                 for section_id in grouped[(bid, ln)]:
                     MaintenanceWindow.insert_many(
+                        cur,
                         [
                             PartialMaintenanceWindow(
                                 today + timedelta(days=days) + st,
@@ -185,12 +196,15 @@ def insert(  # noqa: PLR0913
     pref_end: time | None,
 ) -> None:
     """Section: STN-STN or STN YD."""
+    con = get_db()
+    cur = con.cursor()
+
     if duration is None and (pref_start is None or pref_end is None):
         msg = "Please either set duration or (pref_start and pref_end)"
         raise click.UsageError(msg)
 
     try:
-        section = Section.find_by_name_and_line(name, line)
+        section = Section.find_by_name_and_line(cur, name, line)
         if section is None:
             logger.error("Section not found: %s - %s", name, line)
 
@@ -216,6 +230,7 @@ def insert(  # noqa: PLR0913
             assert requested_duration is not None
 
         Task.insert_one(
+            cur,
             PartialTask(priority, requested_duration, pref_start, pref_end, section.id),
         )
 
@@ -240,18 +255,21 @@ def insert(  # noqa: PLR0913
 @click.argument("dst", type=ClickPath(exists=False, dir_okay=False))
 def schedule(src: Path, dst: Path):
     """Process tasks from src and dump them into dst."""
+    con = get_db()
+    cur = con.cursor()
+
     try:
         taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
         fmt, data = FileManager.get_manager(src).read(src)
-        for taskq, section_id in data:
-            taskqs_per_section[section_id].append(taskq)
+        for taskq in data:
+            taskqs_per_section[taskq.section_id].append(taskq)
 
         tasks = []
         for section_id, taskqs in taskqs_per_section.items():
             logger.info("Scheduling section: %d", section_id)
             try:
-                tasks.extend(Task.insert_many(taskqs))
+                tasks.extend(Task.insert_many(cur, taskqs))
             except Exception:  # noqa: BLE001
                 logger.warning("Ignoring section: %d", section_id)
 

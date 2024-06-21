@@ -6,7 +6,7 @@ from datetime import time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING
 
-from train.db import cur, decode_time
+from train.db import decode_time, get_db
 from train.models.section import Section
 from train.models.task import PartialTask, Task
 
@@ -51,6 +51,9 @@ class FileManager(ABC):
 
     @staticmethod
     def encode_tasks(tasks: list[Task], fmt: Format) -> list[dict]:
+        con = get_db()
+        cur = con.cursor()
+
         if fmt == FileManager.Format.bare_minimum:
             cur.execute(
                 f"""
@@ -90,22 +93,22 @@ class FileManager(ABC):
 
             return [
                 {
-                    "date": x[0],
+                    "date": row[0],
                     "block_section_or_yard": (
-                        f"{x[1].replace("_", " ")}"
-                        if x[1] == x[2]
-                        else f"{x[1]}-{x[2]}"
+                        f"{row[1].replace("_", " ")}"
+                        if row[1] == row[2]
+                        else f"{row[1]}-{row[2]}"
                     ),
-                    "corridor_block": x[3],
-                    "line": x[4],
-                    "demanded_time_from": x[5],
-                    "demanded_time_to": x[6],
-                    "block_demanded": x[7],
-                    "permitted_time_from": x[8],
-                    "permitted_time_to": x[9],
-                    "block_permitted": x[7],
+                    "corridor_block": row[3],
+                    "line": row[4],
+                    "demanded_time_from": row[5],
+                    "demanded_time_to": row[6],
+                    "block_demanded": row[7],
+                    "permitted_time_from": row[8],
+                    "permitted_time_to": row[9],
+                    "block_permitted": row[7],
                 }
-                for x in cur.fetchall()
+                for row in cur.fetchall()
             ]
 
         return {}
@@ -122,12 +125,15 @@ class FileManager(ABC):
         raise Exception(msg)
 
     @staticmethod
-    def decode(item: dict, fmt: Format) -> tuple[PartialTask, int] | None:
+    def decode(item: dict, fmt: Format) -> PartialTask | None:
+        con = get_db()
+        cur = con.cursor()
+
         if fmt == FileManager.Format.bare_minimum:
             preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
             preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
 
-            section = Section.find_by_name_and_line(item["section_name"], "UP")
+            section = Section.find_by_name_and_line(cur, item["section_name"], "UP")
             if section is None:
                 logger.warning(
                     "Could not find section: %s - %s",
@@ -138,28 +144,22 @@ class FileManager(ABC):
                 return None
 
             if preferred_starts_at is None and preferred_ends_at is None:
-                return (
-                    PartialTask(
-                        int(item["priority"]),
-                        timedelta(minutes=int(item["duration"])),
-                        preferred_starts_at,
-                        preferred_ends_at,
-                        section.id,
-                    ),
+                return PartialTask(
+                    int(item["priority"]),
+                    timedelta(minutes=int(item["duration"])),
+                    preferred_starts_at,
+                    preferred_ends_at,
                     section.id,
                 )
 
             assert preferred_starts_at is not None
             assert preferred_ends_at is not None
 
-            return (
-                PartialTask(
-                    int(item["priority"]),
-                    timedelta(minutes=int(item["duration"])),
-                    preferred_starts_at,
-                    preferred_ends_at,
-                    section.id,
-                ),
+            return PartialTask(
+                int(item["priority"]),
+                timedelta(minutes=int(item["duration"])),
+                preferred_starts_at,
+                preferred_ends_at,
                 section.id,
             )
 
@@ -170,7 +170,7 @@ class FileManager(ABC):
     def read(
         path: Path,
         fmt: Format | None = None,
-    ) -> tuple[Format, list[tuple[PartialTask, int]]]: ...
+    ) -> tuple[Format, list[PartialTask]]: ...
 
     @staticmethod
     @abstractmethod
@@ -182,7 +182,7 @@ class CSVManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
+    ) -> tuple[FileManager.Format, list[PartialTask]]:
         import csv
 
         with path.open(newline="") as fd:
@@ -215,7 +215,7 @@ class ExcelManager(FileManager):
     def read(
         path: Path,
         fmt: FileManager.Format | None = None,
-    ) -> tuple[FileManager.Format, list[tuple[PartialTask, int]]]:
+    ) -> tuple[FileManager.Format, list[PartialTask]]:
         import openpyxl
 
         wb = openpyxl.load_workbook(path, read_only=True)

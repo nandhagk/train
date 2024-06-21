@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, TypeAlias
-
-from train.db import cur
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-
-RawSection: TypeAlias = tuple[int, str, int, int]
+    from sqlite3 import Cursor, Row
 
 
 @dataclass(frozen=True)
@@ -28,7 +25,7 @@ class Section:
     to_id: int
 
     @staticmethod
-    def find_by_id(id: int) -> Section | None:
+    def find_by_id(cur: Cursor, id: int) -> Section | None:
         payload = {"id": id}
 
         cur.execute(
@@ -40,14 +37,14 @@ class Section:
             payload,
         )
 
-        raw = cur.fetchone()
-        if raw is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             return None
 
-        return Section.decode(raw)
+        return Section.decode(row)
 
     @staticmethod
-    def find_by_name_and_line(name: str, line: str) -> Section | None:
+    def find_by_name_and_line(cur: Cursor, name: str, line: str) -> Section | None:
         if name.endswith("YD"):
             f = t = name.removesuffix("YD").replace("-", "").strip() + "_YD"
 
@@ -77,14 +74,14 @@ class Section:
             payload,
         )
 
-        raw = cur.fetchone()
-        if raw is None:
+        row: Row | None = cur.fetchone()
+        if row is None:
             return None
 
-        return Section.decode(raw)
+        return Section.decode(row)
 
     @staticmethod
-    def insert_many(sections: Iterable[PartialSection]) -> None:
+    def insert_many(cur: Cursor, sections: Iterable[PartialSection]) -> None:
         payload = [
             {"line": section.line, "from_id": section.from_id, "to_id": section.to_id}
             for section in sections
@@ -100,6 +97,5 @@ class Section:
         )
 
     @staticmethod
-    def decode(raw: RawSection) -> Section:
-        id, line, from_id, to_id = raw
-        return Section(id, line, from_id, to_id)
+    def decode(row: Row) -> Section:
+        return Section(row["id"], row["line"], row["from_id"], row["to_id"])
