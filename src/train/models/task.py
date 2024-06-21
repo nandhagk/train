@@ -5,7 +5,7 @@ from datetime import UTC, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from train.db import decode_timedelta, timediff, unixepoch, utcnow, decode_datetime
+from train.db import decode_datetime, decode_timedelta, timediff, unixepoch, utcnow
 
 if TYPE_CHECKING:
     from sqlite3 import Cursor, Row
@@ -269,7 +269,7 @@ class Task(Generic[T]):
             p_starts -= timedelta(days=1)
 
         def mapper(row: Row) -> tuple[timedelta, datetime, datetime, int]:
-            window_start = decode_datetime(row["window_start"])
+            window_start = row["window_start"]
             window_end = decode_datetime(row["window_end"])
             window_id = row["window_id"]
 

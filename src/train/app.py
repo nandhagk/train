@@ -45,7 +45,7 @@ def handle_form():
     try:
         taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
-        fmt, data = FileManager.get_manager(src).read(src)
+        fmt, data = FileManager.get_manager(src).read(cur, src)
         for taskq in data:
             taskqs_per_section[taskq.section_id].append(taskq)
 
@@ -57,7 +57,7 @@ def handle_form():
             except Exception:  # noqa: BLE001
                 logger.warning("Ignoring section: %d", section_id)
 
-        FileManager.get_manager(dst).write(dst, tasks, fmt)
+        FileManager.get_manager(dst).write(cur, dst, tasks, fmt)
 
         logger.info("Populated database and saved output file: %s", dst)
     except Exception as e:

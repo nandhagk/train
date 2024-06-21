@@ -281,7 +281,7 @@ def schedule(src: Path, dst: Path):
             logger.info("Scheduling section: %d", section_id)
             try:
                 tasks.extend(Task.insert_many(cur, taskqs))
-            except Exception:  # noqa: BLE001
+            except Exception:
                 logger.exception("Ignoring section: %d", section_id)
 
         con.commit()
