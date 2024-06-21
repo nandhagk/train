@@ -290,7 +290,7 @@ class Task(Generic[T]):
                 - max(m_starts - p_starts + timedelta(days=1), timedelta()),
             )
 
-            return (intersection, window_start, window_end, window_id)
+            return intersection, window_start, window_end, window_id
 
         intersection, window_start, window_end, window_id = max(
             [mapper(row) for row in cur.fetchall()],
