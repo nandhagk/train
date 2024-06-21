@@ -2,6 +2,7 @@
 *.db
 **/output.xlsx
 **/output.csv
+**/tmp/
 
 # Byte-compiled / optimized / DLL files
 .ruff_cache/
