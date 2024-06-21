@@ -4,6 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import time, timedelta
 from enum import IntEnum, auto
+from sqlite3 import Cursor
 from typing import TYPE_CHECKING
 
 from train.db import decode_time, get_db
@@ -50,9 +51,7 @@ class FileManager(ABC):
         return []
 
     @staticmethod
-    def encode_tasks(tasks: list[Task], fmt: Format) -> list[dict]:
-        con = get_db()
-        cur = con.cursor()
+    def encode_tasks(cur: Cursor, tasks: list[Task], fmt: Format) -> list[dict]:
 
         if fmt == FileManager.Format.bare_minimum:
             cur.execute(
@@ -125,61 +124,61 @@ class FileManager(ABC):
         raise Exception(msg)
 
     @staticmethod
-    def decode(item: dict, fmt: Format) -> PartialTask | None:
-        con = get_db()
-        cur = con.cursor()
+    def decode(cur: Cursor, item: dict, fmt: Format) -> PartialTask | None:        
+        try:
+            if fmt == FileManager.Format.bare_minimum:
+                preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
+                preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
 
-        if fmt == FileManager.Format.bare_minimum:
-            preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
-            preferred_starts_at = FileManager._get_time(str(item["demanded_time_from"]))
+                section = Section.find_by_name_and_line(cur, item["section_name"], "UP")
+                if section is None:
+                    logger.warning(
+                        "Could not find section: %s - %s",
+                        item["section_name"],
+                        item["line"],
+                    )
 
-            section = Section.find_by_name_and_line(cur, item["section_name"], "UP")
-            if section is None:
-                logger.warning(
-                    "Could not find section: %s - %s",
-                    item["section_name"],
-                    item["line"],
-                )
+                    return None
 
-                return None
+                if preferred_starts_at is None or preferred_ends_at is None:
+                    return PartialTask(
+                        int(item.get("priority", 1)),
+                        timedelta(minutes=int(item["duration"])),
+                        preferred_starts_at,
+                        preferred_ends_at,
+                        section.id,
+                    )
 
-            if preferred_starts_at is None and preferred_ends_at is None:
+                assert preferred_starts_at is not None
+                assert preferred_ends_at is not None
+
                 return PartialTask(
-                    int(item["priority"]),
+                    int(item.get("priority", 1)),
                     timedelta(minutes=int(item["duration"])),
                     preferred_starts_at,
                     preferred_ends_at,
                     section.id,
                 )
-
-            assert preferred_starts_at is not None
-            assert preferred_ends_at is not None
-
-            return PartialTask(
-                int(item["priority"]),
-                timedelta(minutes=int(item["duration"])),
-                preferred_starts_at,
-                preferred_ends_at,
-                section.id,
-            )
-
+        except Exception: return None
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def read(
+        cur: Cursor,
         path: Path,
         fmt: Format | None = None,
     ) -> tuple[Format, list[PartialTask]]: ...
 
     @staticmethod
     @abstractmethod
-    def write(path: Path, tasks: list[Task], fmt: Format) -> None: ...
+    def write(cur: Cursor, path: Path, tasks: list[Task], fmt: Format) -> None: ...
 
 
 class CSVManager(FileManager):
     @staticmethod
     def read(
+        cur: Cursor,
         path: Path,
         fmt: FileManager.Format | None = None,
     ) -> tuple[FileManager.Format, list[PartialTask]]:
@@ -196,13 +195,13 @@ class CSVManager(FileManager):
         if fmt is None:
             fmt = FileManager.get_file_fmt_type([*data[0].keys()])
 
-        return fmt, list(filter(None, [FileManager.decode(item, fmt) for item in data]))
+        return fmt, list(filter(None, [FileManager.decode(cur, item, fmt) for item in data]))
 
     @staticmethod
-    def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
+    def write(cur: Cursor, path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
         import csv
 
-        data = FileManager.encode_tasks(tasks, fmt)
+        data = FileManager.encode_tasks(cur, tasks, fmt)
 
         with path.open(mode="w", newline="") as fd:
             writer = csv.DictWriter(fd, FileManager.get_headers(fmt))
@@ -213,6 +212,7 @@ class CSVManager(FileManager):
 class ExcelManager(FileManager):
     @staticmethod
     def read(
+        cur: Cursor,
         path: Path,
         fmt: FileManager.Format | None = None,
     ) -> tuple[FileManager.Format, list[PartialTask]]:
@@ -239,13 +239,13 @@ class ExcelManager(FileManager):
             data.append({headers[i]: row[i].value for i in range(col_count)})
 
         wb.close()
-        return fmt, list(filter(None, [FileManager.decode(item, fmt) for item in data]))
+        return fmt, list(filter(None, [FileManager.decode(cur, item, fmt) for item in data]))
 
     @staticmethod
-    def write(path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
+    def write(cur: Cursor, path: Path, tasks: list[Task], fmt: FileManager.Format) -> None:
         import openpyxl
 
-        data = FileManager.encode_tasks(tasks, fmt)
+        data = FileManager.encode_tasks(cur, tasks, fmt)
         wb = openpyxl.Workbook(write_only=True)
         sheet = wb.create_sheet()
 
