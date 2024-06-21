@@ -67,7 +67,6 @@ class Task(Generic[T]):
         tasks_: list[Task] = []
         while tasks:
             task = heappop(tasks)
-            print(task.section_id, len(tasks))
             if task.preferred_ends_at is None and task.preferred_starts_at is None:
                 window_id, starts_at, ends_at = Task._insert_nopref(cur, task)
             else:

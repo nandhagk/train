@@ -126,49 +126,53 @@ class FileManager(ABC):
     @staticmethod
     def decode(cur: Cursor, item: dict, fmt: Format) -> PartialTask | None:
         if fmt == FileManager.Format.bare_minimum:
-            try:
-                preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
-                preferred_starts_at = FileManager._get_time(
-                    str(item["demanded_time_from"]),
-                )
+            preferred_ends_at = FileManager._get_time(str(item["demanded_time_to"]))
+            preferred_starts_at = FileManager._get_time(
+                str(item["demanded_time_from"]),
+            )
 
-                section = Section.find_by_name_and_line(
-                    cur,
+            section = Section.find_by_name_and_line(
+                cur,
+                item["section_name"],
+                item["line"],
+            )
+
+            if section is None:
+                logger.warning(
+                    "Could not find section: %s - %s",
                     item["section_name"],
                     item["line"],
                 )
 
-                if section is None:
-                    logger.warning(
-                        "Could not find section: %s - %s",
-                        item["section_name"],
-                        item["line"],
-                    )
+                return None
 
-                    return None
-
-                if preferred_starts_at is None or preferred_ends_at is None:
-                    return PartialTask(
+            if preferred_starts_at is None or preferred_ends_at is None:
+                return (
+                    PartialTask(
                         int(item.get("priority", 1)),
                         timedelta(minutes=int(item["duration"])),
                         preferred_starts_at,
                         preferred_ends_at,
                         section.id,
-                    ) if int(item["duration"]) != 0 else None
+                    )
+                    if int(item["duration"]) != 0
+                    else None
+                )
 
-                assert preferred_starts_at is not None
-                assert preferred_ends_at is not None
+            assert preferred_starts_at is not None
+            assert preferred_ends_at is not None
 
-                return PartialTask(
+            return (
+                PartialTask(
                     int(item.get("priority", 1)),
                     timedelta(minutes=int(item["duration"])),
                     preferred_starts_at,
                     preferred_ends_at,
                     section.id,
-                ) if int(item["duration"]) != 0 else None
-            
-            except Exception:
-                return None
+                )
+                if int(item["duration"]) != 0
+                else None
+            )
 
         raise NotImplementedError
 
