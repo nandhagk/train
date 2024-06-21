@@ -5,6 +5,7 @@ import logging
 from collections import defaultdict
 from datetime import datetime, time, timedelta
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import click
 
@@ -16,6 +17,9 @@ from train.models.section import PartialSection, Section
 from train.models.station import PartialStation, Station
 from train.models.task import PartialTask, Task
 
+if TYPE_CHECKING:
+    from os import PathLike
+
 logging.basicConfig(
     filename=Path.cwd() / "train.log",
     level=logging.INFO,
@@ -26,7 +30,12 @@ logger = logging.getLogger()
 
 
 class ClickPath(click.Path):
-    def convert(self, value: str, param: click.Parameter, ctx: click.Context):
+    def convert(
+        self,
+        value: str | PathLike[str],
+        param: click.Parameter | None,
+        ctx: click.Context | None,
+    ):
         return Path(super().convert(value, param, ctx))  # type: ignore ()
 
 
@@ -34,8 +43,8 @@ class ClickTime(click.ParamType):
     def convert(
         self,
         value: str,
-        _param: click.Parameter | None,
-        _ctx: click.Context | None,
+        param: click.Parameter | None,  # noqa: ARG002
+        ctx: click.Context | None,  # noqa: ARG002
     ) -> time:
         return time.fromisoformat(value)
 
@@ -63,8 +72,9 @@ def init(data: Path):
 
             stations: set[str] = set()
             for section in blocks[block]:
-                if section[0] == section[1]:
-                    section[0] = section[1] = section[0] + "_YD"
+                section[0] = section[0].replace(" ", "_")
+                section[1] = section[1].replace(" ", "_")
+
                 stations.add(section[0])
                 stations.add(section[1])
 
