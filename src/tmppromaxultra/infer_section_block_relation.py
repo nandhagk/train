@@ -5,17 +5,16 @@ import json
 from pathlib import Path
 from runpy import run_path
 from typing import Any, Callable, TypeVar
-import openpyxl
+import csv
 import sys
 
-import openpyxl.worksheet
-import openpyxl.worksheet.worksheet
+
 
 ROW_LIMIT = 6600
 
 MAP = {
-    'block': 5,
-    'section': 4
+    'block': 4,
+    'section': 3
 }
 
 Block = str
@@ -78,12 +77,10 @@ def parse(item: str, parse_handlers: ParseHandlers[T]) -> T | None:
 
 
 def main(path: Path, block_source: Path, section_source: Path):
-    wb = openpyxl.load_workbook(path, read_only=True)
-    sheet: openpyxl.worksheet.worksheet.Worksheet | None = wb.active  # type: ignore ()
-
-    if sheet is None:
-        msg = f"Could not read excel sheet `{path}`"
-        raise Exception(msg)
+    with open(path.as_posix()) as f:
+        reader = csv.reader(f)
+        data = [next(reader) for i in range(ROW_LIMIT)]
+    
     
     block_accepts: dict[str, Block]
     section_accepts: dict[str, Section]
@@ -163,12 +160,11 @@ def main(path: Path, block_source: Path, section_source: Path):
     mas = defaultdict(list)
     
 
-    for row in range(2, ROW_LIMIT):
+    for row in range(0, ROW_LIMIT):
         print(row)
-        sheet: openpyxl.worksheet.worksheet.Worksheet
         
-        section_name = sheet.cell(row = row, column = MAP['section']).value
-        block_name = sheet.cell(row = row, column = MAP['block']).value
+        section_name = data[row][MAP['section']]
+        block_name = data[row][MAP['block']]
 
         block = parse_block_name(block_name)
         section = parse_section_name(section_name) if block is not None else None
@@ -177,11 +173,11 @@ def main(path: Path, block_source: Path, section_source: Path):
             print("IGNORING ROW!", row, f"`{block_name}`, `{section_name}`")
             continue
 
-        mas[block].append(section)
+        mas[block].append(list(section))
 
     dump(block_rejects, block_accepts, block_source_code, block_source)
     dump(section_rejects, section_accepts, section_source_code, section_source)
-    Path("mas.json").write_text(json.dumps(mas))
+    Path("mas2.json").write_text(json.dumps(mas))
 
     return 0
 

@@ -1,8 +1,1 @@
-{
-    "acceptor": {},
-    "skiplist": [],
-    "handlers": [
-        [],
-        []
-    ]
-}
+{"skiplist": ["CORRIDOR block section", "", "UP           ", "TI YD", "MS YD", "TDK Y D", "TNP  YD", "ENR YD", "EAST", "MAS YARD", "T/OUT OF RAILS", "MFBW", "BT UNLOADING", "DES/WW", "RR", "WW", "FISH PLATE O & E", "JT INS NOTES", "ROOF SHEET REPLACEMENT", "RR/WW", "BR.14R", "CGL-MLPM-AJJ", "TNPM YD", "MAS YD", "KBT YD", "TO YD", "TADA YD", "AJJ YD", "TVT YD", "AIPP YD", "CGL YD", "CTRE YD", "CGL-AJJ-MLPM", "MSB YD"], "acceptor": {"MAS-AJJ-DN-SLOW - 00:30HRS-03:30HRS-ALL DAYS": "MAS-AJJ", "MS-V M": "MS-VM", "SUB": "SUBURBAN", "SUBARBAN": "SUBURBAN", "UP & DN SUB": "SUBURBAN", "MAS GDR": "MAS-GDR", "SUBURBAN": "SUBURBAN", "MSB-VLCY& MSB-TBM": "MSB-VLCY"}, "handlers": [[], ["def skipper(raw: str):\n    pass\n\ndef parser(raw: str):\n    raw = raw.strip()\n    a, _, b = raw.partition('-')\n    a = a.strip().replace(\"-\", \" \").replace(\"_\", \" \")\n    b = b.strip().replace(\"-\", \" \").replace(\"_\", \" \")\n    _ = _.strip()\n\n    if not _ or not b: return None\n\n    if a.count(\" \") == 0 and b.count(\" \") == 0:\n        return a.upper() + \"-\" + b.upper()\n\n"]]}
