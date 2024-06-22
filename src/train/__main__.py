@@ -279,8 +279,8 @@ def schedule(src: Path, dst: Path):
     try:
         taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
-        fmt, data = FileManager.get_manager(src).read(cur, src)
-        for taskq in data:
+        fm = FileManager.get_manager(src)(src, dst)
+        for taskq in fm.read(cur):
             taskqs_per_section[taskq.section_id].append(taskq)
 
         tasks = []
@@ -292,7 +292,7 @@ def schedule(src: Path, dst: Path):
                 logger.exception("Ignoring section: %d", section_id)
 
         con.commit()
-        FileManager.get_manager(dst).write(cur, dst, tasks, fmt)
+        fm.write(cur, tasks)
 
         logger.info("Populated database and saved output file: %s", dst)
     except Exception as e:

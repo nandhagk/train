@@ -3,6 +3,7 @@
 **/output.xlsx
 **/output.csv
 **/tmp/
+**/*.log.*
 
 # Byte-compiled / optimized / DLL files
 .ruff_cache/
