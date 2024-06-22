@@ -22,7 +22,14 @@ class PartialTask(Generic[T]):
     preferred_starts_at: T
     preferred_ends_at: T
     section_id: int
+
+    department: str
+    den: str
+    nature_of_work: str
+    location: str
+
     starts_at: datetime = field(default_factory=utcnow)
+    ends_at: datetime = field(default_factory=utcnow)
 
     @property
     def preferred_range(self) -> timedelta:
@@ -52,11 +59,19 @@ class PartialTask(Generic[T]):
 @dataclass(frozen=True)
 class Task(Generic[T]):
     id: int
+
+    department: str
+    den: str
+    nature_of_work: str
+    location: str
+
     starts_at: datetime
     ends_at: datetime
+
     preferred_starts_at: T
     preferred_ends_at: T
     requested_duration: timedelta
+
     priority: int
 
     maintenance_window_id: int
@@ -106,19 +121,19 @@ class Task(Generic[T]):
                         task_to_remove.preferred_starts_at,
                         task_to_remove.preferred_ends_at,
                         task.section_id,
+                        task_to_remove.department,
+                        task_to_remove.den,
+                        task_to_remove.nature_of_work,
+                        task_to_remove.location,
                         task_to_remove.starts_at,
                     ),
                 )
 
             task_ = Task._insert(
                 cur,
-                starts_at,
+                task,
                 ends_at,
-                task.requested_duration,
-                task.priority,
                 window_id,
-                task.preferred_starts_at,
-                task.preferred_ends_at,
             )
 
             tasks_.append(task_)
@@ -152,6 +167,10 @@ class Task(Generic[T]):
     def decode(row: Row) -> Task:
         return Task(
             row["id"],
+            row["department"],
+            row["den"],
+            row["nature_of_work"],
+            row["location"],
             row["starts_at"],
             row["ends_at"],
             row["preferred_starts_at"],
@@ -162,29 +181,33 @@ class Task(Generic[T]):
         )
 
     @staticmethod
-    def _insert(  # noqa: PLR0913
+    def _insert(
         cur: Cursor,
-        starts_at: datetime,
+        taskq: PartialTask,
         ends_at: datetime,
-        requested_duration: timedelta,
-        priority: int,
-        maintenance_window_id: int,
-        preferred_starts_at: time | None = None,
-        preferred_ends_at: time | None = None,
+        window_id: int,
     ) -> Task:
         payload = {
-            "starts_at": starts_at,
+            "department": taskq.department,
+            "den": taskq.den,
+            "nature_of_work": taskq.nature_of_work,
+            "location": taskq.location,
+            "starts_at": taskq.starts_at,
             "ends_at": ends_at,
-            "preferred_starts_at": preferred_starts_at,
-            "preferred_ends_at": preferred_ends_at,
-            "requested_duration": requested_duration,
-            "priority": priority,
-            "maintenance_window_id": maintenance_window_id,
+            "preferred_starts_at": taskq.preferred_starts_at,
+            "preferred_ends_at": taskq.preferred_ends_at,
+            "requested_duration": taskq.requested_duration,
+            "priority": taskq.priority,
+            "maintenance_window_id": window_id,
         }
 
         cur.execute(
             """
             INSERT INTO task (
+                department,
+                den,
+                nature_of_work,
+                location,
                 starts_at,
                 ends_at,
                 preferred_starts_at,
@@ -193,6 +216,10 @@ class Task(Generic[T]):
                 priority,
                 maintenance_window_id
             ) VALUES (
+                :department,
+                :den,
+                :nature_of_work,
+                :location,
                 :starts_at,
                 :ends_at,
                 :preferred_starts_at,

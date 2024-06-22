@@ -47,6 +47,12 @@ CREATE TABLE maintenance_window (
 
 CREATE TABLE task (
     id INTEGER PRIMARY KEY,
+
+    department TEXT NOT NULL,
+    den TEXT NOT NULL,
+    nature_of_work TEXT NOT NULL,
+    location TEXT NOT NULL,
+
     starts_at DATETIME NOT NULL,
     ends_at DATETIME NOT NULL,
     preferred_starts_at TIME,
