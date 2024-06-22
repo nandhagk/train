@@ -6,6 +6,7 @@ from heapq import heapify, heappop, heappush
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from train.db import decode_datetime, decode_timedelta, timediff, unixepoch, utcnow
+from train.exceptions import CriticalLogicError, NoFreeWindowError
 
 if TYPE_CHECKING:
     from sqlite3 import Cursor, Row
@@ -293,8 +294,13 @@ class Task(Generic[T]):
 
             return intersection, window_start, window_end, window_id
 
+        data = [mapper(row) for row in cur.fetchall()]
+
+        if len(data) == 0:
+            raise NoFreeWindowError(taskq)
+
         intersection, window_start, window_end, window_id = max(
-            [mapper(row) for row in cur.fetchall()],
+            data,
             key=lambda z: (min(z[0], taskq.requested_duration), utcnow() - z[1]),
         )
 
@@ -337,7 +343,7 @@ class Task(Generic[T]):
                 closest_preferred_end = pwe
                 break
         else:
-            raise Exception
+            raise CriticalLogicError("Could not find window that gave max intersection")
 
         if intersection >= taskq.requested_duration:
             # There are 4 possible cases
@@ -441,7 +447,7 @@ class Task(Generic[T]):
 
         row: Row | None = cur.fetchone()
         if row is None:
-            raise Exception
+            raise NoFreeWindowError(taskq)
 
         window_start = row["window_start"]
         window_id = row["window_id"]

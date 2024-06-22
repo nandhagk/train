@@ -6,6 +6,8 @@ from datetime import time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING
 
+
+from train.exceptions import UnsupportedFileTypeError, UnknownFileFormatError, InvalidFileDataError
 from train.db import decode_time
 from train.models.section import Section
 from train.models.task import PartialTask, Task
@@ -120,8 +122,7 @@ class FileManager(ABC):
         if path.suffix == ".xlsx":
             return ExcelManager
 
-        msg = f"Unsupported file extension `{path.suffix}`"
-        raise Exception(msg)
+        raise UnsupportedFileTypeError(path.suffix)
 
     @staticmethod
     def decode(cur: Cursor, item: dict, fmt: Format) -> PartialTask | None:
@@ -167,10 +168,11 @@ class FileManager(ABC):
                     section.id,
                 ) if int(item["duration"]) != 0 else None
             
-            except Exception:
+            except Exception as e:
+                print("DEBUG: Unhandled exception!", e)
                 return None
 
-        raise NotImplementedError
+        raise UnknownFileFormatError(fmt)
 
     @staticmethod
     @abstractmethod
@@ -200,7 +202,7 @@ class CSVManager(FileManager):
 
         if not data:
             msg = "Please give file with data ;-;"
-            raise Exception(msg)
+            raise InvalidFileDataError(msg)
 
         if fmt is None:
             fmt = FileManager.get_file_fmt_type([*data[0].keys()])
@@ -241,7 +243,7 @@ class ExcelManager(FileManager):
 
         if sheet is None:
             msg = "Could not read excel sheet"
-            raise Exception(msg)
+            raise InvalidFileDataError(msg)
 
         col_count = sheet.max_column
 
