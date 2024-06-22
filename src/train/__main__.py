@@ -48,10 +48,14 @@ class ClickTime(click.ParamType):
 
 
 @click.group(invoke_without_command=True)
+@click.pass_context
 @click.option("--port", type=click.IntRange(1000, 10000), default=5432)
 @click.option("--debug", is_flag=True, default=False)
-def main(port: int, debug: bool):
+def main(ctx: click.Context, port: int, debug: bool):
     """Spins up a flask server."""
+    if ctx.invoked_subcommand is not None:
+        return
+
     if debug:
         app.run(port=port, debug=True)
     else:
