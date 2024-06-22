@@ -7,7 +7,7 @@ def setup_logging():
     """Set up logging."""
     logging.basicConfig(
         handlers=[
-            RotatingFileHandler("train.log", maxBytes=1024 * 1024, backupCount=5),
+            RotatingFileHandler("train.log", maxBytes=32 * 1024 * 1024, backupCount=5),
             StreamHandler(),
         ],
         level=logging.INFO,

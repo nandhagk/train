@@ -11,7 +11,7 @@ import click
 from waitress import serve
 
 from train.app import app
-from train.db import get_db, timediff, utcnow
+from train.db import get_db, utcnow
 from train.file_management import FileManager
 from train.logging import setup_logging
 from train.models.block import Block, PartialBlock
@@ -195,76 +195,6 @@ def create_windows(data: str, length: int, clear: bool):
         logger.exception("Failed to populate maintenance_window table")
 
         msg = f"Failed to populate maintenance_window table: {e}"
-        raise click.ClickException(msg) from e
-
-
-@main.command()
-@click.argument("name")
-@click.argument("line")
-@click.option("--priority", type=int, default=1)
-@click.option("--duration", type=int)
-@click.option("--pref-start", type=ClickTime())
-@click.option("--pref-end", type=ClickTime())
-def insert(  # noqa: PLR0913
-    name: str,
-    line: str,
-    priority: int,
-    duration: int | None,
-    pref_start: time | None,
-    pref_end: time | None,
-) -> None:
-    """Section: STN-STN or STN YD."""
-    con = get_db()
-    cur = con.cursor()
-
-    if duration is None and (pref_start is None or pref_end is None):
-        msg = "Please either set duration or (pref_start and pref_end)"
-        raise click.UsageError(msg)
-
-    try:
-        section = Section.find_by_name_and_line(cur, name, line)
-        if section is None:
-            logger.error("Section not found: %s - %s", name, line)
-
-            msg = f"Section not found: {name} - {line}"
-            raise click.ClickException(msg)  # noqa: TRY301
-
-        requested_duration: timedelta | None = None
-        if duration is not None:
-            requested_duration = timedelta(minutes=duration)
-
-        if pref_start is not None and pref_end is not None:
-            preferred_window = timediff(pref_start, pref_end)
-            if duration is None:
-                requested_duration = preferred_window
-
-            assert requested_duration is not None
-
-            if requested_duration > preferred_window:
-                msg = "Requested duration is greater than preference window."
-                raise click.BadParameter(msg)  # noqa: TRY301
-
-        else:
-            assert requested_duration is not None
-
-        Task.insert_one(
-            cur,
-            PartialTask(priority, requested_duration, pref_start, pref_end, section.id),
-        )
-
-        con.commit()
-
-        logger.info(
-            "Inserted new task with duration %d and priority %d for Section: %s - %s",
-            requested_duration.total_seconds(),
-            priority,
-            name,
-            line,
-        )
-    except Exception as e:
-        logger.exception("Failed to insert task")
-
-        msg = f"Failed to insert task: {e}"
         raise click.ClickException(msg) from e
 
 

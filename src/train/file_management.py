@@ -6,10 +6,13 @@ from datetime import time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, Any
 
-from torch import isin
-
 from train.db import decode_time, timediff
-from train.exceptions import InvalidFileDataError, UnsupportedFileTypeError, InvalidHeadersError, CriticalLogicError
+from train.exceptions import (
+    CriticalLogicError,
+    InvalidFileDataError,
+    InvalidHeadersError,
+    UnsupportedFileTypeError,
+)
 from train.models.section import Section
 from train.models.task import PartialTask, Task
 
@@ -31,9 +34,9 @@ class FileManager(ABC):
             return decode_time(raw)
         except ValueError:
             return None
-        
+
     @staticmethod
-    def try_int(raw: str, default = 0):
+    def try_int(raw: str, default: int = 0) -> int:
         try:
             return int(raw)
         except ValueError:
@@ -55,19 +58,23 @@ class FileManager(ABC):
 
         self.headers: list[str]
 
-        self.fmt: FileManager.Format | None  = None
-    
+        self.fmt: FileManager.Format | None = None
+
     @staticmethod
-    def get_file_fmt_type(headers: list[str]) -> Format:  # noqa: ARG004
+    def get_file_fmt_type(headers: list[str]) -> Format:
         if "DATE" in headers:
             return FileManager.Format.mas_recent
-        else:
-            return FileManager.Format.bare_minimum
-        
+
+        return FileManager.Format.bare_minimum
+
     def validate_headers(self):
         if self.fmt == FileManager.Format.bare_minimum:
             if not {
                 "date",
+                "department",
+                "den",
+                "nature_of_work",
+                "location",
                 "block_section_or_yard",
                 "corridor_block",
                 "line",
@@ -79,48 +86,47 @@ class FileManager(ABC):
                 "block_permitted",
             }.issubset(self.headers):
                 raise InvalidHeadersError(self.fmt, self.headers)
-        
-        elif self.fmt == FileManager.Format.mas_recent:
-            if {
-                "DATE",
-                "Department",
-                "DEN",
-                "Block Section/ Yard",
-                "CORRIDOR block section",
-                # "corridor block period",
-                "UP/ DN Line",
-                # "Block demanded in Hrs(Day or Night)",
-                "Demanded time (From)",
-                "Demanded time (To)",
-                "Block demanded in(MINS)",
-                "Permitted time (From) No need to fill",
-                "Permitted time (To) No need to fill",
-                "BLOCK PERMITTED MINS",
-                # "Location - FROM",
-                # "Location - TO",
-                "Nautre of work & Quantum of Output Planned",
-                # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",
-                # "Caution required",
-                # "Caution required (if yes with relaxation date dd:mm:yyyy)",
-                # "Power Block & its Elementary Section. Please give specific details without fail",
-                # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",
-                # "Whether site preparation & resources ready",
-                # "Supervisors to be deputed (JE/SSE with section)",
-                # "Coaching repercussions/ Movement Repercussions",
-                "Actual Block Granted From No need to fill",
-                "Actual Block Granted To No need to fill",
-                "Actual block duration MINS No need to fill",
-                "Over all % granted for the day No need to fill",
-                "Output as per Manual No need to fill",
-                "Actual Output",
-                "% Output vs Planned\nNo need to fill",
-                # "% Output\nvs\nPlanned",
-                # "PROGRESS",
-                "LOCATION",
-                "SECTION",
-                "ARB/RB",
-            }.issubset(self.headers):
-                raise InvalidHeadersError(self.fmt, self.headers)
+
+        elif self.fmt == FileManager.Format.mas_recent and not {
+            "DATE",
+            "Department",
+            "DEN",
+            "Block Section/ Yard",
+            "CORRIDOR block section",
+            # "corridor block period",
+            "UP/ DN Line",
+            # "Block demanded in Hrs(Day or Night)",
+            "Demanded time (From)",
+            "Demanded time (To)",
+            "Block demanded in(MINS)",
+            "Permitted time (From) No need to fill",
+            "Permitted time (To) No need to fill",
+            "BLOCK PERMITTED MINS",
+            # "Location - FROM",
+            # "Location - TO",
+            "Nautre of work & Quantum of Output Planned",
+            # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",  # noqa: E501
+            # "Caution required",
+            # "Caution required (if yes with relaxation date dd:mm:yyyy)",
+            # "Power Block & its Elementary Section. Please give specific details without fail",  # noqa: E501
+            # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",  # noqa: E501
+            # "Whether site preparation & resources ready",
+            # "Supervisors to be deputed (JE/SSE with section)",
+            # "Coaching repercussions/ Movement Repercussions",
+            # "Actual Block Granted From No need to fill",
+            # "Actual Block Granted To No need to fill",
+            # "Actual block duration MINS No need to fill",
+            # "Over all % granted for the day No need to fill",
+            # "Output as per Manual No need to fill",
+            # "Actual Output",
+            # "% Output vs Planned\nNo need to fill",
+            # "% Output\nvs\nPlanned",
+            # "PROGRESS",
+            "LOCATION",
+            # "SECTION",
+            # "ARB/RB",
+        }.issubset(self.headers):
+            raise InvalidHeadersError(self.fmt, self.headers)
 
     def encode_tasks(self, cur: Cursor, tasks: list[Task]) -> list[dict]:
         cur.execute(
@@ -144,7 +150,11 @@ class FileManager(ABC):
                 task.requested_duration / 60,
                 TIME(task.starts_at),
                 TIME(task.ends_at),
-                task.priority
+                task.priority,
+                task.department,
+                task.den,
+                task.nature_of_work,
+                task.location
             FROM task
             JOIN maintenance_window ON
                 maintenance_window.id = task.maintenance_window_id
@@ -163,22 +173,26 @@ class FileManager(ABC):
         return [
             self.unmap(
                 {
-                    "priority"              : row[10],
-                    "date"                  : row[0],
-                    "block_section_or_yard" : (
+                    "priority": row[10],
+                    "date": row[0],
+                    "block_section_or_yard": (
                         f"{row[1].replace("_", " ")}"
                         if row[1] == row[2]
                         else f"{row[1]}-{row[2]}"
                     ),
-                    "corridor_block"        : row[3],
-                    "line"                  : row[4],
-                    "demanded_time_from"    : row[5],
-                    "demanded_time_to"      : row[6],
-                    "block_demanded"        : row[7],
-                    "permitted_time_from"   : row[8],
-                    "permitted_time_to"     : row[9],
-                    "block_permitted"       : row[7],
-                }
+                    "corridor_block": row[3],
+                    "line": row[4],
+                    "demanded_time_from": row[5],
+                    "demanded_time_to": row[6],
+                    "block_demanded": row[7],
+                    "permitted_time_from": row[8],
+                    "permitted_time_to": row[9],
+                    "block_permitted": row[7],
+                    "department": row[11],
+                    "den": row[12],
+                    "nature_of_work": row[13],
+                    "location": row[14],
+                },
             )
             for row in cur.fetchall()
         ]
@@ -186,63 +200,71 @@ class FileManager(ABC):
         raise NotImplementedError
 
     def map(self, item: dict) -> dict[str, Any] | None:
-        # TODO! Add additional information to taskq
         mapped: dict
         if self.fmt == FileManager.Format.bare_minimum:
             mapped = {"priority": 1} | item
-        
+
         elif self.fmt == FileManager.Format.mas_recent:
             mapped = {
-                "priority"              : 1,
-                "date"                  : item["DATE"],
-                "block_section_or_yard" : item["Block Section/ Yard"],
-                "corridor_block"        : item["CORRIDOR block section"],
-                "line"                  : item["UP/ DN Line"],
-                "demanded_time_from"    : item["Demanded time (From)"],
-                "demanded_time_to"      : item["Demanded time (To)"],
-                "block_demanded"        : item["Block demanded in(MINS)"],
-                "permitted_time_from"   : item["Permitted time (From) No need to fill"],
-                "permitted_time_to"     : item["Permitted time (To) No need to fill"],
-                "block_permitted"       : item["BLOCK PERMITTED MINS"]
+                "priority": 1,
+                "date": item["DATE"],
+                "block_section_or_yard": item["Block Section/ Yard"],
+                "corridor_block": item["CORRIDOR block section"],
+                "line": item["UP/ DN Line"],
+                "demanded_time_from": item["Demanded time (From)"],
+                "demanded_time_to": item["Demanded time (To)"],
+                "block_demanded": item["Block demanded in(MINS)"],
+                "permitted_time_from": item["Permitted time (From) No need to fill"],
+                "permitted_time_to": item["Permitted time (To) No need to fill"],
+                "block_permitted": item["BLOCK PERMITTED MINS"],
+                "department": item["Department"],
+                "den": item["DEN"],
+                "nature_of_work": item["Nautre of work & Quantum of Output Planned"],
+                "location": item["LOCATION"],
             }
-        
+
         else:
-            raise CriticalLogicError("Format is None!")
-        
+            msg = "Format is None!"
+            raise CriticalLogicError(msg)
+
         # Validate the type of data
 
         if not isinstance(mapped["priority"], int):
-            logger.warn("Invalid priority")
+            logger.warning("Invalid priority")
             return None
-        
+
         if not isinstance(mapped["block_section_or_yard"], str):
-            logger.warn("Invalid section")
+            logger.warning("Invalid section")
             return None
 
         if not isinstance(mapped["corridor_block"], str):
-            logger.warn("Invalid block")
+            logger.warning("Invalid block")
             return None
-        
+
         if not isinstance(mapped["line"], str):
-            logger.warn("Invalid line")
+            logger.warning("Invalid line")
             return None
-        
-        mapped["demanded_time_from"] = FileManager._get_time(str(mapped["demanded_time_from"]))
-        mapped["demanded_time_to"] = FileManager._get_time(str(mapped["demanded_time_to"]))
-        
+
+        mapped["demanded_time_from"] = FileManager._get_time(
+            str(mapped["demanded_time_from"]),
+        )
+        mapped["demanded_time_to"] = FileManager._get_time(
+            str(mapped["demanded_time_to"]),
+        )
+
         mapped["block_demanded"] = FileManager.try_int(str(mapped["block_demanded"]), 0)
-        
+
         return mapped
-        
+
     def unmap(self, item: dict) -> dict:
         if self.fmt == FileManager.Format.bare_minimum:
             return item
-        
-        elif self.fmt == FileManager.Format.mas_recent:
+
+        if self.fmt == FileManager.Format.mas_recent:
             return {
                 "DATE": item["date"],
-                # "Department": item{"department"},
-                # "DEN": item["DEN"],
+                "Department": item["department"],
+                "DEN": item["den"],
                 "Block Section/ Yard": item["block_section_or_yard"],
                 "CORRIDOR block section": item["corridor_block"],
                 # # "corridor block period",
@@ -256,16 +278,16 @@ class FileManager(ABC):
                 "BLOCK PERMITTED MINS": item["block_permitted"],
                 # # "Location - FROM",
                 # # "Location - TO",
-                # "Nautre of work & Quantum of Output Planned": item["nature"],
-                # # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",
+                "Nautre of work & Quantum of Output Planned": item["nature_of_work"],
+                # # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",  # noqa: E501
                 # # "Caution required",
                 # # "Caution required (if yes with relaxation date dd:mm:yyyy)",
-                # # "Power Block & its Elementary Section. Please give specific details without fail",
-                # # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",
+                # # "Power Block & its Elementary Section. Please give specific details without fail",  # noqa: E501
+                # # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",  # noqa: E501
                 # # "Whether site preparation & resources ready",
                 # # "Supervisors to be deputed (JE/SSE with section)",
                 # # "Coaching repercussions/ Movement Repercussions",
-                # "Actual Block Granted From No need to fill": item["actual_block_from"],
+                # "Actual Block Granted From No need to fill": item["actual_block_from"]
                 # "Actual Block Granted To No need to fill": item["actual_block_to"],
                 # "Actual block duration MINS No need to fill": item["block_actual"],
                 # "Over all % granted for the day No need to fill": item["overall_per"],
@@ -274,19 +296,18 @@ class FileManager(ABC):
                 # "% Output vs Planned\nNo need to fill",
                 # # "% Output\nvs\nPlanned",
                 # # "PROGRESS",
-                # "LOCATION",
+                "LOCATION": item["location"],
                 # "SECTION",
                 # "ARB/RB",
             }
-        
-        else:
-            raise CriticalLogicError("Format is None!")
-        
+
+        msg = "Format is None!"
+        raise CriticalLogicError(msg)
+
     def decode(self, cur: Cursor, item: dict) -> PartialTask | None:
         mapped_item = self.map(item)
         if mapped_item is None:
             return None
-        
 
         preferred_ends_at = mapped_item["demanded_time_to"]
         preferred_starts_at = mapped_item["demanded_time_from"]
@@ -306,51 +327,38 @@ class FileManager(ABC):
 
             return None
 
-        if preferred_starts_at is None or preferred_ends_at is None:
-            if mapped_item["block_demanded"] != 0:
-                return (
-                    PartialTask(
-                        int(mapped_item.get("priority", 1)),
-                        timedelta(minutes=mapped_item["block_demanded"]),
-                        preferred_starts_at,
-                        preferred_ends_at,
-                        section.id,
-                    )
-                )
-            else:
-                logger.warning("Invalid duration (It is empty)")
-                return None
+        if mapped_item["block_demanded"] == 0 and (
+            preferred_starts_at is None or preferred_ends_at is None
+        ):
+            logger.warning("Invalid duration (It is empty)")
+            return None
 
-        assert preferred_starts_at is not None
-        assert preferred_ends_at is not None
+        if (preferred_starts_at is None) ^ (preferred_ends_at is None):
+            logger.warning("Invalid demanded time")
+            return None
 
-        if mapped_item["block_demanded"] != 0:
-            return (
-                PartialTask(
-                    mapped_item["priority"],
-                    timedelta(minutes=mapped_item["block_demanded"]),
-                    preferred_starts_at,
-                    preferred_ends_at,
-                    section.id,
-                )
-            )
-        else:
-            return (
-                PartialTask(
-                    mapped_item["priority"],
-                    timediff(preferred_starts_at, preferred_ends_at),
-                    preferred_starts_at,
-                    preferred_ends_at,
-                    section.id,
-                )
-            )
+        return PartialTask(
+            mapped_item["priority"],
+            (
+                timedelta(minutes=mapped_item["block_demanded"])
+                if mapped_item["block_demanded"] != 0
+                else timediff(preferred_starts_at, preferred_ends_at)
+            ),
+            preferred_starts_at,
+            preferred_ends_at,
+            section.id,
+            mapped_item["department"],
+            mapped_item["den"],
+            mapped_item["nature_of_work"],
+            mapped_item["location"],
+        )
 
         raise NotImplementedError
 
     @abstractmethod
     def read(
         self,
-        cur: Cursor
+        cur: Cursor,
     ) -> list[PartialTask]: ...
 
     @abstractmethod
@@ -358,14 +366,13 @@ class FileManager(ABC):
 
 
 class CSVManager(FileManager):
-    
     def read(
         self,
-        cur: Cursor
+        cur: Cursor,
     ) -> list[PartialTask]:
         import csv
 
-        with self.src_path.open(newline="") as fd:
+        with self.src_path.open(newline="", encoding="utf-8-sig") as fd:
             reader = csv.DictReader(fd)
             data = [*reader]
 
@@ -373,25 +380,24 @@ class CSVManager(FileManager):
             msg = "Please give file with data ;-;"
             raise InvalidFileDataError(msg)
 
-        self.fmt = FileManager.get_file_fmt_type([*data[0].keys()])
-        self.validate_headers()
-
         self.headers = [*data[0].keys()]
+        self.fmt = FileManager.get_file_fmt_type(self.headers)
+
+        self.validate_headers()
 
         taskqs = []
         for idx, item in enumerate(data):
             if (decoded := self.decode(cur, item)) is None:
-                logger.warning(f"Ignoring item on row `{idx}` `{item}`")
+                logger.warning("Ignoring item on row `%d` ", idx)
                 continue
             taskqs.append(decoded)
 
         return taskqs
-        
 
     def write(
         self,
         cur: Cursor,
-        tasks: list[Task]
+        tasks: list[Task],
     ) -> None:
         import csv
 
@@ -406,7 +412,7 @@ class CSVManager(FileManager):
 class ExcelManager(FileManager):
     def read(
         self,
-        cur: Cursor
+        cur: Cursor,
     ) -> list[PartialTask]:
         import openpyxl
 
@@ -419,8 +425,8 @@ class ExcelManager(FileManager):
 
         col_count = sheet.max_column
 
-        self.headers = [str(sheet.cell(1, col).value) for col in range(1, col_count + 1)]
-        
+        self.headers = [str(sheet.cell(1, col + 1).value) for col in range(col_count)]
+
         self.fmt = FileManager.get_file_fmt_type(self.headers)
         self.validate_headers()
 
@@ -435,7 +441,7 @@ class ExcelManager(FileManager):
         taskqs = []
         for idx, item in enumerate(data):
             if (decoded := self.decode(cur, item)) is None:
-                logger.warning(f"Ignoring item on row `{idx}` `{item}`")
+                logger.warning("Ignoring item on row `%d` ", idx)
                 continue
             taskqs.append(decoded)
 
@@ -444,7 +450,7 @@ class ExcelManager(FileManager):
     def write(
         self,
         cur: Cursor,
-        tasks: list[Task]
+        tasks: list[Task],
     ) -> None:
         import openpyxl
 
@@ -454,7 +460,7 @@ class ExcelManager(FileManager):
 
         sheet.append(self.headers)
         for row in data:
-            sheet.append(list(row.get(heading, "") for heading in self.headers))
+            sheet.append([row.get(heading, "") for heading in self.headers])
 
         wb.save(self.dst_path.as_posix())
         wb.close()

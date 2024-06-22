@@ -29,7 +29,6 @@ class PartialTask(Generic[T]):
     location: str
 
     starts_at: datetime = field(default_factory=utcnow)
-    ends_at: datetime = field(default_factory=utcnow)
 
     @property
     def preferred_range(self) -> timedelta:
@@ -83,7 +82,7 @@ class Task(Generic[T]):
         tasks_: list[Task] = []
         while tasks:
             task = heappop(tasks)
-            if task.preferred_ends_at is None and task.preferred_starts_at is None:
+            if task.preferred_ends_at is None or task.preferred_starts_at is None:
                 window_id, starts_at, ends_at = Task._insert_nopref(cur, task)
             else:
                 window_id, starts_at, ends_at = Task._insert_pref(cur, task)
@@ -116,26 +115,20 @@ class Task(Generic[T]):
                 heappush(
                     tasks,
                     PartialTask(
-                        task_to_remove.priority,
-                        task_to_remove.requested_duration,
-                        task_to_remove.preferred_starts_at,
-                        task_to_remove.preferred_ends_at,
-                        task.section_id,
-                        task_to_remove.department,
-                        task_to_remove.den,
-                        task_to_remove.nature_of_work,
-                        task_to_remove.location,
-                        task_to_remove.starts_at,
+                        priority=task_to_remove.priority,
+                        requested_duration=task_to_remove.requested_duration,
+                        preferred_starts_at=task_to_remove.preferred_starts_at,
+                        preferred_ends_at=task_to_remove.preferred_ends_at,
+                        section_id=task.section_id,
+                        department=task_to_remove.department,
+                        den=task_to_remove.den,
+                        nature_of_work=task_to_remove.nature_of_work,
+                        location=task_to_remove.location,
+                        starts_at=task_to_remove.starts_at,
                     ),
                 )
 
-            task_ = Task._insert(
-                cur,
-                task,
-                ends_at,
-                window_id,
-            )
-
+            task_ = Task._insert(cur, task, starts_at, ends_at, window_id)
             tasks_.append(task_)
 
         return tasks_
@@ -166,24 +159,25 @@ class Task(Generic[T]):
     @staticmethod
     def decode(row: Row) -> Task:
         return Task(
-            row["id"],
-            row["department"],
-            row["den"],
-            row["nature_of_work"],
-            row["location"],
-            row["starts_at"],
-            row["ends_at"],
-            row["preferred_starts_at"],
-            row["preferred_ends_at"],
-            decode_timedelta(row["requested_duration"]),
-            row["priority"],
-            row["maintenance_window_id"],
+            id=row["id"],
+            department=row["department"],
+            den=row["den"],
+            nature_of_work=row["nature_of_work"],
+            location=row["location"],
+            starts_at=row["starts_at"],
+            ends_at=row["ends_at"],
+            preferred_starts_at=row["preferred_starts_at"],
+            preferred_ends_at=row["preferred_ends_at"],
+            requested_duration=decode_timedelta(row["requested_duration"]),
+            priority=row["priority"],
+            maintenance_window_id=row["maintenance_window_id"],
         )
 
     @staticmethod
     def _insert(
         cur: Cursor,
         taskq: PartialTask,
+        starts_at: datetime,
         ends_at: datetime,
         window_id: int,
     ) -> Task:
@@ -192,7 +186,7 @@ class Task(Generic[T]):
             "den": taskq.den,
             "nature_of_work": taskq.nature_of_work,
             "location": taskq.location,
-            "starts_at": taskq.starts_at,
+            "starts_at": starts_at,
             "ends_at": ends_at,
             "preferred_starts_at": taskq.preferred_starts_at,
             "preferred_ends_at": taskq.preferred_ends_at,

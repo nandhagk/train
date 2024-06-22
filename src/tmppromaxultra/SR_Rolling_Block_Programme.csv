@@ -1,4 +1,4 @@
-﻿DATE,Department,DEN,section_name,CORRIDOR block section,corridor block period,line,Block demanded in Hrs(Day or Night),demanded_time_from,demanded_time_to,duration,Permitted time (From) No need to fill,Permitted time (To) No need to fill,BLOCK PERMITTED MINS,Location - FROM,Location - TO,Nautre of work & Quantum of Output Planned,Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail,Caution required,Caution required (if yes with relaxation date dd:mm:yyyy),Power Block & its Elementary Section. Please give specific details without fail,"Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",Whether site preparation & resources ready,Supervisors to be deputed (JE/SSE with section),Coaching repercussions/ Movement Repercussions,"Actual Block Granted From
+﻿DATE,Department,DEN,Block Section/ Yard,CORRIDOR block section,corridor block period,UP/ DN Line,Block demanded in Hrs(Day or Night),Demanded time (From),Demanded time (To),Block demanded in(MINS),Permitted time (From) No need to fill,Permitted time (To) No need to fill,BLOCK PERMITTED MINS,Location - FROM,Location - TO,Nautre of work & Quantum of Output Planned,Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail,Caution required,Caution required (if yes with relaxation date dd:mm:yyyy),Power Block & its Elementary Section. Please give specific details without fail,"Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",Whether site preparation & resources ready,Supervisors to be deputed (JE/SSE with section),Coaching repercussions/ Movement Repercussions,"Actual Block Granted From
   No need to fill","Actual Block Granted To
   No need to fill","Actual block duration MINS
   No need to fill","Over all % granted for the day
@@ -396,7 +396,7 @@ Date on which block is required (If the block is required from 00:00hrs to 23:59
 07-01-2024,ENGG,WEST,CTRE YD,TRL-KPD,,DN,,01:00,03:00,120,01:50,03:30,100,,,UNIMAT 4S,,,,,,,,,01:50,03:30,100,,,1 UNIT+500 SLEEPERS ,,,,,,,PT NO  54 B,WJR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 07-01-2024,ENGG,CENTRAL,ABU YD,MAS-TRL,,UP/DN F,,00:15,02:15,120,00:15,02:15,120,,,MFI 56916,,,,,,,,,00:15,02:15,120,,,1.4 UNIT+600 SLEEPERS ,,,,,,,PT NO 123 B,AVD,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 07-01-2024,ENGG,CENTRAL,AVD YD,MAS-TRL,,DN/F,,02:30,04:30,120,02:50,04:25,95,,,MFI 56916,,,,,,,,,02:50,04:25,95,,,800 SLEEPERS ,,,,,,,20/050-300,AVD,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-07-01-2024,ENGG,SOUTH,VDR YD,MS-VM,,DN,,00:40,03:55,195,00:40,03:55,195,,,MPT 2004,,,,,,,,,00:40,03:55,195,,,1 UNIT+800 SLEEPERS ,,,,,,,"34/800-35/150 
+07-01-2024,ENGG,SOUTH,VDR YD,MS-VM,,DN,,00:40,03:55,195,00:40,03:55,195,,,MPT 2004,,,,,,,,,00:40,03:55,195,,,1 UNIT+800 SLEEPERS ,,,,,,,"34/800-35/150
 PT NO 62 B",TBM,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 07-01-2024,ENGG,SOUTH,PV YD,MS-VM,,A LINE,,00:25,03:45,200,00:25,03:45,200,,,MFI 56924,,,,,,,,,00:25,03:45,200,,,2.4 UNIT+850 SLEEPERS ,,,,,,,"PT NO 106A,107A,105B",TBM,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 07-01-2024,ENGG,CENTRAL,VPY-VLK,MAS-TRL,,DN/F,,00:45,03:29,164,00:45,03:29,164,,,UTV 024,,,,,,,,,00:45,03:29,164,,,39 RAILS LOADED +9 RAILS UNLOADED ,,,,,,,,WST A,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -569,7 +569,7 @@ Date on which block is required (If the block is required from 00:00hrs to 23:59
 10-01-2024,ENGG,CENTRAL,VPY-VLK,MAS-TRL,,DN /F,,23:00,03:00,240,00:00,03:00,180,,,TRR,,,,,,,,,00:20,03:20,180,,,520 M LH+260 M RH,,,780,,,,05/8A-26A,WST A,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 10-01-2024,ENGG,SOUTH,MKK-PV,MS-VM,,DN/SUB,,00:30,04:00,210,00:45,04:00,195,,,MFBW ,,,,,,,,,00:40,03:50,190,,,22 WELDS,,,22,,,,18/327-600,MS,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 10-01-2024,ENGG,CENTRAL,KBT YD,TRL-KPD,,DN/SLOW,,00:00,04:00,240,00:15,03:45,210,,,RR/WW,,,,,,,,,00:15,03:45,210,,,6.85 M+6.20 M R/R+4 WELDS,,,13.05,,4,,PT NO 63B,TRL B,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-10-01-2024,ENGG,CENTRAL,TI YD,MAS-TRL,,DN/SLOW,,00:50,02:20,90,00:50,02:20,90,,,"PRELIMINARY 
+10-01-2024,ENGG,CENTRAL,TI YD,MAS-TRL,,DN/SLOW,,00:50,02:20,90,00:50,02:20,90,,,"PRELIMINARY
 WORK TTR",,,,,,,,,00:50,02:20,90,,,PRELIMINARY WORK DONE,,,,,,,PT 53B,TRL A,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 10-01-2024,ENGG,WEST,VGA YD,AJJ-RU,,UP,,13:00,15:00,120,13:00,15:00,120,,,WW,,,,,,,,,15:15,16:20,65,,,6.45 MTR /R,,,6.45,,,,,PUT,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 10-01-2024,ENGG,CENTRAL,PYA-NYP,MAS-GDR,,UP,,12:10,13:45,95,12:10,13:45,95,,,RR ,,,,,,,,,12:10,13:45,95,,,220 MTR R/R,,,220,,,,114/29-23,GDR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -1839,9 +1839,9 @@ LC 28",TRL B,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 04-02-2024,ENGG,WEST,JTJ YD,KPD-JTJ,,RD-2,,13:00,15:00,120,13:00,15:00,120,,,WW,,,,,,,,,13:00,15:00,,,,05 NOS OF WELDING JTS,,,,,,,GL/35-37,JTJ,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 04-02-2024,ENGG,EAST,TNPM YD,MAS-GDR,,MRL-1,,10:40,14:10,210,10:40,14:10,210,,,MFBW,,,,,,,,,10:40,14:10,,,,23 NOS OF WELDING JOINTS/CUT RR-6.2 MTS,,,,,,,,TVT,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 04-02-2024,ENGG,WEST,AB-PCKM,KPD-JTJ,,UP,,22:00,00:30,150,22:45,00:15,90,,,RR/WW,,,,,,,,,22:30,00:00,,,,WELD-02 NOS,,,,,,,181/5-3,AB,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-04-02-2024,ENGG,CENTRAL,MAS YD,MAS-TRL,,RAKE LINE,,01:50,03:15,85,01:50,03:15,85,,,UTV 066,,,,,,,,,01:50,03:15,,,,"1:12 T/R & S/R 08 Sets - 8*3=24 nos. 
- 60kg Check Rails - 08 nos. 
- Glued Joints 60kg - 07 nos. Unloaded. 
+04-02-2024,ENGG,CENTRAL,MAS YD,MAS-TRL,,RAKE LINE,,01:50,03:15,85,01:50,03:15,85,,,UTV 066,,,,,,,,,01:50,03:15,,,,"1:12 T/R & S/R 08 Sets - 8*3=24 nos.
+ 60kg Check Rails - 08 nos.
+ Glued Joints 60kg - 07 nos. Unloaded.
  Released sleepers loaded - 21 nos.",,,,,,,,WST-A,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 04-02-2024,ENGG,CENTRAL,PAB-AVD,MAS-TRL,,UP/F,,00:20,02:20,120,00:20,02:20,120,,,BRM R 32,,,,,,,,,00:20,02:20,,,,2700 MTS,,,,,,,23/100-22/200,AVD,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 04-02-2024,ENGG,CENTRAL,PAB-AVD,MAS-TRL,,UP/F,,23:40,01:40,120,23:40,01:40,120,,,BRM R 32,,,,,,,,,23:40,01:40,,,,1950 MTS,,,,,,,"24/200-23/700,22/200-22/050",AVD,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -5129,9 +5129,9 @@ WORK DONE",,,,,,,,WJR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 30-03-2024,ENGG,CENTRAL,TO YD,TRL-KPD,,DN/S,,02:15,04:15,120,02:15,03:45,90,,,MFI 56924,,,,,,,,,02:15,03:45,90,,,1 UNIT + 300 SLEEPERS,,,,,,,PT:63A,TRL-B,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 30-03-2024,ENGG,SOUTH,SKL YD,MSB-VM,,3 rd,,00:00,02:00,120,00:00,02:00,120,,,MFI 56925,,,,,,,,,00:25,01:40,75,,,1 UNIT,,,,,,,PT:55A,CGL,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 30-03-2024,ENGG,SOUTH,SKL-CGL,MSB-VM,,3 rd,,02:00,04:00,120,02:00,04:00,120,,,MFI 56925,,,,,,,,,02:40,04:00,80,,,400 M,,,,,,,58/200-600,CGL,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-30-03-2024,ENGG,SOUTH,MMK-MS,MSB-VM,,B,,00:00,02:35:00,155,00:00,02:35,155,,,DUO 8113,,,,,,,,,00:00,02:35,155,,,3020 SLEEPERS,,,,,,,"9/400-8/100 
+30-03-2024,ENGG,SOUTH,MMK-MS,MSB-VM,,B,,00:00,02:35:00,155,00:00,02:35,155,,,DUO 8113,,,,,,,,,00:00,02:35,155,,,3020 SLEEPERS,,,,,,,"9/400-8/100
  7/450-750",MS,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-30-03-2024,ENGG,SOUTH,MMK-MS,MSB-VM,,B,,00:00,02:35,155,00:00,02:35,155,,,DGS 350,,,,,,,,,00:00,02:35,155,,,1600 M,,,,,,,"9/400-8/100 
+30-03-2024,ENGG,SOUTH,MMK-MS,MSB-VM,,B,,00:00,02:35,155,00:00,02:35,155,,,DGS 350,,,,,,,,,00:00,02:35,155,,,1600 M,,,,,,,"9/400-8/100
  7/450-750",MS,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 30-03-2024,ENGG,SOUTH,PEI-VVN,MSB-VM,,DN,,03:15,06:15,180,03:15,06:15,180,,,DUO 8078,,,,,,,,,03:15,06:15,180,,,4050 SLEEPERS,,,,,,,145/500-147/400,TMV,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 30-03-2024,ENGG,SOUTH,PEI-VVN,MSB-VM,,DN,,03:15,06:15,180,03:15,06:15,180,,,DGS 353,,,,,,,,,03:15,06:15,180,,,1900 M,,,,,,,145/500-147/400,TMV,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -5358,7 +5358,7 @@ WORK DONE",,,,,,,,WJR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
  Sleepers handling 16
  One CMS Xing (4rails)+2 check rails.
  Rails handling:6",,,,,,,,TVT,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-03-04-2024,ENGG,EAST,PYA-NYP,MAS-GDR,,DN,,01:00,04:00,180,01:30,04:30,180,,,DTE 56743,,,,,,,,,01:25,04:25,180,,,3510 SLP,,,,,,,"KM: 115/050-115/150 (LC83 opened and packed) 
+03-04-2024,ENGG,EAST,PYA-NYP,MAS-GDR,,DN,,01:00,04:00,180,01:30,04:30,180,,,DTE 56743,,,,,,,,,01:25,04:25,180,,,3510 SLP,,,,,,,"KM: 115/050-115/150 (LC83 opened and packed)
   110/900-112/600",GDR,ROLLING BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,CENTRAL,TI YD,TRL-KPD,,UP/F,,00:40,01:30,50,00:40,01:30,50,,,UTV 164,,,,,,,,,00:40,01:30,50,,,Pt. Slps(62nos)LDD,,,,,,,28/21A-19A,TRL-A,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,CENTRAL,TI YD,TRL-KPD,,UP/S,,02:40,03:30,50,02:40,03:30,50,,,UTV 164,,,,,,,,,02:40,03:30,50,,,Pt. Slps(62nos)UN/L LDD,,,,,,,41/23A-19A,TRL-A,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -5407,7 +5407,7 @@ WORK DONE",,,,,,,,WJR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,SOUTH,MKK-PV,SUB,,DN SUB,,00:00,04:00,240,00:45,04:00,195,,,MFBW WORK,,,,,,,,,00:55,03:50,175,,,32 WELDS,,,,,,,"10/070-09/890,10/460-350",MS,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,SOUTH,MS-MKK,MS-VM,,B LIN,,00:00,04:00,240,00:30,02:30,120,,,WW,,,,,,,,,00:30,02:00,90,,,2 JTS OF WELDING,,,,,,,08/00-100,MS,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,SOUTH,PEI-VVN,MS-VM,,DN,,02:00,07:00,300,02:15,05:15,180,,,WW,,,,,,,,,02:30,05:30,180,,,WELD-05 NOS,,,,,,,"147/26-28,148/2-6,148/12-14",TMV,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-03-04-2024,ENGG,SOUTH,PV YD,MS-VM,,B,,10:00,13:30,210,10:30,13:00,150,,,TRUCKING OUT WORK,,,,,,,,,10:00,12:00,120,,,"4 nos Rails and 1 nos GJ trucking 
+03-04-2024,ENGG,SOUTH,PV YD,MS-VM,,B,,10:00,13:30,210,10:30,13:00,150,,,TRUCKING OUT WORK,,,,,,,,,10:00,12:00,120,,,"4 nos Rails and 1 nos GJ trucking
  out done for renewal work.",,,,,,,,TBM,ROLLING BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,SOUTH,MKK YD,MS-VM,,UP,,10:50,11:30,40,10:50,11:30,40,,,RR/WW,,,,,,,,,10:50,11:30,40,,,1 NOS OF GJ RENEWED/WELD-02 NOS,,,,,,,84/05-07,MS,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 03-04-2024,ENGG,SOUTH,GI YD,MS-VM,,3RD LINE,,10:40,12:40,120,13:40,15:00,80,,,RR/WW,,,,,,,,,10:30,12:30,120,,,RR-7.18 MTS/WW-01 NOS,,,,,,,"41/146,41/153",TBM,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
@@ -5520,7 +5520,7 @@ WORK DONE",,,,,,,,WJR,ADDITIONAL BLOCK,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
  No.of sleepers: 240 Nos
  No.of GRSP : 240×2 = 480 Nos
  No.of liner : 240×4 = 960 Nos
- No.of ERC : 240×4 = 960 Nos 
+ No.of ERC : 240×4 = 960 Nos
  No.of weld : 2 Nos",,,,,,,"KPD/2031-2036,KPD/2012-2016",KPD,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 05-04-2024,ENGG,WEST,JTJ-SKPT,KPD-JTJ,,BYE PASS,,11:30,13:30,120,11:30,13:30,120,,,RP UNLOADING WORK,,,,,,,,,12:30,15:30,180,,,RP UNLOADING=6+6=12 NOS,,,,,,,,JTJ,ADDITIONAL BLOCK,CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 05-04-2024,ENGG,WEST,JTJ YD,KPD-JTJ,,SBC DN,,15:00,16:30,90,15:40,16:25,45,,,WW,,,,,,,,,13:30,14:30,60,,,WW-1 NOS,,,,,,,215A/34-36,JTJ,ADDITIONAL BLOCK,NON CORRIDOR,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
