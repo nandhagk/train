@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
+from waitress import serve
 
 from train.app import app
 from train.db import get_db, timediff, utcnow
 from train.file_management import FileManager
+from train.logging import setup_logging
 from train.models.block import Block, PartialBlock
 from train.models.maintenance_window import MaintenanceWindow, PartialMaintenanceWindow
 from train.models.section import PartialSection, Section
@@ -21,13 +23,8 @@ from train.models.task import PartialTask, Task
 if TYPE_CHECKING:
     from os import PathLike
 
-logging.basicConfig(
-    filename=Path.cwd() / "train.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-
-logger = logging.getLogger()
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 class ClickPath(click.Path):
@@ -50,9 +47,15 @@ class ClickTime(click.ParamType):
         return time.fromisoformat(value)
 
 
-@click.group()
-def main() -> None:
-    """Entrypoint."""
+@click.group(invoke_without_command=True)
+@click.option("--port", type=click.IntRange(1000, 10000), default=5432)
+@click.option("--debug", is_flag=True, default=False)
+def main(port: int, debug: bool):
+    """Spins up a flask server."""
+    if debug:
+        app.run(port=port, debug=True)
+    else:
+        serve(app, port=port)
 
 
 @main.command()
@@ -293,13 +296,6 @@ def schedule(src: Path, dst: Path):
 
         msg = f"Failed to populate database from file: {e}"
         raise click.ClickException(msg) from e
-
-
-@main.command()
-@click.option("--port", type=click.IntRange(1000, 10000), default=5432)
-def server(port: int):
-    """Spins up a flask server."""
-    app.run(port=port, debug=True)
 
 
 if __name__ == "__main__":

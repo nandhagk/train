@@ -211,7 +211,7 @@ class Task(Generic[T]):
         return task
 
     @staticmethod
-    def _insert_pref(  # noqa: C901
+    def _insert_pref(  # noqa: C901, PLR0912
         cur: Cursor,
         taskq: PartialTask[time],
     ) -> tuple[int, datetime, datetime]:
@@ -294,7 +294,6 @@ class Task(Generic[T]):
             return intersection, window_start, window_end, window_id
 
         data = [mapper(row) for row in cur.fetchall()]
-
         if len(data) == 0:
             raise NoFreeWindowError(taskq)
 
@@ -342,7 +341,8 @@ class Task(Generic[T]):
                 closest_preferred_end = pwe
                 break
         else:
-            raise CriticalLogicError("Could not find window that gave max intersection")
+            msg = "Could not find window that gave max intersection"
+            raise CriticalLogicError(msg)
 
         if intersection >= taskq.requested_duration:
             # There are 4 possible cases

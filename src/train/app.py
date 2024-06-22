@@ -21,7 +21,7 @@ def idk():
 
 count = 0
 
-logger = getLogger()
+logger = getLogger(__name__)
 
 
 @app.post("/request")

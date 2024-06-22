@@ -6,9 +6,8 @@ from datetime import time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING
 
-
-from train.exceptions import UnsupportedFileTypeError, UnknownFileFormatError, InvalidFileDataError
 from train.db import decode_time
+from train.exceptions import InvalidFileDataError, UnsupportedFileTypeError
 from train.models.section import Section
 from train.models.task import PartialTask, Task
 
@@ -54,7 +53,6 @@ class FileManager(ABC):
 
     @staticmethod
     def encode_tasks(cur: Cursor, tasks: list[Task], fmt: Format) -> list[dict]:
-
         if fmt == FileManager.Format.bare_minimum:
             cur.execute(
                 f"""
@@ -112,7 +110,7 @@ class FileManager(ABC):
                 for row in cur.fetchall()
             ]
 
-        return {}
+        raise NotImplementedError
 
     @staticmethod
     def get_manager(path: Path) -> type[FileManager]:
@@ -156,7 +154,7 @@ class FileManager(ABC):
                         preferred_ends_at,
                         section.id,
                     )
-                    if int(item["duration"]) != 0
+                    if item["duration"] and int(item["duration"]) != 0
                     else None
                 )
 
@@ -171,11 +169,11 @@ class FileManager(ABC):
                     preferred_ends_at,
                     section.id,
                 )
-                if int(item["duration"]) != 0
+                if item["duration"] and int(item["duration"]) != 0
                 else None
             )
 
-        raise UnknownFileFormatError(fmt)
+        raise NotImplementedError
 
     @staticmethod
     @abstractmethod
