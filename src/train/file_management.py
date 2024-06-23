@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 Reason: TypeAlias = str
 
+
 class FileManager(ABC):
     class Format(IntEnum):
         bare_minimum = auto()
@@ -45,10 +46,15 @@ class FileManager(ABC):
             return default
 
     @staticmethod
-    def get_manager(src: Path, dst: Path, err: Path, logger: logging.Logger | None = None) -> FileManager:
+    def get_manager(
+        src: Path,
+        dst: Path,
+        err: Path,
+        logger: logging.Logger | None = None,
+    ) -> FileManager:
         if logger is None:
             logger = logging.getLogger(__name__)
-        
+
         if src.suffix == ".csv":
             return CSVManager(src, dst, err, logger)
 
@@ -327,7 +333,7 @@ class FileManager(ABC):
         res = self.map(item)
         if isinstance(res, Err):
             return res
-        
+
         mapped_item = res.value
 
         preferred_ends_at = mapped_item["demanded_time_to"]
@@ -346,7 +352,10 @@ class FileManager(ABC):
                 mapped_item["line"],
             )
 
-            return Err(f'Invalid section {mapped_item["block_section_or_yard"]}-{mapped_item["line"]}')
+            return Err(
+                "Invalid section"
+                f' {mapped_item["block_section_or_yard"]}-{mapped_item["line"]}',
+            )
 
         if mapped_item["block_demanded"] == 0 and (
             preferred_starts_at is None or preferred_ends_at is None
@@ -358,21 +367,23 @@ class FileManager(ABC):
             self.logger.warning("Demanded range is not complete")
             return Err("Demanded range is not complete")
 
-        return Ok(PartialTask(
-            mapped_item["priority"],
-            (
-                timedelta(minutes=mapped_item["block_demanded"])
-                if mapped_item["block_demanded"] != 0
-                else timediff(preferred_starts_at, preferred_ends_at)
+        return Ok(
+            PartialTask(
+                mapped_item["priority"],
+                (
+                    timedelta(minutes=mapped_item["block_demanded"])
+                    if mapped_item["block_demanded"] != 0
+                    else timediff(preferred_starts_at, preferred_ends_at)
+                ),
+                preferred_starts_at,
+                preferred_ends_at,
+                section.id,
+                mapped_item["department"],
+                mapped_item["den"],
+                mapped_item["nature_of_work"],
+                mapped_item["location"],
             ),
-            preferred_starts_at,
-            preferred_ends_at,
-            section.id,
-            mapped_item["department"],
-            mapped_item["den"],
-            mapped_item["nature_of_work"],
-            mapped_item["location"],
-        ))
+        )
 
     def read(self, cur: Cursor) -> list[Result[PartialTask, Reason]]:
         data = self._read()
@@ -380,7 +391,7 @@ class FileManager(ABC):
         taskqs = []
         for idx, item in enumerate(data):
             if isinstance(decoded := self.decode(cur, item), Err):
-                self.logger.warning("Ignoring item on row `%d` ", idx)               
+                self.logger.warning("Ignoring item on row `%d` ", idx)
 
             taskqs.append(decoded)
 
@@ -392,12 +403,9 @@ class FileManager(ABC):
 
     def write_error(self, skipped_list: list[tuple[int, str]]):
         self._write(
-            [
-                {'row': row, 'reason': reason}
-                for row, reason in skipped_list
-            ],
-            ['row', 'reason'],
-            self.err_path
+            [{"row": row, "reason": reason} for row, reason in skipped_list],
+            ["row", "reason"],
+            self.err_path,
         )
 
     @abstractmethod
@@ -409,7 +417,7 @@ class FileManager(ABC):
 
 class CSVManager(FileManager):
     def _read(self) -> list[dict]:
-        with self.src_path.open(newline="", encoding="utf-8-sig") as fd:
+        with self.src_path.open(mode="r", newline="", encoding="utf-8-sig") as fd:
             reader = csv.DictReader(fd)
             data = [*reader]
 

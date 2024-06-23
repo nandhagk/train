@@ -1,24 +1,22 @@
 from __future__ import annotations
 
+import os
 from collections import defaultdict
 from io import BytesIO
 from logging import getLogger
-import os
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+from zipfile import ZipFile
 
 from flask import Flask, request, send_file
-from flask.logging import create_logger
 from result import Err
 
 from train.db import get_db
 from train.file_management import FileManager
 from train.models.task import PartialTask, Task
 
-from zipfile import ZipFile
-
 logger = getLogger(__name__)
 app = Flask("app")
+
 
 @app.get("/")
 def home():
@@ -34,15 +32,17 @@ def handle_form():
 
     name, _, ext = f.filename.rpartition(".")
 
-        
     src_path = (Path.cwd() / "tmp" / os.urandom(24).hex()).with_suffix("." + ext)
     dst_path = (Path.cwd() / "tmp" / os.urandom(24).hex()).with_suffix("." + ext)
     err_path = (Path.cwd() / "tmp" / os.urandom(24).hex()).with_suffix("." + ext)
 
-    def clean():
-        if src_path.is_file(): src_path.unlink()
-        if dst_path.is_file(): dst_path.unlink()
-        if err_path.is_file(): err_path.unlink()
+    def _clean() -> None:
+        if src_path.is_file():
+            src_path.unlink()
+        if dst_path.is_file():
+            dst_path.unlink()
+        if err_path.is_file():
+            err_path.unlink()
 
     f.save(src_path.as_posix())
 
@@ -77,19 +77,19 @@ def handle_form():
         logger.info("Populated database and saved output file: %s", dst_path.name)
     except Exception as e:
         logger.exception("Failed to populate database from file")
-        clean()
+        _clean()
         return repr(e)
-    
+
     stream = BytesIO()
-    with ZipFile(stream, 'w') as zf:
+    with ZipFile(stream, "w") as zf:
         zf.write(dst_path, f"{name}_output.{ext}")
         zf.write(err_path, f"{name}_errors.{ext}")
 
     stream.seek(0)
 
-    clean()
+    _clean()
     return send_file(
         stream,
         as_attachment=True,
-        download_name='archive.zip'
+        download_name="archive.zip",
     )

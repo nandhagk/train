@@ -235,7 +235,7 @@ def schedule(src: Path, dst: Path):
         fm.write(cur, tasks)
         fm.write_error(skipped_data)
         logger.info("Populated database and saved output file: %s", dst)
-        
+
     except Exception as e:
         logger.exception("Failed to populate database from file")
 

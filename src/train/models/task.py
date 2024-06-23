@@ -98,9 +98,12 @@ class Task(Generic[T]):
             if isinstance(res, Err):
                 cur.execute(
                     f"""
-                    DELETE FROM task WHERE id IN ({', '.join(str(t.id) for t in tasks_)})
-                    """
+                    DELETE FROM task
+                    WHERE
+                        id IN ({', '.join(str(t.id) for t in tasks_)})
+                    """,  # noqa: S608
                 )
+
                 return res
 
             window_id, starts_at, ends_at = res.value
