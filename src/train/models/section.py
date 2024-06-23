@@ -46,7 +46,7 @@ class Section:
     @staticmethod
     def find_by_name_and_line(cur: Cursor, name: str, line: str) -> Section | None:
         name = name.replace(" ", "_").replace("-YD", "_YD")
-
+        line = line.strip()
         if "-" not in name:
             f = t = name
         else:

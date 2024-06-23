@@ -316,6 +316,7 @@ class Task(Generic[T]):
 
         data = [mapper(row) for row in cur.fetchall()]
         if len(data) == 0:
+            # assert cur.execute(f"SELECT count(*) from maintenance_window where section_id = {taskq.section_id}").fetchone()[0] == 0
             raise NoFreeWindowError(taskq)
 
         intersection, window_start, window_end, window_id = max(
@@ -467,6 +468,7 @@ class Task(Generic[T]):
 
         row: Row | None = cur.fetchone()
         if row is None:
+            # assert cur.execute(f"SELECT count(*) from maintenance_window where section_id = {taskq.section_id}").fetchone()[0] == 0
             raise NoFreeWindowError(taskq)
 
         window_start = row["window_start"]

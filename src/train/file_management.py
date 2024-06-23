@@ -237,19 +237,19 @@ class FileManager(ABC):
             logger.warning("Invalid section")
             return None
 
-        if not isinstance(mapped["corridor_block"], str):
-            logger.warning("Invalid block")
-            return None
+        # if not isinstance(mapped["corridor_block"], str):
+        #     logger.warning("Invalid block")
+        #     return None
 
         if not isinstance(mapped["line"], str):
             logger.warning("Invalid line")
             return None
 
         mapped["demanded_time_from"] = FileManager._get_time(
-            str(mapped["demanded_time_from"]),
+            str(mapped["demanded_time_from"]).strip(),
         )
         mapped["demanded_time_to"] = FileManager._get_time(
-            str(mapped["demanded_time_to"]),
+            str(mapped["demanded_time_to"]).strip(),
         )
 
         mapped["block_demanded"] = FileManager.try_int(str(mapped["block_demanded"]), 0)
@@ -432,10 +432,7 @@ class ExcelManager(FileManager):
 
         data = []
         for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_count):
-            if not row[0].value:
-                continue
-
-            data.append({self.headers[i]: row[i].value for i in range(col_count)})
+            data.append({self.headers[i]: str(row[i].value) if row[i].value is not None else '' for i in range(col_count)})
 
         wb.close()
         taskqs = []
