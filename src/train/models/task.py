@@ -84,10 +84,10 @@ class Task(Generic[T]):
     def insert_many(
         cur: Cursor,
         tasks: list[PartialTask],
-    ) -> list[Result[Task, InsertErr]]:
+    ) -> Result[list[Task], InsertErr]:
         heapify(tasks)
 
-        tasks_: list[Result[Task, InsertErr]] = []
+        tasks_: list[Task] = []
         while tasks:
             task = heappop(tasks)
             if task.preferred_ends_at is None or task.preferred_starts_at is None:
@@ -96,8 +96,7 @@ class Task(Generic[T]):
                 res = Task._insert_pref(cur, task)
 
             if isinstance(res, Err):
-                tasks_.append(res)
-                continue
+                return res
 
             window_id, starts_at, ends_at = res.value
             payload = {
@@ -142,15 +141,15 @@ class Task(Generic[T]):
                 )
 
             task_ = Task._insert(cur, task, starts_at, ends_at, window_id)
-            tasks_.append(Ok(task_))
+            tasks_.append(task_)
 
-        return tasks_
+        return Ok(tasks_)
 
     @staticmethod
     def insert_one(
         cur: Cursor,
         taskq: PartialTask,
-    ) -> list[Result[Task, InsertErr]]:
+    ) -> Result[list[Task], InsertErr]:
         return Task.insert_many(cur, [taskq])
 
     @staticmethod

@@ -54,11 +54,12 @@ def handle_form():
             tasks: list[Task] = []
             for section_id, taskqs in taskqs_per_section.items():
                 logger.info("Scheduling %d", section_id)
-                for res in Task.insert_many(cur, taskqs):
-                    if isinstance(res, Err):
-                        logger.warning(res.err_value)
-                    else:
-                        tasks.append(res.value)
+
+                res = Task.insert_many(cur, taskqs)
+                if isinstance(res, Err):
+                    logger.warning("Ignoring %d", section_id, exc_info=res.err_value)
+                else:
+                    tasks.extend(res.value)
 
             fm.write(cur, tasks)
             logger.info("Populated database and saved output file: %s", dst)
