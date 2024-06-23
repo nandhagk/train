@@ -7,7 +7,7 @@ from logging import getLogger
 from pathlib import Path
 from zipfile import ZipFile
 
-from flask import Flask, request, send_file
+from flask import Flask, Response, request, send_file
 from result import Err
 
 from train.db import get_db
@@ -78,7 +78,7 @@ def handle_form():
     except Exception as e:
         logger.exception("Failed to populate database from file")
         _clean()
-        return repr(e)
+        return Response(repr(e), 400)
 
     stream = BytesIO()
     with ZipFile(stream, "w") as zf:
