@@ -96,6 +96,11 @@ class Task(Generic[T]):
                 res = Task._insert_pref(cur, task)
 
             if isinstance(res, Err):
+                cur.execute(
+                    f"""
+                    DELETE FROM task WHERE id IN ({', '.join(str(t.id) for t in tasks_)})
+                    """
+                )
                 return res
 
             window_id, starts_at, ends_at = res.value

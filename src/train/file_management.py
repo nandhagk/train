@@ -5,9 +5,10 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import time, timedelta
 from enum import IntEnum, auto
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeAlias
 
 import openpyxl
+from result import Err, Ok, Result
 
 from train.db import decode_time, timediff
 from train.exceptions import (
@@ -22,8 +23,7 @@ if TYPE_CHECKING:
     from pathlib import Path
     from sqlite3 import Cursor
 
-logger = logging.getLogger(__name__)
-
+Reason: TypeAlias = str
 
 class FileManager(ABC):
     class Format(IntEnum):
@@ -45,21 +45,26 @@ class FileManager(ABC):
             return default
 
     @staticmethod
-    def get_manager(src: Path, dst: Path) -> FileManager:
+    def get_manager(src: Path, dst: Path, err: Path, logger: logging.Logger | None = None) -> FileManager:
+        if logger is None:
+            logger = logging.getLogger(__name__)
+        
         if src.suffix == ".csv":
-            return CSVManager(src, dst)
+            return CSVManager(src, dst, err, logger)
 
         if dst.suffix == ".xlsx":
-            return ExcelManager(dst, dst)
+            return ExcelManager(dst, dst, err, logger)
 
         raise UnsupportedFileTypeError(src.suffix)
 
     _headers: list[str]
     _fmt: Format | None
 
-    def __init__(self, src: Path, dst: Path) -> None:
+    def __init__(self, src: Path, dst: Path, err: Path, logger: logging.Logger) -> None:
         self.src_path = src
         self.dst_path = dst
+        self.err_path = err
+        self.logger = logger
 
     @property
     def headers(self) -> list[str]:
@@ -219,7 +224,8 @@ class FileManager(ABC):
             for row in cur.fetchall()
         ]
 
-    def map(self, item: dict) -> dict[str, Any] | None:
+    def map(self, item: dict) -> Result[dict[str, Any], Reason]:
+        mapped = {}
         if self.fmt == FileManager.Format.bare_minimum:
             mapped = item | {"priority": 1}
 
@@ -245,20 +251,20 @@ class FileManager(ABC):
         # Validate the type of data
 
         if not isinstance(mapped["priority"], int):
-            logger.warning("Invalid priority")
-            return None
+            self.logger.warning("Invalid priority")
+            return Err("Invalid priority")
 
         if not isinstance(mapped["block_section_or_yard"], str):
-            logger.warning("Invalid section")
-            return None
+            self.logger.warning("Invalid section")
+            return Err("Invalid section")
 
         # if not isinstance(mapped["corridor_block"], str):
-        #     logger.warning("Invalid block")
-        #     return None
+        #     self.logger.warning("Invalid block")
+        #     return Err("Invalid block")
 
         if not isinstance(mapped["line"], str):
-            logger.warning("Invalid line")
-            return None
+            self.logger.warning("Invalid line")
+            return Err("Invalid line")
 
         mapped["demanded_time_from"] = FileManager._get_time(
             str(mapped["demanded_time_from"]).strip(),
@@ -270,7 +276,7 @@ class FileManager(ABC):
 
         mapped["block_demanded"] = FileManager.try_int(str(mapped["block_demanded"]), 0)
 
-        return mapped
+        return Ok(mapped)
 
     def unmap(self, item: dict) -> dict:
         if self.fmt == FileManager.Format.mas_recent:
@@ -317,10 +323,12 @@ class FileManager(ABC):
         # bare minimum
         return item
 
-    def decode(self, cur: Cursor, item: dict) -> PartialTask | None:
-        mapped_item = self.map(item)
-        if mapped_item is None:
-            return None
+    def decode(self, cur: Cursor, item: dict) -> Result[PartialTask, Reason]:
+        res = self.map(item)
+        if isinstance(res, Err):
+            return res
+        
+        mapped_item = res.value
 
         preferred_ends_at = mapped_item["demanded_time_to"]
         preferred_starts_at = mapped_item["demanded_time_from"]
@@ -332,25 +340,25 @@ class FileManager(ABC):
         )
 
         if section is None:
-            logger.warning(
+            self.logger.warning(
                 "Could not find section: %s - %s",
                 mapped_item["block_section_or_yard"],
                 mapped_item["line"],
             )
 
-            return None
+            return Err(f'Invalid section {mapped_item["block_section_or_yard"]}-{mapped_item["line"]}')
 
         if mapped_item["block_demanded"] == 0 and (
             preferred_starts_at is None or preferred_ends_at is None
         ):
-            logger.warning("Invalid duration (It is empty)")
-            return None
+            self.logger.warning("Invalid duration (It is empty)")
+            return Err("Invalid duration (It is empty)")
 
         if (preferred_starts_at is None) ^ (preferred_ends_at is None):
-            logger.warning("Invalid demanded time")
-            return None
+            self.logger.warning("Demanded range is not complete")
+            return Err("Demanded range is not complete")
 
-        return PartialTask(
+        return Ok(PartialTask(
             mapped_item["priority"],
             (
                 timedelta(minutes=mapped_item["block_demanded"])
@@ -364,16 +372,15 @@ class FileManager(ABC):
             mapped_item["den"],
             mapped_item["nature_of_work"],
             mapped_item["location"],
-        )
+        ))
 
-    def read(self, cur: Cursor) -> list[PartialTask]:
+    def read(self, cur: Cursor) -> list[Result[PartialTask, Reason]]:
         data = self._read()
 
         taskqs = []
         for idx, item in enumerate(data):
-            if (decoded := self.decode(cur, item)) is None:
-                logger.warning("Ignoring item on row `%d` ", idx)
-                continue
+            if isinstance(decoded := self.decode(cur, item), Err):
+                self.logger.warning("Ignoring item on row `%d` ", idx)               
 
             taskqs.append(decoded)
 
@@ -381,13 +388,23 @@ class FileManager(ABC):
 
     def write(self, cur: Cursor, tasks: list[Task]) -> None:
         data = self.encode_tasks(cur, tasks)
-        self._write(data)
+        self._write(data, self.headers, self.dst_path)
+
+    def write_error(self, skipped_list: list[tuple[int, str]]):
+        self._write(
+            [
+                {'row': row, 'reason': reason}
+                for row, reason in skipped_list
+            ],
+            ['row', 'reason'],
+            self.err_path
+        )
 
     @abstractmethod
     def _read(self) -> list[dict]: ...
 
     @abstractmethod
-    def _write(self, tasks: list[dict]) -> None: ...
+    def _write(self, data: list[dict], headers: list[str], file: Path) -> None: ...
 
 
 class CSVManager(FileManager):
@@ -403,11 +420,11 @@ class CSVManager(FileManager):
         self.headers = [*data[0].keys()]
         return data
 
-    def _write(self, tasks: list[dict]) -> None:
-        with self.dst_path.open(mode="w", newline="") as fd:
-            writer = csv.DictWriter(fd, self._headers)
+    def _write(self, data: list[dict], headers: list[str], file: Path) -> None:
+        with file.open(mode="w", newline="") as fd:
+            writer = csv.DictWriter(fd, headers)
             writer.writeheader()
-            writer.writerows(tasks)
+            writer.writerows(data)
 
 
 class ExcelManager(FileManager):
@@ -433,13 +450,13 @@ class ExcelManager(FileManager):
         wb.close()
         return data
 
-    def _write(self, tasks: list[dict]) -> None:
+    def _write(self, data: list[dict], headers: list[str], file: Path) -> None:
         wb = openpyxl.Workbook(write_only=True)
         sheet = wb.create_sheet()
 
-        sheet.append(self._headers)
-        for row in tasks:
-            sheet.append([row.get(heading, "") for heading in self._headers])
+        sheet.append(headers)
+        for row in data:
+            sheet.append([row.get(heading, "") for heading in headers])
 
-        wb.save(self.dst_path.as_posix())
+        wb.save(file.as_posix())
         wb.close()

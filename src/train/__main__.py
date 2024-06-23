@@ -209,26 +209,33 @@ def schedule(src: Path, dst: Path):
     cur = con.cursor()
 
     try:
-        taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
+        taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = defaultdict(list)
+        skipped_data = []
 
-        fm = FileManager.get_manager(src, dst)
-        for taskq in fm.read(cur):
-            taskqs_per_section[taskq.section_id].append(taskq)
+        fm = FileManager.get_manager(src, dst, Path())
+        for idx, res in enumerate(fm.read(cur)):
+            if isinstance(res, Err):
+                skipped_data.append((idx + 1, res.err_value))
+                continue
+            taskq = res.value
+            taskqs_per_section[taskq.section_id].append((taskq, idx + 1))
 
         tasks: list[Task] = []
-        for section_id, taskqs in taskqs_per_section.items():
+        for section_id, rows in taskqs_per_section.items():
             logger.info("Scheduling %d", section_id)
 
-            res = Task.insert_many(cur, taskqs)
+            res = Task.insert_many(cur, [taskq for taskq, _idx in rows])
             if isinstance(res, Err):
                 logger.warning("Ignoring %d", section_id, exc_info=res.err_value)
+                skipped_data.extend((idx, repr(res.err_value)) for _taskq, idx in rows)
             else:
                 tasks.extend(res.value)
 
         con.commit()
         fm.write(cur, tasks)
-
+        fm.write_error(skipped_data)
         logger.info("Populated database and saved output file: %s", dst)
+        
     except Exception as e:
         logger.exception("Failed to populate database from file")
 
