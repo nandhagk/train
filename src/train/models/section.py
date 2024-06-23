@@ -2,11 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+import json
+from pathlib import Path
+
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from sqlite3 import Cursor, Row
 
+FALLBACK_MAP = json.loads((Path.cwd() / 'tmppromaxultra' / 'masection.json').read_text())
 
 @dataclass(frozen=True)
 class PartialSection:
@@ -45,16 +49,22 @@ class Section:
 
     @staticmethod
     def find_by_name_and_line(cur: Cursor, name: str, line: str) -> Section | None:
-        name = name.replace(" ", "_").replace("-YD", "_YD")
-        line = line.strip()
-        if "-" not in name:
-            f = t = name
-        else:
-            f, _, t = name.partition("-")
-            f = f.strip()
-            t = t.strip()
+        if FALLBACK_MAP.get(name) is None:
+            name = name.replace(" ", "_").replace("-YD", "_YD")
+            line = line.strip()
+            if "-" not in name:
+                f = t = name
+            else:
+                f, _, t = name.partition("-")
+                f = f.strip()
+                t = t.strip()
 
-        payload = {"f": f, "t": t, "line": line}
+        else:
+            f, t = FALLBACK_MAP[name]
+            f = f.replace(" ", "_")
+            t = t.replace(" ", "_")
+
+        payload = {"f": f, "t": t, "line": "UP"}
 
         cur.execute(
             """

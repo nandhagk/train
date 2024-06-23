@@ -1,0 +1,2639 @@
+{
+    "AKM-ELR": [
+        "AKM",
+        "ELR"
+    ],
+    "ELR-AKM": [
+        "ELR",
+        "AKM"
+    ],
+    "SPE YD": [
+        "SPE YD",
+        "SPE YD"
+    ],
+    "PEI-MTL": [
+        "PEI",
+        "MTL"
+    ],
+    "CJ-TMLP": [
+        "CJ",
+        "TMLP"
+    ],
+    "MDVE-SHU": [
+        "MDVE",
+        "SHU"
+    ],
+    "MCN-THL": [
+        "MCN",
+        "THL"
+    ],
+    "MPK-MSB": [
+        "MPK",
+        "MSB"
+    ],
+    "TVT-ENR": [
+        "TVT",
+        "ENR"
+    ],
+    "TVT YD": [
+        "TVT YD",
+        "TVT YD"
+    ],
+    "AB YD": [
+        "AB YD",
+        "AB YD"
+    ],
+    "TUG YD": [
+        "TUG YD",
+        "TUG YD"
+    ],
+    "RPM YD": [
+        "RPM YD",
+        "RPM YD"
+    ],
+    "CGL YD": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "CGL-SKL": [
+        "CGL",
+        "SKL"
+    ],
+    "TNP-TVT": [
+        "TNP",
+        "TVT"
+    ],
+    "KOK-TNP": [
+        "KOK",
+        "TNP"
+    ],
+    "PV-TBM": [
+        "PV",
+        "TBM"
+    ],
+    "ENR YD": [
+        "ENR YD",
+        "ENR YD"
+    ],
+    "TRL-TI/TI YD": [
+        "TI YD",
+        "TI YD"
+    ],
+    "AKM YD": [
+        "AKM YD",
+        "AKM YD"
+    ],
+    "NG-VGA": [
+        "NG",
+        "VGA"
+    ],
+    "PCKM-AB": [
+        "PCKM",
+        "AB"
+    ],
+    "WST-BBQ": [
+        "WST",
+        "BBQ"
+    ],
+    "VDR YD": [
+        "VDR YD",
+        "VDR YD"
+    ],
+    "VDR-GI": [
+        "VDR",
+        "GI"
+    ],
+    "PV YD": [
+        "PV YD",
+        "PV YD"
+    ],
+    "AVD YD": [
+        "AVD YD",
+        "AVD YD"
+    ],
+    "SPE-TADA": [
+        "SPE",
+        "TADA"
+    ],
+    "GYM YD": [
+        "GYM YD",
+        "GYM YD"
+    ],
+    "AB-VGM": [
+        "AB",
+        "VGM"
+    ],
+    "TVT-TNP": [
+        "TVT",
+        "TNP"
+    ],
+    "TADA-AKM": [
+        "TADA",
+        "AKM"
+    ],
+    "KBT YD": [
+        "KBT YD",
+        "KBT YD"
+    ],
+    "PV-STM": [
+        "PV",
+        "STM"
+    ],
+    "AJJN YD": [
+        "AJJN YD",
+        "AJJN YD"
+    ],
+    "TDK-VGA": [
+        "TDK",
+        "VGA"
+    ],
+    "TDK-PUT": [
+        "TDK",
+        "PUT"
+    ],
+    "MSB-MS": [
+        "MSB",
+        "MS"
+    ],
+    "KDY YD": [
+        "KDY YD",
+        "KDY YD"
+    ],
+    "SHU YD": [
+        "SHU YD",
+        "SHU YD"
+    ],
+    "CTRE-MDVE": [
+        "CTRE",
+        "MDVE"
+    ],
+    "JTJ-KDY": [
+        "JTJ",
+        "KDY"
+    ],
+    "AB-PCKM": [
+        "AB",
+        "PCKM"
+    ],
+    "SVF YD": [
+        "SVF YD",
+        "SVF YD"
+    ],
+    "AVD-PAB": [
+        "AVD",
+        "PAB"
+    ],
+    "MMK-MLMR": [
+        "MMK",
+        "MLMR"
+    ],
+    "MPI-PCKM": [
+        "MPI",
+        "PCKM"
+    ],
+    "MDVE YD": [
+        "MDVE YD",
+        "MDVE YD"
+    ],
+    "AJJ YD": [
+        "AJJ YD",
+        "AJJ YD"
+    ],
+    "PEW-VPY": [
+        "PEW",
+        "VPY"
+    ],
+    "BBQ-KOK ": [
+        "BBQ",
+        "KOK"
+    ],
+    "AKM-TADA": [
+        "AKM",
+        "TADA"
+    ],
+    "MTL YD": [
+        "MTL YD",
+        "MTL YD"
+    ],
+    "VLK YD": [
+        "VLK YD",
+        "VLK YD"
+    ],
+    "MAS YD": [
+        "MAS YD",
+        "MAS YD"
+    ],
+    "MMC YD": [
+        "MMC YD",
+        "MMC YD"
+    ],
+    "TBM YD": [
+        "TBM YD",
+        "TBM YD"
+    ],
+    "ABU-VLK": [
+        "ABU",
+        "VLK"
+    ],
+    "VPY-VLK": [
+        "VPY",
+        "VLK"
+    ],
+    "STM-MKK": [
+        "STM",
+        "MKK"
+    ],
+    "TRL YD": [
+        "TRL YD",
+        "TRL YD"
+    ],
+    "PYD YD": [
+        "PYD YD",
+        "PYD YD"
+    ],
+    "TNP YD": [
+        "TNP YD",
+        "TNP YD"
+    ],
+    "AB ": [
+        "AB YD",
+        "AB YD"
+    ],
+    "TZD-OLA": [
+        "TZD",
+        "OLA"
+    ],
+    "OLA YD": [
+        "OLA YD",
+        "OLA YD"
+    ],
+    "MYP-VM": [
+        "MYP",
+        "VM"
+    ],
+    "CGL-OV": [
+        "CGL",
+        "OV"
+    ],
+    "OV-KGZ": [
+        "OV",
+        "KGZ"
+    ],
+    "TO-KBT": [
+        "TO",
+        "KBT"
+    ],
+    "MDVE -SHU": [
+        "MDVE",
+        "SHU"
+    ],
+    "ABU-AVD": [
+        "ABU",
+        "AVD"
+    ],
+    "PCKM YD": [
+        "PCKM YD",
+        "PCKM YD"
+    ],
+    "GYM-KVN": [
+        "GYM",
+        "KVN"
+    ],
+    "TMV-MTL": [
+        "TMV",
+        "MTL"
+    ],
+    "VPY-MMC": [
+        "VPY",
+        "MMC"
+    ],
+    "KVN YD": [
+        "KVN YD",
+        "KVN YD"
+    ],
+    "VVN YD": [
+        "VVN YD",
+        "VVN YD"
+    ],
+    "NYP-PYA": [
+        "NYP",
+        "PYA"
+    ],
+    "MLMR YD": [
+        "MLMR YD",
+        "MLMR YD"
+    ],
+    "MS YD": [
+        "MS YD",
+        "MS YD"
+    ],
+    "MTL-PEI": [
+        "MTL",
+        "PEI"
+    ],
+    "PEI-VVN": [
+        "PEI",
+        "VVN"
+    ],
+    "PEI-MTL/MTL YD": [
+        "MTL YD",
+        "MTL YD"
+    ],
+    "GI YD": [
+        "GI YD",
+        "GI YD"
+    ],
+    "PAB YD": [
+        "PAB YD",
+        "PAB YD"
+    ],
+    "VGM YD": [
+        "VGM YD",
+        "VGM YD"
+    ],
+    "CTRE YD": [
+        "CTRE YD",
+        "CTRE YD"
+    ],
+    "VPY-BBQ": [
+        "VPY",
+        "BBQ"
+    ],
+    "GYM-VLT": [
+        "GYM",
+        "VLT"
+    ],
+    "MKK-PV": [
+        "MKK",
+        "PV"
+    ],
+    "MCN YD": [
+        "MCN YD",
+        "MCN YD"
+    ],
+    "KPD YD": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "MS-MSB": [
+        "MS",
+        "MSB"
+    ],
+    "DVR YD": [
+        "DVR YD",
+        "DVR YD"
+    ],
+    "KOK-RPM": [
+        "KOK",
+        "RPM"
+    ],
+    "ODUR YD": [
+        "ODUR YD",
+        "ODUR YD"
+    ],
+    "AJJ INTER YD": [
+        "AJJ INTER YD",
+        "AJJ INTER YD"
+    ],
+    "KPL YD": [
+        "KPL YD",
+        "KPL YD"
+    ],
+    "AB Yard": [
+        "AB YD",
+        "AB YD"
+    ],
+    "MPI Yard": [
+        "MPI YD",
+        "MPI YD"
+    ],
+    "SVUR YD": [
+        "SVUR YD",
+        "SVUR YD"
+    ],
+    "KV N YD": ["KVN YD", "KVN YD"],
+    "SKL-CGL": [
+        "SKL",
+        "CGL"
+    ],
+    "ABU YD": [
+        "ABU YD",
+        "ABU YD"
+    ],
+    "MYP-VVN": [
+        "MYP",
+        "VVN"
+    ],
+    "GI-SKL": [
+        "GI",
+        "SKL"
+    ],
+    "AJJ-MLPM": [
+        "AJJ",
+        "MLPM"
+    ],
+    "KOK-VPY": [
+        "KOK",
+        "VPY"
+    ],
+    "MPI YD": [
+        "MPI YD",
+        "MPI YD"
+    ],
+    "BBQ-MAS": [
+        "BBQ",
+        "MAS"
+    ],
+    "NYP YD": [
+        "NYP YD",
+        "NYP YD"
+    ],
+    "PUT-VGA": [
+        "PUT",
+        "VGA"
+    ],
+    "BBQ YD": [
+        "BBQ YD",
+        "BBQ YD"
+    ],
+    "TI YD": [
+        "TI YD",
+        "TI YD"
+    ],
+    "KOK YD": [
+        "KOK YD",
+        "KOK YD"
+    ],
+    "JTJ-VN": [
+        "JTJ",
+        "VN"
+    ],
+    "JTJ YD": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "MCPK YD": [
+        "MCPK YD",
+        "MCPK YD"
+    ],
+    "OLA-TMV": [
+        "OLA",
+        "TMV"
+    ],
+    "AVD-PRES": [
+        "AVD",
+        "PRES"
+    ],
+    "TO YD": [
+        "TO YD",
+        "TO YD"
+    ],
+    "VGA YD": [
+        "VGA YD",
+        "VGA YD"
+    ],
+    "PYA-NYP": [
+        "PYA",
+        "NYP"
+    ],
+    "MS-VM": [
+        "MS",
+        "VM"
+    ],
+    "WJR YD": [
+        "WJR YD",
+        "WJR YD"
+    ],
+    "MLMR-TZD": [
+        "MLMR",
+        "TZD"
+    ],
+    "AIPP-ENR": [
+        "AIPP",
+        "ENR"
+    ],
+    "AIPP YD": [
+        "AIPP YD",
+        "AIPP YD"
+    ],
+    "VVN-PEI": [
+        "VVN",
+        "PEI"
+    ],
+    "STM YD": [
+        "STM YD",
+        "STM YD"
+    ],
+    "KGZ YD": [
+        "KGZ YD",
+        "KGZ YD"
+    ],
+    "RANIPET YD": [
+        "RANIPET YD",
+        "RANIPET YD"
+    ],
+    "CTM YD": [
+        "CTM YD",
+        "CTM YD"
+    ],
+    "TRL-TI": [
+        "TRL",
+        "TI"
+    ],
+    "AJJ ": [
+        "AJJ YD",
+        "AJJ YD"
+    ],
+    "AIP YD": [
+        "AIP YD",
+        "AIP YD"
+    ],
+    "MKK": [
+        "MKK YD",
+        "MKK YD"
+    ],
+    "TO-KBT ": [
+        "TO",
+        "KBT"
+    ],
+    "TI  YD": [
+        "TI YD",
+        "TI YD"
+    ],
+    "AJJ-TO": [
+        "AJJ",
+        "TO"
+    ],
+    "MLMR-MMK": [
+        "MLMR",
+        "MMK"
+    ],
+    "PEI YD": [
+        "PEI YD",
+        "PEI YD"
+    ],
+    "MTL  YD": [
+        "MTL YD",
+        "MTL YD"
+    ],
+    "MLMR": [
+        "MLMR YD",
+        "MLMR YD"
+    ],
+    "PDD YD": [
+        "PDD YD",
+        "PDD YD"
+    ],
+    "MKK-STM": [
+        "MKK",
+        "STM"
+    ],
+    "WJ R YD": [
+        "WJR YD",
+        "WJR YD"
+    ],
+    "ODR YD": [
+        "ODR YD",
+        "ODR YD"
+    ],
+    "VLT-GYM": [
+        "VLT",
+        "GYM"
+    ],
+    "TNPM YD": [
+        "TNPM YD",
+        "TNPM YD"
+    ],
+    "MKK YD": [
+        "MKK YD",
+        "MKK YD"
+    ],
+    "VLT YD": [
+        "VLT YD",
+        "VLT YD"
+    ],
+    "AVD-ABU": [
+        "AVD",
+        "ABU"
+    ],
+    "MKK-MS": [
+        "MKK",
+        "MS"
+    ],
+    "MS": [
+        "MS YD",
+        "MS YD"
+    ],
+    "OV-CGL": [
+        "OV",
+        "CGL"
+    ],
+    "VPY-MASS": [
+        "VPY",
+        "MASS"
+    ],
+    "MLPM YD": [
+        "MLPM YD",
+        "MLPM YD"
+    ],
+    "TBM -PV": [
+        "TBM",
+        "PV"
+    ],
+    "PYA YD": [
+        "PYA YD",
+        "PYA YD"
+    ],
+    "MYP YD": [
+        "MYP YD",
+        "MYP YD"
+    ],
+    "AB": [
+        "ABYD",
+        "ABYD"
+    ],
+    "TVT": [
+        "TVTYD",
+        "TVTYD"
+    ],
+    "TZD-MLMR": [
+        "TZD",
+        "MLMR"
+    ],
+    "OV YD": [
+        "OV YD",
+        "OV YD"
+    ],
+    "TNP-KOK": [
+        "TNP",
+        "KOK"
+    ],
+    "MS-YD": [
+        "MS",
+        "YD"
+    ],
+    "VLT-MPI": [
+        "VLT",
+        "MPI"
+    ],
+    "TVT Y D": [
+        "TVT YD",
+        "TVT YD"
+    ],
+    "AIP-ENR": [
+        "AIP",
+        "ENR"
+    ],
+    "VPY-WST": [
+        "VPY",
+        "WST"
+    ],
+    "PAB-YD": [
+        "PAB",
+        "YD"
+    ],
+    "ABU-YD": [
+        "ABU",
+        "YD"
+    ],
+    "MSB-MPK": [
+        "MSB",
+        "MPK"
+    ],
+    "MPK-MS": [
+        "MPK",
+        "MS"
+    ],
+    "TI-YD": [
+        "TI",
+        "YD"
+    ],
+    "KBT-YD": [
+        "KBT",
+        "YD"
+    ],
+    "TBM-YD": [
+        "TBM",
+        "YD"
+    ],
+    "AIPP-YD": [
+        "AIPP",
+        "YD"
+    ],
+    "AIP-AIPP": [
+        "AIP",
+        "AIPP"
+    ],
+    "TVT-YD": [
+        "TVT",
+        "YD"
+    ],
+    "PCKM-YD": [
+        "PCKM",
+        "YD"
+    ],
+    "MLPM-YD": [
+        "MLPM",
+        "YD"
+    ],
+    "AJJ-YD": [
+        "AJJ",
+        "YD"
+    ],
+    "VDR-YD": [
+        "VDR",
+        "YD"
+    ],
+    "JTJ-YD": [
+        "JTJ",
+        "YD"
+    ],
+    "KPD-YD": [
+        "KPD",
+        "YD"
+    ],
+    "MCN-YD": [
+        "MCN",
+        "YD"
+    ],
+    "TDK-YD": [
+        "TDK",
+        "YD"
+    ],
+    "POI-YD": [
+        "POI",
+        "YD"
+    ],
+    "MLPM-AJJ": [
+        "MLPM",
+        "AJJ"
+    ],
+    "KGZ-OV": [
+        "KGZ",
+        "OV"
+    ],
+    "GYM-YD": [
+        "GYM",
+        "YD"
+    ],
+    "TUG-YD": [
+        "TUG",
+        "YD"
+    ],
+    "WST-VPY": [
+        "WST",
+        "VPY"
+    ],
+    "MTL-YD": [
+        "MTL",
+        "YD"
+    ],
+    "MLMP YD": [
+        "MLMP YD",
+        "MLMP YD"
+    ],
+    "AIPP": [
+        "AIPPYD",
+        "AIPPYD"
+    ],
+    "VN YD": [
+        "VN YD",
+        "VN YD"
+    ],
+    "KVN-LTI": [
+        "KVN",
+        "LTI"
+    ],
+    "MSB YD": [
+        "MSB YD",
+        "MSB YD"
+    ],
+    "POI YD": [
+        "POI YD",
+        "POI YD"
+    ],
+    "LTI-YD": [
+        "LTI",
+        "YD"
+    ],
+    "BBQ-YD": [
+        "BBQ",
+        "YD"
+    ],
+    "MAS-YD": [
+        "MAS",
+        "YD"
+    ],
+    "VLK-YD": [
+        "VLK",
+        "YD"
+    ],
+    "PAB-AVD": [
+        "PAB",
+        "AVD"
+    ],
+    "BBQ-WST": [
+        "BBQ",
+        "WST"
+    ],
+    "PON-YD": [
+        "PON",
+        "YD"
+    ],
+    "TNPM-YD": [
+        "TNPM",
+        "YD"
+    ],
+    "SPE-YD": [
+        "SPE",
+        "YD"
+    ],
+    "PDD-YD": [
+        "PDD",
+        "YD"
+    ],
+    "AKM-YD": [
+        "AKM",
+        "YD"
+    ],
+    "KVP-PON": [
+        "KVP",
+        "PON"
+    ],
+    "POI-TRT": [
+        "POI",
+        "TRT"
+    ],
+    "KGZ-YD": [
+        "KGZ",
+        "YD"
+    ],
+    "SHU-YD": [
+        "SHU",
+        "YD"
+    ],
+    "PUT-YD": [
+        "PUT",
+        "YD"
+    ],
+    "MPI-YD": [
+        "MPI",
+        "YD"
+    ],
+    "KBT-TO": [
+        "KBT",
+        "TO"
+    ],
+    "CTRE-YD": [
+        "CTRE",
+        "YD"
+    ],
+    "SHU-TUG": [
+        "SHU",
+        "TUG"
+    ],
+    "MDVE-DHU": [
+        "MDVE",
+        "DHU"
+    ],
+    "CTTRE YD": [
+        "CTTRE YD",
+        "CTTRE YD"
+    ],
+    "LTI-KVN": [
+        "LTI",
+        "KVN"
+    ],
+    "MS-MKK": [
+        "MS",
+        "MKK"
+    ],
+    "VLK-VPY": [
+        "VLK",
+        "VPY"
+    ],
+    "OV-CGL ": [
+        "OV",
+        "CGL"
+    ],
+    "TZD YD": [
+        "TZD YD",
+        "TZD YD"
+    ],
+    "JTJ Y D": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "LTI YD": [
+        "LTI YD",
+        "LTI YD"
+    ],
+    "PON-MJR": [
+        "PON",
+        "MJR"
+    ],
+    "PUDI YD": [
+        "PUDI YD",
+        "PUDI YD"
+    ],
+    "TDK YD": [
+        "TDK YD",
+        "TDK YD"
+    ],
+    "MAS-BBQ": [
+        "MAS",
+        "BBQ"
+    ],
+    "ENR-TVT": [
+        "ENR",
+        "TVT"
+    ],
+    "VN-YD": [
+        "VN",
+        "YD"
+    ],
+    "PUDI-YD": [
+        "PUDI",
+        "YD"
+    ],
+    "WJ-YD": [
+        "WJ",
+        "YD"
+    ],
+    "DVR-YD": [
+        "DVR",
+        "YD"
+    ],
+    "THL-YD": [
+        "THL",
+        "YD"
+    ],
+    "VN-KDY": [
+        "VN",
+        "KDY"
+    ],
+    "GYM  YD": [
+        "GYM YD",
+        "GYM YD"
+    ],
+    "TBM  YD": [
+        "TBM YD",
+        "TBM YD"
+    ],
+    "VLK-ABU": [
+        "VLK",
+        "ABU"
+    ],
+    "KVP YD": [
+        "KVP YD",
+        "KVP YD"
+    ],
+    "TMV YD": [
+        "TMV YD",
+        "TMV YD"
+    ],
+    "TNP-YD": [
+        "TNP",
+        "YD"
+    ],
+    "TZD-YD": [
+        "TZD",
+        "YD"
+    ],
+    "TMV-YD": [
+        "TMV",
+        "YD"
+    ],
+    "MSB-YD": [
+        "MSB",
+        "YD"
+    ],
+    "PTMS-YD": [
+        "PTMS",
+        "YD"
+    ],
+    "KDY-JTJ": [
+        "KDY",
+        "JTJ"
+    ],
+    "VGM-YD": [
+        "VGM",
+        "YD"
+    ],
+    "ENR-YD": [
+        "ENR",
+        "YD"
+    ],
+    "CGL-YD": [
+        "CGL",
+        "YD"
+    ],
+    "CJ-YD": [
+        "CJ",
+        "YD"
+    ],
+    "KVN-YD": [
+        "KVN",
+        "YD"
+    ],
+    "AB-YD": [
+        "AB",
+        "YD"
+    ],
+    "TADA-SPE": [
+        "TADA",
+        "SPE"
+    ],
+    "SPE-PEL": [
+        "SPE",
+        "PEL"
+    ],
+    "OV-YD": [
+        "OV",
+        "YD"
+    ],
+    "MPI-VLT": [
+        "MPI",
+        "VLT"
+    ],
+    "NYP-DVR": [
+        "NYP",
+        "DVR"
+    ],
+    "ELR YD": [
+        "ELR YD",
+        "ELR YD"
+    ],
+    "MSB-RPM": [
+        "MSB",
+        "RPM"
+    ],
+    "WST-YD": [
+        "WST",
+        "YD"
+    ],
+    "KOK-YD": [
+        "KOK",
+        "YD"
+    ],
+    "BBQ-KOK": [
+        "BBQ",
+        "KOK"
+    ],
+    "STM-YD": [
+        "STM",
+        "YD"
+    ],
+    "MKK-YD": [
+        "MKK",
+        "YD"
+    ],
+    "KVN-GYM": [
+        "KVN",
+        "GYM"
+    ],
+    "VGM-VN": [
+        "VGM",
+        "VN"
+    ],
+    "PYA-YD": [
+        "PYA",
+        "YD"
+    ],
+    "ELR-YD": [
+        "ELR",
+        "YD"
+    ],
+    "VGA-PUT": [
+        "VGA",
+        "PUT"
+    ],
+    "TBM-VDR": [
+        "TBM",
+        "VDR"
+    ],
+    "OLA-YD": [
+        "OLA",
+        "YD"
+    ],
+    "ODR-YD": [
+        "ODR",
+        "YD"
+    ],
+    "PEL-YD": [
+        "PEL",
+        "YD"
+    ],
+    "MLMR-YD": [
+        "MLMR",
+        "YD"
+    ],
+    "TBM-PV": [
+        "TBM",
+        "PV"
+    ],
+    "PV-MKK": [
+        "PV",
+        "MKK"
+    ],
+    "MPK YD": [
+        "MPK YD",
+        "MPK YD"
+    ],
+    "OLA-TZD": [
+        "OLA",
+        "TZD"
+    ],
+    "VGA-NG": [
+        "VGA",
+        "NG"
+    ],
+    "PON YD": [
+        "PON YD",
+        "PON YD"
+    ],
+    "WJ YD": [
+        "WJ YD",
+        "WJ YD"
+    ],
+    "RPM-YD": [
+        "RPM",
+        "YD"
+    ],
+    "VLT-YD": [
+        "VLT",
+        "YD"
+    ],
+    "ODR-GDR": [
+        "ODR",
+        "GDR"
+    ],
+    "GI-YD": [
+        "GI",
+        "YD"
+    ],
+    "VN-VGM": [
+        "VN",
+        "VGM"
+    ],
+    "SPEL-PEL": [
+        "SPEL",
+        "PEL"
+    ],
+    "PEL YD": [
+        "PEL YD",
+        "PEL YD"
+    ],
+    "PEL-SPE": [
+        "PEL",
+        "SPE"
+    ],
+    "KDY-VN": [
+        "KDY",
+        "VN"
+    ],
+    "CGLYD-SKL": [
+        "CGLYD",
+        "SKL"
+    ],
+    "AJJN-AJJ": [
+        "AJJN",
+        "AJJ"
+    ],
+    "JTJ-SKPT": [
+        "JTJ",
+        "SKPT"
+    ],
+    "KOK-BBQ": [
+        "KOK",
+        "BBQ"
+    ],
+    "ODUR-YD": [
+        "ODUR",
+        "YD"
+    ],
+    "CGL-YD-SKL": [
+        "CGL YD",
+        "SKL"
+    ],
+    "PON-KVP": [
+        "PON",
+        "KVP"
+    ],
+    "PCKM Y D": [
+        "PCKM YD",
+        "PCKM YD"
+    ],
+    "PYA-ODR": [
+        "PYA",
+        "ODR"
+    ],
+    "ODR-PYA": [
+        "ODR",
+        "PYA"
+    ],
+    "VLK": [
+        "VLKYD",
+        "VLKYD"
+    ],
+    "PEL  YD": [
+        "PEL YD",
+        "PEL YD"
+    ],
+    "PYA": [
+        "PYAYD",
+        "PYAYD"
+    ],
+    "TADA YD": [
+        "TADA YD",
+        "TADA YD"
+    ],
+    "PCKM-MPI": [
+        "PCKM",
+        "MPI"
+    ],
+    "AJJ-RU": [
+        "AJJ",
+        "RU"
+    ],
+    "VGA-YD": [
+        "VGA",
+        "YD"
+    ],
+    "AJJ-AJJN": [
+        "AJJ",
+        "AJJN"
+    ],
+    "TRL-YD": [
+        "TRL",
+        "YD"
+    ],
+    "MMC-VPY": [
+        "MMC",
+        "VPY"
+    ],
+    "TRT-AJJN": [
+        "TRT",
+        "AJJN"
+    ],
+    "AJJN-TRT": [
+        "AJJN",
+        "TRT"
+    ],
+    "SVUR-KPD": [
+        "SVUR",
+        "KPD"
+    ],
+    "DVR-NYP": [
+        "DVR",
+        "NYP"
+    ],
+    "NYP-YD": [
+        "NYP",
+        "YD"
+    ],
+    "VGM-AB": [
+        "VGM",
+        "AB"
+    ],
+    "AJJ (N)-TRT": [
+        "AJJ North",
+        "TRT"
+    ],
+    "SKL YD": [
+        "SKL YD",
+        "SKL YD"
+    ],
+    "PTMS YD": [
+        "PTMS YD",
+        "PTMS YD"
+    ],
+    "THL YD": [
+        "THL YD",
+        "THL YD"
+    ],
+    "SKL-CGL ": [
+        "SKL",
+        "CGL"
+    ],
+    "PTMS  YD": [
+        "PTMS YD",
+        "PTMS YD"
+    ],
+    "MLMR ": [
+        "MLMRYD",
+        "MLMRYD"
+    ],
+    "JTJ TD ": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "SKL-YD": [
+        "SKL",
+        "YD"
+    ],
+    "ODUR-PYA": [
+        "ODUR",
+        "PYA"
+    ],
+    "ODUR-GDR": [
+        "ODUR",
+        "GDR"
+    ],
+    "ENR-AIPP": [
+        "ENR",
+        "AIPP"
+    ],
+    "PTMS": [
+        "PTMSYD",
+        "PTMSYD"
+    ],
+    "PDD-RU": [
+        "PDD",
+        "RU"
+    ],
+    "TNP  YD": [
+        "TNP YD",
+        "TNP YD"
+    ],
+    "TRL-KPD": [
+        "TRL",
+        "KPD"
+    ],
+    "TVT-TNPM": [
+        "TVT",
+        "TNPM"
+    ],
+    "KVP-YD": [
+        "KVP",
+        "YD"
+    ],
+    "AVD-YD": [
+        "AVD",
+        "YD"
+    ],
+    "GPD-YD": [
+        "GPD",
+        "YD"
+    ],
+    "GPD YD": [
+        "GPD YD",
+        "GPD YD"
+    ],
+    "PYA-ODUR": [
+        "PYA",
+        "ODUR"
+    ],
+    "FEW YD": [
+        "FEW YD",
+        "FEW YD"
+    ],
+    "VGM-AB/VGM YD": [
+        "VGM YD",
+        "VGM YD"
+    ],
+    "VPY-PEW": [
+        "VPY",
+        "PEW"
+    ],
+    "RU-PUDI": [
+        "RU",
+        "PUDI"
+    ],
+    "SVUR-YD": [
+        "SVUR",
+        "YD"
+    ],
+    "GDR-ODR": [
+        "GDR",
+        "ODR"
+    ],
+    "MCN-WJR": [
+        "MCN",
+        "WJR"
+    ],
+    "TI-TRL": [
+        "TI",
+        "TRL"
+    ],
+    "PUDI  YD": [
+        "PUDI YD",
+        "PUDI YD"
+    ],
+    "MPK": [
+        "MPKYD",
+        "MPKYD"
+    ],
+    "WJR-TUG": [
+        "WJR",
+        "TUG"
+    ],
+    "KPD yard": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "MDVE yard": [
+        "MDVE YD",
+        "MDVE YD"
+    ],
+    "TUG yard": [
+        "TUG YD",
+        "TUG YD"
+    ],
+    "JTJ yard": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "MMK yard": [
+        "MMK YD",
+        "MMK YD"
+    ],
+    "VN YD/VN-KDY": [
+        "VN YD",
+        "VN YD"
+    ],
+    "PCKM Yard": [
+        "PCKM YD",
+        "PCKM YD"
+    ],
+    "LTI -KPD": [
+        "LTI",
+        "KPD"
+    ],
+    "TNPM": [
+        "TNPMYD",
+        "TNPMYD"
+    ],
+    "ENR YARD": [
+        "ENR YD",
+        "ENR YD"
+    ],
+    "SVF YARD": [
+        "SVF YD",
+        "SVF YD"
+    ],
+    "TI - TRL": [
+        "TI",
+        "TRL"
+    ],
+    "TMV Yard": [
+        "TMV YD",
+        "TMV YD"
+    ],
+    "CGL - SKL": [
+        "CGL",
+        "SKL"
+    ],
+    "ABU yd": [
+        "ABU YD",
+        "ABU YD"
+    ],
+    "ENRyard": [
+        "ENR YD",
+        "ENR YD"
+    ],
+    "ELR YARD": [
+        "ELR YD",
+        "ELR YD"
+    ],
+    "MSB-VM": [
+        "MSB",
+        "VM"
+    ],
+    "MAS-GDR": [
+        "MAS",
+        "GDR"
+    ],
+    "NG-POI": [
+        "NG",
+        "POI"
+    ],
+    "KDY-YD": [
+        "KDY",
+        "YD"
+    ],
+    "KDU-JTJ": [
+        "KDU",
+        "JTJ"
+    ],
+    "MJR-YD": [
+        "MJR",
+        "YD"
+    ],
+    "GPD-KVP": [
+        "GPD",
+        "KVP"
+    ],
+    "PCM-YD": [
+        "PCM",
+        "YD"
+    ],
+    "KPD  YD": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "STM-PV ": [
+        "STM",
+        "PV"
+    ],
+    "MJR YD": [
+        "MJR YD",
+        "MJR YD"
+    ],
+    "PAB-TI": [
+        "PAB",
+        "TI"
+    ],
+    "NG-YD": [
+        "NG",
+        "YD"
+    ],
+    "NG YD": [
+        "NG YD",
+        "NG YD"
+    ],
+    "KGZ-MMK": [
+        "KGZ",
+        "MMK"
+    ],
+    "MMK YD": [
+        "MMK YD",
+        "MMK YD"
+    ],
+    "STM-PV": [
+        "STM",
+        "PV"
+    ],
+    "LTI-KPD": [
+        "LTI",
+        "KPD"
+    ],
+    "AJJN-YD": [
+        "AJJN",
+        "YD"
+    ],
+    "AIP-YD": [
+        "AIP",
+        "YD"
+    ],
+    "PV-STM &PV YD": [
+        "PV YD",
+        "PV YD"
+    ],
+    "KBTYD": [
+        "KBT YD",
+        "KBT YD"
+    ],
+    "RU-PDD": [
+        "RU",
+        "PDD"
+    ],
+    "MKK-PV ": [
+        "MKK",
+        "PV"
+    ],
+    "PUT YD": [
+        "PUT YD",
+        "PUT YD"
+    ],
+    "TI yard": [
+        "TI YD",
+        "TI YD"
+    ],
+    "VGA Yard": [
+        "VGA YD",
+        "VGA YD"
+    ],
+    "PV YD/PV-TBM": [
+        "PV YD",
+        "PV YD"
+    ],
+    "KBT YARD": [
+        "KBT YD",
+        "KBT YD"
+    ],
+    "AJJ(N)-AJJ": [
+        "AJJ(N)",
+        "AJJ"
+    ],
+    "MLMR Yard": [
+        "MLMR YD",
+        "MLMR YD"
+    ],
+    "PEL Yard": [
+        "PEL YD",
+        "PEL YD"
+    ],
+    "VGA-POI": [
+        "VGA",
+        "POI"
+    ],
+    "KPD ": [
+        "KPDYD",
+        "KPDYD"
+    ],
+    "MCN-THL ": [
+        "MCN",
+        "THL"
+    ],
+    "MAS-TRL": [
+        "MAS",
+        "TRL"
+    ],
+    "NA-VGA": [
+        "NA",
+        "VGA"
+    ],
+    "TRT YD": [
+        "TRT YD",
+        "TRT YD"
+    ],
+    "KPD-LTI": [
+        "KPD",
+        "LTI"
+    ],
+    "GSN YD": [
+        "GSN YD",
+        "GSN YD"
+    ],
+    "TBM-GI": [
+        "TBM",
+        "GI"
+    ],
+    "WJR-MCN": [
+        "WJR",
+        "MCN"
+    ],
+    "MMC-YD": [
+        "MMC",
+        "YD"
+    ],
+    "PEL-DVR": [
+        "PEL",
+        "DVR"
+    ],
+    "MMK-YD": [
+        "MMK",
+        "YD"
+    ],
+    "CGL  YD": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "JTJ-ED": [
+        "JTJ",
+        "ED"
+    ],
+    "POI YD ": [
+        "POI YD",
+        "POI YD"
+    ],
+    "LTI  YD": [
+        "LTI YD",
+        "LTI YD"
+    ],
+    "WJR-YD": [
+        "WJR",
+        "YD"
+    ],
+    "AVD YARD": [
+        "AVD YD",
+        "AVD YD"
+    ],
+    "AVD-PAB PAB YARD": [
+        "PAB YD",
+        "PAB YD"
+    ],
+    "STM - PV": [
+        "STM",
+        "PV"
+    ],
+    "TMV yard": [
+        "TMV YD",
+        "TMV YD"
+    ],
+    "CGL YARD": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "MTL-PEI /MTL YD": [
+        "MTL YD",
+        "MTL YD"
+    ],
+    "TI-PAB": [
+        "TI",
+        "PAB"
+    ],
+    "CGL0SKL": [
+        "CGL0SKLYD",
+        "CGL0SKLYD"
+    ],
+    "MSB ": [
+        "MSBYD",
+        "MSBYD"
+    ],
+    "PV  YD": [
+        "PV YD",
+        "PV YD"
+    ],
+    "TO-YD": [
+        "TO",
+        "YD"
+    ],
+    "RPM ": [
+        "RPMYD",
+        "RPMYD"
+    ],
+    "VDR-TBM": [
+        "VDR",
+        "TBM"
+    ],
+    "TBM ": [
+        "TBMYD",
+        "TBMYD"
+    ],
+    "KOK  YD": [
+        "KOK YD",
+        "KOK YD"
+    ],
+    "TDK-PDD": [
+        "TDK",
+        "PDD"
+    ],
+    "SVUR-THL": [
+        "SVUR",
+        "THL"
+    ],
+    "CGK-SKL": [
+        "CGK",
+        "SKL"
+    ],
+    "TRT-YD": [
+        "TRT",
+        "YD"
+    ],
+    "ENR-AIPP YD": [
+        "ENR",
+        "AIPP YD"
+    ],
+    "TRL  YD": [
+        "TRL YD",
+        "TRL YD"
+    ],
+    "AJJ  YD": [
+        "AJJ YD",
+        "AJJ YD"
+    ],
+    "POI-NG": [
+        "POI",
+        "NG"
+    ],
+    "KBT-TRL": [
+        "KBT",
+        "TRL"
+    ],
+    "TRL-KBT": [
+        "TRL",
+        "KBT"
+    ],
+    "PAB-AVD/ AVD YD": [
+        "AVD YD",
+        "AVD YD"
+    ],
+    "AIPP-AIP": [
+        "AIPP",
+        "AIP"
+    ],
+    "AVD-ABU/ AVD YD": [
+        "AVD YD",
+        "AVD YD"
+    ],
+    "TBMYD": [
+        "TBM YD",
+        "TBM YD"
+    ],
+    "CGL-PALR": [
+        "CGL",
+        "PALR"
+    ],
+    "MJR-AIP": [
+        "MJR",
+        "AIP"
+    ],
+    "MPK-YD": [
+        "MPK",
+        "YD"
+    ],
+    "TDK-PUDI": [
+        "TDK",
+        "PUDI"
+    ],
+    "PCKM-YD-AB": [
+        "PCKM YD",
+        "AB"
+    ],
+    "TADA-YD": [
+        "TADA",
+        "YD"
+    ],
+    "TRL-KBT ": [
+        "TRL",
+        "KBT"
+    ],
+    "DVR  YD": [
+        "DVR YD",
+        "DVR YD"
+    ],
+    "VLK YD ": [
+        "VLK YD",
+        "VLK YD"
+    ],
+    "JTJ  YD": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "WST YD": [
+        "WST YD",
+        "WST YD"
+    ],
+    "MDVE-CTRE": [
+        "MDVE",
+        "CTRE"
+    ],
+    "PEW-VLK": [
+        "PEW",
+        "VLK"
+    ],
+    "VLCY-YD": [
+        "VLCY",
+        "YD"
+    ],
+    "TRT-AJJ": [
+        "TRT",
+        "AJJ"
+    ],
+    "MDVE-YD": [
+        "MDVE",
+        "YD"
+    ],
+    "TO-AJJ": [
+        "TO",
+        "AJJ"
+    ],
+    "GI-TBM": [
+        "GI",
+        "TBM"
+    ],
+    "VLT  YD": [
+        "VLT YD",
+        "VLT YD"
+    ],
+    "TDD-PDD": [
+        "TDD",
+        "PDD"
+    ],
+    "RPM  YD": [
+        "RPM YD",
+        "RPM YD"
+    ],
+    "MMC-BBQ": [
+        "MMC",
+        "BBQ"
+    ],
+    "MMC-VPY ": [
+        "MMC",
+        "VPY"
+    ],
+    "TVT  YD": [
+        "TVT YD",
+        "TVT YD"
+    ],
+    "KOKG YD": [
+        "KOKG YD",
+        "KOKG YD"
+    ],
+    "VLK ": [
+        "VLKYD",
+        "VLKYD"
+    ],
+    "MTL-TMV": [
+        "MTL",
+        "TMV"
+    ],
+    "PDDYD": [
+        "PDD YD",
+        "PDD YD"
+    ],
+    "ABU-YD-VLK": [
+        "ABU YD",
+        "VLK"
+    ],
+    "THL-MCN": [
+        "THL",
+        "MCN"
+    ],
+    "CGL-YD -SKL": [
+        "CGL YD",
+        "SKL"
+    ],
+    "KOKYD": [
+        "KOK YD",
+        "KOK YD"
+    ],
+    "TNPM ": [
+        "TNPMYD",
+        "TNPMYD"
+    ],
+    "MN YD": [
+        "MN YD",
+        "MN YD"
+    ],
+    "CGL-OV/CGL YD": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "KOK-TNP/KOK YD": [
+        "KOK YD",
+        "KOK YD"
+    ],
+    "KVN yd": [
+        "KVN YD",
+        "KVN YD"
+    ],
+    "AJJ East Yard": [
+        "AJJ East YD",
+        "AJJ East YD"
+    ],
+    "SVUR yard": [
+        "SVUR YD",
+        "SVUR YD"
+    ],
+    "RPM YARD": [
+        "RPM YD",
+        "RPM YD"
+    ],
+    "ABU - VLK": [
+        "ABU",
+        "VLK"
+    ],
+    "TRL yard": [
+        "TRL YD",
+        "TRL YD"
+    ],
+    "PALR Yard": [
+        "PALR YD",
+        "PALR YD"
+    ],
+    "PEL-DVR/ DVR YD": [
+        "DVR YD",
+        "DVR YD"
+    ],
+    "TNP YARD": [
+        "TNP YD",
+        "TNP YD"
+    ],
+    "RPM-MSB": [
+        "RPM",
+        "MSB"
+    ],
+    "PCKM-MPI MPI Yard": [
+        "MPI YD",
+        "MPI YD"
+    ],
+    "SPE YARD": [
+        "SPE YD",
+        "SPE YD"
+    ],
+    "MS-MPK": [
+        "MS",
+        "MPK"
+    ],
+    "MJR  YD": [
+        "MJR YD",
+        "MJR YD"
+    ],
+    "CGL Y D": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "AJJ EAST YD": [
+        "AJJ East YD",
+        "AJJ East YD"
+    ],
+    "TRL YARD": [
+        "TRL YD",
+        "TRL YD"
+    ],
+    "THL yd": [
+        "THL YD",
+        "THL YD"
+    ],
+    "PALR Yard & PALR-WJ": [
+        "PALR",
+        "WJ"
+    ],
+    "PCKM-MPI/MPI YD": [
+        "MPI YD",
+        "MPI YD"
+    ],
+    "TNPM  YD": [
+        "TNPM YD",
+        "TNPM YD"
+    ],
+    "MLPM": [
+        "MLPMYD",
+        "MLPMYD"
+    ],
+    "KVN-LTI YD": [
+        "KVN",
+        "LTI YD"
+    ],
+    "RU-PPD": [
+        "RU",
+        "PPD"
+    ],
+    "SPE": [
+        "SPEYD",
+        "SPEYD"
+    ],
+    "VVN-MYP": [
+        "VVN",
+        "MYP"
+    ],
+    "PALR-WJ": [
+        "PALR",
+        "WJ"
+    ],
+    "MTL-PEI ": [
+        "MTL",
+        "PEI"
+    ],
+    "AJJ-TRT": [
+        "AJJ",
+        "TRT"
+    ],
+    "KPD Yard": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "TRL - TI": [
+        "TRL",
+        "TI"
+    ],
+    "DVR-PEL": [
+        "DVR",
+        "PEL"
+    ],
+    "GPD YARD": [
+        "GPD YD",
+        "GPD YD"
+    ],
+    "CGL Yard": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "TRL-TI/TIYD": [
+        "TRL",
+        "TI/TIYD"
+    ],
+    "TI YD/TI-PAB": [
+        "TI YD",
+        "TI YD"
+    ],
+    "Pudi yd": [
+        "PUDI YD",
+        "PUDI YD"
+    ],
+    "PUT YArd": [
+        "PUT YD",
+        "PUT YD"
+    ],
+    "TRL- YD": [
+        "TRL",
+        "YD"
+    ],
+    "MMK": [
+        "MMKYD",
+        "MMKYD"
+    ],
+    "PEL -DVR": [
+        "PEL",
+        "DVR"
+    ],
+    "VLK-ANNG": [
+        "VLK",
+        "ANNG"
+    ],
+    "TRT YD ": [
+        "TRT YD",
+        "TRT YD"
+    ],
+    "PAB - TI": [
+        "PAB",
+        "TI"
+    ],
+    "KBT yard & KBT-TO": [
+        "KBT",
+        "TO"
+    ],
+    "PV YARD": [
+        "PV YD",
+        "PV YD"
+    ],
+    "MAS YARD": [
+        "MAS YD",
+        "MAS YD"
+    ],
+    "VPY-PER": [
+        "VPY",
+        "PER"
+    ],
+    "TDK Yard": [
+        "TDK YD",
+        "TDK YD"
+    ],
+    "SHU yard": [
+        "SHU YD",
+        "SHU YD"
+    ],
+    "PEI yard": [
+        "PEI YD",
+        "PEI YD"
+    ],
+    "CTRE-MLPM": [
+        "CTRE",
+        "MLPM"
+    ],
+    "MKK-STM ": [
+        "MKK",
+        "STM"
+    ],
+    "PUT-TDK": [
+        "PUT",
+        "TDK"
+    ],
+    "PUDD YD": [
+        "PUDD YD",
+        "PUDD YD"
+    ],
+    "POI-TRT&TRT YD": [
+        "POI",
+        "TRT"
+    ],
+    "ABU Yd and ABU-VLK": [
+        "ABU",
+        "VLK"
+    ],
+    "PE-VVN": [
+        "PE",
+        "VVN"
+    ],
+    "BBQ YARD": [
+        "BBQ YD",
+        "BBQ YD"
+    ],
+    "MLPM yard": [
+        "MLPM YD",
+        "MLPM YD"
+    ],
+    "KVN yard": [
+        "KVN YD",
+        "KVN YD"
+    ],
+    "TBM YARD": [
+        "TBM YD",
+        "TBM YD"
+    ],
+    "AJJ E YD": [
+        "AJJ East YD",
+        "AJJ East YD"
+    ],
+    "SKL  YD": [
+        "SKL YD",
+        "SKL YD"
+    ],
+    "ENR": [
+        "ENR YD",
+        "ENR YD"
+    ],
+    "PEI-VNN": [
+        "PEI",
+        "VNN"
+    ],
+    "AKM-TADA/AKM YD": [
+        "AKM YD",
+        "AKM YD"
+    ],
+    "AJJ NORTH YD": [
+        "AJJ North YD",
+        "AJJ North YD"
+    ],
+    "CTM YARD": [
+        "CTM YD",
+        "CTM YD"
+    ],
+    "SHU YARD": [
+        "SHU YD",
+        "SHU YD"
+    ],
+    "AJJ INTER YARD": [
+        "AJJ Inter YD",
+        "AJJ Inter YD"
+    ],
+    "POI-TRT & TRT YD": [
+        "POI",
+        "TRT"
+    ],
+    "Ajj East yard": [
+        "AJJ East YD",
+        "AJJ East YD"
+    ],
+    "CTRE yard": [
+        "CTRE YD",
+        "CTRE YD"
+    ],
+    "ELR ": [
+        "ELRYD",
+        "ELRYD"
+    ],
+    "VM-MYP": [
+        "VM",
+        "MYP"
+    ],
+    "PALR-WJ YD": [
+        "PALR",
+        "WJ YD"
+    ],
+    "BBQYD": [
+        "BBQ YD",
+        "BBQ YD"
+    ],
+    "TDK  YD": [
+        "TDK YD",
+        "TDK YD"
+    ],
+    "PER-PERC": [
+        "PER",
+        "PERC"
+    ],
+    "KPD YARD": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "WJR yard": [
+        "WJR YD",
+        "WJR YD"
+    ],
+    "POI-TRT/TRT YD": [
+        "TRT YD",
+        "TRT YD"
+    ],
+    "AJJ (N)-AJJ": [
+        "AJJ North",
+        "AJJ"
+    ],
+    "VN yard": [
+        "VN YD",
+        "VN YD"
+    ],
+    "TDK YArd": [
+        "TDK YD",
+        "TDK YD"
+    ],
+    "MMK-MS": [
+        "MMK",
+        "MS"
+    ],
+    "VLK YG": [
+        "VLK YD",
+        "VLK YD"
+    ],
+    "MS-MKK/MS YD": [
+        "MS YD",
+        "MS YD"
+    ],
+    "GI YARD": [
+        "GI YD",
+        "GI YD"
+    ],
+    "AB yard": [
+        "AB YD",
+        "AB YD"
+    ],
+    "POI-TRT&TRTYD": [
+        "POI",
+        "TRT"
+    ],
+    "TUG-SHU": [
+        "TUG",
+        "SHU"
+    ],
+    "PON-MJR ": [
+        "PON",
+        "MJR"
+    ],
+    "RPM-WST": [
+        "RPM",
+        "WST"
+    ],
+    "CJ YD": [
+        "CJ YD",
+        "CJ YD"
+    ],
+    "CTRE-MLPM & MLPM yard": [
+        "CTRE",
+        "MLPM"
+    ],
+    "PERC-PEW": [
+        "PERC",
+        "PEW"
+    ],
+    "TUG-WJR ": [
+        "TUG",
+        "WJR"
+    ],
+    "MYP-VNN": [
+        "MYP",
+        "VNN"
+    ],
+    "VPY-KOK": [
+        "VPY",
+        "KOK"
+    ],
+    "WJ-CJ": [
+        "WJ",
+        "CJ"
+    ],
+    "PAB-AVD & AVD YD": [
+        "PAB",
+        "AVD"
+    ],
+    "TRT Yd": [
+        "TRT YD",
+        "TRT YD"
+    ],
+    "SVUR YARD": [
+        "SVUR YD",
+        "SVUR YD"
+    ],
+    "RPM-KOK": [
+        "RPM",
+        "KOK"
+    ],
+    "TNP ": [
+        "TNPYD",
+        "TNPYD"
+    ],
+    "MLPM ": [
+        "MLPMYD",
+        "MLPMYD"
+    ],
+    "JTJ-SBC": [
+        "JTJ",
+        "SBC"
+    ],
+    "ABU-VLK VLK YD": [
+        "ABU",
+        "VLK"
+    ],
+    "MPK-MS/MPK YD": [
+        "MPK YD",
+        "MPK YD"
+    ],
+    "PUT-TDK ": [
+        "PUT",
+        "TDK"
+    ],
+    "POI-VGA": [
+        "POI",
+        "VGA"
+    ],
+    "KOK-BBG": [
+        "KOK",
+        "BBG"
+    ],
+    "VN Yard": [
+        "VN YD",
+        "VN YD"
+    ],
+    "JTJ Yard": [
+        "JTJ YD",
+        "JTJ YD"
+    ],
+    "TBM Yard": [
+        "TBM YD",
+        "TBM YD"
+    ],
+    "MJR-PON": [
+        "MJR",
+        "PON"
+    ],
+    "VN YD ": [
+        "VN YD",
+        "VN YD"
+    ],
+    "GYM Yard": [
+        "GYM YD",
+        "GYM YD"
+    ],
+    "TI YARD": [
+        "TI YD",
+        "TI YD"
+    ],
+    "SHU - MDVE": [
+        "SHU",
+        "MDVE"
+    ],
+    "KPD-LTI/LTI YD": [
+        "LTI YD",
+        "LTI YD"
+    ],
+    "TVT-KOK": [
+        "TVT",
+        "KOK"
+    ],
+    "VLKYD": [
+        "VLK YD",
+        "VLK YD"
+    ],
+    "KPD YD ": [
+        "KPD YD",
+        "KPD YD"
+    ],
+    "SHU-MDVE": [
+        "SHU",
+        "MDVE"
+    ],
+    "PEI-VVN/VVN YD": [
+        "VVN YD",
+        "VVN YD"
+    ],
+    "TNP": [
+        "TNPYD",
+        "TNPYD"
+    ],
+    "TDK-PUT/PUT YD": [
+        "PUT YD",
+        "PUT YD"
+    ],
+    "MMK-KGZ": [
+        "MMK",
+        "KGZ"
+    ],
+    "MDVE Yard": [
+        "MDVE YD",
+        "MDVE YD"
+    ],
+    "VPY YD": [
+        "VPY YD",
+        "VPY YD"
+    ],
+    "CJ-WJ": [
+        "CJ",
+        "WJ"
+    ],
+    "PDD-SVF": [
+        "PDD",
+        "SVF"
+    ],
+    "VVN-YD": [
+        "VVN",
+        "YD"
+    ],
+    "PEI-YD": [
+        "PEI",
+        "YD"
+    ],
+    "VVN-MYP/VVN YD": [
+        "VVN YD",
+        "VVN YD"
+    ],
+    "VLK-ABU/ABU YD": [
+        "ABU YD",
+        "ABU YD"
+    ],
+    "ABU-AVD/AVD YD": [
+        "AVD YD",
+        "AVD YD"
+    ],
+    "VGA-PUT/PUT YD": [
+        "PUT YD",
+        "PUT YD"
+    ],
+    "KVN YD ": [
+        "KVN YD",
+        "KVN YD"
+    ],
+    "VLK-PEW": [
+        "VLK",
+        "PEW"
+    ],
+    "PV-YD": [
+        "PV",
+        "YD"
+    ],
+    "BBQ YD ": [
+        "BBQ YD",
+        "BBQ YD"
+    ],
+    "KBT yard": [
+        "KBT YD",
+        "KBT YD"
+    ],
+    "CGL yard": [
+        "CGL YD",
+        "CGL YD"
+    ],
+    "PON YARD": [
+        "PON YD",
+        "PON YD"
+    ],
+    "TPT-SBC": [
+        "TPT",
+        "SBC"
+    ],
+    "TMV-OLA": [
+        "TMV",
+        "OLA"
+    ],
+    "WST- VPY": [
+        "WST",
+        "VPY"
+    ],
+    "AJJ YARD": [
+        "AJJ YD",
+        "AJJ YD"
+    ],
+    "PUDI Yard": [
+        "PUDI YD",
+        "PUDI YD"
+    ],
+    "JTJ EAST YD": [
+        "JTJ East YD",
+        "JTJ East YD"
+    ],
+    "VLCY YD": [
+        "VLCY YD",
+        "VLCY YD"
+    ],
+    "PEW-YD": [
+        "PEW",
+        "YD"
+    ],
+    "BBQ-VPY": [
+        "BBQ",
+        "VPY"
+    ],
+    "MAS ": [
+        "MASYD",
+        "MASYD"
+    ],
+    "NG YD ": [
+        "NG YD",
+        "NG YD"
+    ],
+    "NGYD": [
+        "NG YD",
+        "NG YD"
+    ],
+    "TVT-ENR,TVT YD": [
+        "TVT",
+        "ENR"
+    ],
+    "PEI": [
+        "PEIYD",
+        "PEIYD"
+    ],
+    "ENR-TVT/TVT YD": [
+        "TVT YD",
+        "TVT YD"
+    ],
+    "MLMR MMK": [
+        "MLMR",
+        "MMK"
+    ],
+    "AIPP YARD": [
+        "AIPP YD",
+        "AIPP YD"
+    ],
+    "ELR-GPD": [
+        "ELR",
+        "GPD"
+    ],
+    "GPD-ELR": [
+        "GPD",
+        "ELR"
+    ],
+    "PALR-YD": [
+        "PALR",
+        "YD"
+    ],
+    "CGL NORTH YD": [
+        "CGL North YD",
+        "CGL North YD"
+    ],
+    "SVF-TDK": [
+        "SVF",
+        "TDK"
+    ]
+}

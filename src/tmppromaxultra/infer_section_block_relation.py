@@ -92,6 +92,7 @@ def main(path: Path, block_source: Path, section_source: Path):
     block_action_file: str = input("Enter file to take BLOCK skipper or parser from: ")
     section_action_file: str = input("Enter file to take SECTION skipper or parser from: ")
 
+    their_section_to_our_section_map: dict[str, Section] = {}
 
     def _parse_generic(item: Any, handlers: tuple[SkipHandlers, ParseHandlers[T]], source_code: tuple[list[str], list[str]], debug_name: str, action_file: str, acceptor: dict[str, T], skiplist: list[str]) -> T | None:
         if not isinstance(item, str): return None
@@ -168,16 +169,21 @@ def main(path: Path, block_source: Path, section_source: Path):
 
         block = parse_block_name(block_name)
         section = parse_section_name(section_name) if block is not None else None
+        if section is not None:
+            their_section_to_our_section_map[section_name] = section
+
 
         if block is None or section is None:
             print("IGNORING ROW!", row, f"`{block_name}`, `{section_name}`")
             continue
 
+        
         mas[block].append(list(section))
 
     dump(block_rejects, block_accepts, block_source_code, block_source)
     dump(section_rejects, section_accepts, section_source_code, section_source)
     Path("mas2.json").write_text(json.dumps(mas))
+    Path("masection.json").write_text(json.dumps(their_section_to_our_section_map))
 
     return 0
 
@@ -186,8 +192,8 @@ if __name__ == '__main__':
     
     sys.exit(
         main(
-            Path(sys.argv[1] if len(sys.argv) > 1 else "SR_Rolling_Block_Programme.xlsx"),
-            Path(sys.argv[2] if len(sys.argv) > 2 else "block_handlers.dat"), 
-            Path(sys.argv[3] if len(sys.argv) > 3 else "section_handlers.dat"), 
+            Path(sys.argv[1] if len(sys.argv) > 1 else "SR_Rolling_Block_Programme.csv"),
+            Path(sys.argv[2] if len(sys.argv) > 2 else "block_handlers.json"), 
+            Path(sys.argv[3] if len(sys.argv) > 3 else "section_handlers.json"), 
         )
     )
