@@ -66,4 +66,6 @@ def get_db() -> sqlite3.Connection:
     con = sqlite3.connect("./tmp/train.db", detect_types=sqlite3.PARSE_DECLTYPES)
     con.row_factory = sqlite3.Row
 
+    con.execute("PRAGMA journal_mode=WAL")
+
     return con
