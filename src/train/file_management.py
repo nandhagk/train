@@ -59,7 +59,7 @@ class FileManager(ABC):
             return CSVManager(src, dst, err, logger)
 
         if dst.suffix == ".xlsx":
-            return ExcelManager(dst, dst, err, logger)
+            return ExcelManager(src, dst, err, logger)
 
         raise UnsupportedFileTypeError(src.suffix)
 

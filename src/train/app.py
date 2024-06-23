@@ -55,9 +55,9 @@ def handle_form():
         name, _, ext = f.filename.rpartition(".")
 
         with (
-            NamedTemporaryFile(suffix=f".{ext}") as src,
-            NamedTemporaryFile(suffix=f".{ext}") as dst,
-            NamedTemporaryFile(suffix=f".{ext}") as err,
+            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as src,
+            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as dst,
+            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as err,
         ):
             src_path = Path(src.name)
             dst_path = Path(dst.name)
