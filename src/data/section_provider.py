@@ -1,6 +1,7 @@
 def skipper(raw: str):
     pass
 
+
 def parser(raw: str):
     raw, _, _ = raw.partition("/")
     raw = raw.strip().replace("-", " ").replace("_", " ").upper()
@@ -10,4 +11,4 @@ def parser(raw: str):
             raw = raw.removesuffix(ed).strip()
             if raw.count(" ") == 0:
                 return raw + " YD", raw + " YD"
-
+    return None

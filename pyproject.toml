@@ -70,5 +70,8 @@ ignore = [
 ]
 select = ["ALL"]
 
+[tool.ruff.lint.per-file-ignores]
+"src/data/*" = ["ALL"]
+
 [tool.pyright]
 include = ["train"]
