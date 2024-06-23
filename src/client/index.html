@@ -23,6 +23,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="grid place-items-center min-h-screen bg-slate-700">
+    <div id="errc" class="duration-1000 top-0 transition-all -translate-y-full absolute flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800" role="alert">
+      <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+      </svg>
+      <span class="sr-only">Info</span>
+      <div>
+        <span class="font-medium">ERROR!</span> <span id="error">Error vro</span>
+      </div>
+    </div>
     <form id="form" class="p-12">
       <span id="info"> Please enter a file that follows a supported format! </span>
       <div class="relative flex w-full max-w-sm flex-col gap-1 text-slate-700 dark:text-slate-300">
@@ -65,6 +74,8 @@
       const spinner = document.getElementById("spinner");
       const buttonText = document.getElementById("button-text");
       const form = document.getElementById("form");
+      const errc = document.getElementById("errc");
+      const err = document.getElementById("error");
 
       button.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -81,7 +92,19 @@
         });
 
         if (!resp.ok) {
-          alert(await resp.text());
+          err.innerText = (await resp.text());
+          errc.classList.replace("-translate-y-full", "translate-y-20");
+
+          setTimeout(() => {
+            buttonText.innerHTML = "Submit";
+          button.classList.remove("cursor-not-allowed");
+          fileInput.classList.remove("cursor-not-allowed");
+          button.classList.replace("bg-indigo-400", "bg-indigo-500");
+          spinner.style.display = "none";
+          errc.classList.replace("translate-y-20", "-translate-y-full");
+          }, 4000)
+
+          return;
         } else {
           const blob = await resp.blob();
           const file = window.URL.createObjectURL(blob);
