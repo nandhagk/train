@@ -6,11 +6,14 @@ The system will allocate maintenance tasks to appropriate time slots in the rail
 ## Setup
 
 ### Requirements
-  - python >= 3.10 (To run the server)
-  - pip (To install additional dependancies)
+  - python >= 3.12 (To run the server)
+  - pip (To install additional dependencies)
 
 ### Download the source code:
 `git clone https://github.com/nandhagk/train.git`
+
+### Install dependencies
+`pip install -r requirements.txt`
 
 ### Initialize data
 **NOTE**: This data has been scraped from what documents we were provided, it doesn't contain the full dataset!
