@@ -13,7 +13,7 @@ The system will allocate maintenance tasks to appropriate time slots in the rail
 `git clone https://github.com/nandhagk/train.git`
 
 ### Initialize data
-NOTE: This data has been scraped from what documents we were provided, it doesn't contain the full dataset !
+**NOTE**: This data has been scraped from what documents we were provided, it doesn't contain the full dataset!
 ```
 cd src
 python -m train init data/mas_sections.json
@@ -25,8 +25,8 @@ python -m train create-windows data/maintenance_windows.dat 180 --clear
 python -m train
 ```
 Navigate to localhost:5432 and fill in the input data file
-NOTE: This is similar to using the schedule command in the cli
 
+**NOTE**: This is similar to using the schedule command in the cli
 
 ## Supported Format for the Input
   - We support both .csv and .xlsx files
