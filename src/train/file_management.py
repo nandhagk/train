@@ -430,9 +430,13 @@ class ExcelManager(FileManager):
         self.fmt = FileManager.get_file_fmt_type(self.headers)
         self.validate_headers()
 
-        data = []
-        for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_count):
-            data.append({self.headers[i]: str(row[i].value) if row[i].value is not None else '' for i in range(col_count)})
+        data = [
+            {
+                self.headers[i]: str(row[i].value) if row[i].value is not None else ""
+                for i in range(col_count)
+            }
+            for row in sheet.iter_rows(min_row=2, min_col=1, max_col=col_count)
+        ]
 
         wb.close()
         taskqs = []
