@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING
 import json
+from dataclasses import dataclass
 from pathlib import Path
-
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from sqlite3 import Cursor, Row
 
-FALLBACK_MAP = json.loads((Path.cwd() / 'tmppromaxultra' / 'masection.json').read_text())
+FALLBACK_MAP = json.loads(
+    (Path.cwd() / "tmppromaxultra" / "masection.json").read_text(),
+)
+
 
 @dataclass(frozen=True)
 class PartialSection:
@@ -64,7 +66,7 @@ class Section:
             f = f.replace(" ", "_")
             t = t.replace(" ", "_")
 
-        payload = {"f": f, "t": t, "line": "UP"}
+        payload = {"f": f, "t": t, "line": line}
 
         cur.execute(
             """

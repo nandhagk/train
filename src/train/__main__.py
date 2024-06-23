@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import click
+from result import Err
 from waitress import serve
 
 from train.app import app
@@ -22,6 +23,7 @@ from train.models.task import PartialTask, Task
 
 if TYPE_CHECKING:
     from os import PathLike
+
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -209,17 +211,18 @@ def schedule(src: Path, dst: Path):
     try:
         taskqs_per_section: dict[int, list[PartialTask]] = defaultdict(list)
 
-        fm = FileManager.get_manager(src)(src, dst)
+        fm = FileManager.get_manager(src, dst)
         for taskq in fm.read(cur):
             taskqs_per_section[taskq.section_id].append(taskq)
 
-        tasks = []
+        tasks: list[Task] = []
         for section_id, taskqs in taskqs_per_section.items():
-            logger.info("Scheduling section: %d", section_id)
-            try:
-                tasks.extend(Task.insert_many(cur, taskqs))
-            except Exception:
-                logger.exception("Ignoring section: %d", section_id)
+            logger.info("Scheduling %d", section_id)
+            for res in Task.insert_many(cur, taskqs):
+                if isinstance(res, Err):
+                    logger.warning(res.err_value)
+                else:
+                    tasks.append(res.value)
 
         con.commit()
         fm.write(cur, tasks)

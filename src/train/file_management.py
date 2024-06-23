@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import csv
 import logging
 from abc import ABC, abstractmethod
 from datetime import time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, Any
 
+import openpyxl
+
 from train.db import decode_time, timediff
 from train.exceptions import (
-    CriticalLogicError,
     InvalidFileDataError,
     InvalidHeadersError,
     UnsupportedFileTypeError,
@@ -43,22 +45,41 @@ class FileManager(ABC):
             return default
 
     @staticmethod
-    def get_manager(path: Path) -> type[FileManager]:
-        if path.suffix == ".csv":
-            return CSVManager
+    def get_manager(src: Path, dst: Path) -> FileManager:
+        if src.suffix == ".csv":
+            return CSVManager(src, dst)
 
-        if path.suffix == ".xlsx":
-            return ExcelManager
+        if dst.suffix == ".xlsx":
+            return ExcelManager(dst, dst)
 
-        raise UnsupportedFileTypeError(path.suffix)
+        raise UnsupportedFileTypeError(src.suffix)
+
+    _headers: list[str]
+    _fmt: Format | None
 
     def __init__(self, src: Path, dst: Path) -> None:
         self.src_path = src
         self.dst_path = dst
 
-        self.headers: list[str]
+    @property
+    def headers(self) -> list[str]:
+        return self._headers
 
-        self.fmt: FileManager.Format | None = None
+    @property
+    def fmt(self) -> Format:
+        if self._fmt is None:
+            raise ValueError
+
+        return self._fmt
+
+    @headers.setter
+    def headers(self, headers: list[str]) -> None:
+        self._headers = headers
+        self._fmt = self.get_file_fmt_type(headers)
+
+        is_valid = self._validate_headers()
+        if not is_valid:
+            raise InvalidHeadersError(self._fmt, self._headers)
 
     @staticmethod
     def get_file_fmt_type(headers: list[str]) -> Format:
@@ -67,9 +88,9 @@ class FileManager(ABC):
 
         return FileManager.Format.bare_minimum
 
-    def validate_headers(self):
+    def _validate_headers(self) -> bool:
         if self.fmt == FileManager.Format.bare_minimum:
-            if not {
+            return {
                 "date",
                 "department",
                 "den",
@@ -84,49 +105,50 @@ class FileManager(ABC):
                 "permitted_time_from",
                 "permitted_time_to",
                 "block_permitted",
-            }.issubset(self.headers):
-                raise InvalidHeadersError(self.fmt, self.headers)
+            }.issubset(self._headers)
 
-        elif self.fmt == FileManager.Format.mas_recent and not {
-            "DATE",
-            "Department",
-            "DEN",
-            "Block Section/ Yard",
-            "CORRIDOR block section",
-            # "corridor block period",
-            "UP/ DN Line",
-            # "Block demanded in Hrs(Day or Night)",
-            "Demanded time (From)",
-            "Demanded time (To)",
-            "Block demanded in(MINS)",
-            "Permitted time (From) No need to fill",
-            "Permitted time (To) No need to fill",
-            "BLOCK PERMITTED MINS",
-            # "Location - FROM",
-            # "Location - TO",
-            "Nautre of work & Quantum of Output Planned",
-            # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",  # noqa: E501
-            # "Caution required",
-            # "Caution required (if yes with relaxation date dd:mm:yyyy)",
-            # "Power Block & its Elementary Section. Please give specific details without fail",  # noqa: E501
-            # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",  # noqa: E501
-            # "Whether site preparation & resources ready",
-            # "Supervisors to be deputed (JE/SSE with section)",
-            # "Coaching repercussions/ Movement Repercussions",
-            # "Actual Block Granted From No need to fill",
-            # "Actual Block Granted To No need to fill",
-            # "Actual block duration MINS No need to fill",
-            # "Over all % granted for the day No need to fill",
-            # "Output as per Manual No need to fill",
-            # "Actual Output",
-            # "% Output vs Planned\nNo need to fill",
-            # "% Output\nvs\nPlanned",
-            # "PROGRESS",
-            "LOCATION",
-            # "SECTION",
-            # "ARB/RB",
-        }.issubset(self.headers):
-            raise InvalidHeadersError(self.fmt, self.headers)
+        if self.fmt == FileManager.Format.mas_recent:
+            return {
+                "DATE",
+                "Department",
+                "DEN",
+                "Block Section/ Yard",
+                "CORRIDOR block section",
+                # "corridor block period",
+                "UP/ DN Line",
+                # "Block demanded in Hrs(Day or Night)",
+                "Demanded time (From)",
+                "Demanded time (To)",
+                "Block demanded in(MINS)",
+                "Permitted time (From) No need to fill",
+                "Permitted time (To) No need to fill",
+                "BLOCK PERMITTED MINS",
+                # "Location - FROM",
+                # "Location - TO",
+                "Nautre of work & Quantum of Output Planned",
+                # "Need for disconnection (If Yes Track Circuit and Signals Affected) Please give specific details without fail",  # noqa: E501
+                # "Caution required",
+                # "Caution required (if yes with relaxation date dd:mm:yyyy)",
+                # "Power Block & its Elementary Section. Please give specific details without fail",  # noqa: E501
+                # "Resources needed (M/C, Manpower, Supervisors) Include Crane,JCB,porcelain or any other equipment also",  # noqa: E501
+                # "Whether site preparation & resources ready",
+                # "Supervisors to be deputed (JE/SSE with section)",
+                # "Coaching repercussions/ Movement Repercussions",
+                # "Actual Block Granted From No need to fill",
+                # "Actual Block Granted To No need to fill",
+                # "Actual block duration MINS No need to fill",
+                # "Over all % granted for the day No need to fill",
+                # "Output as per Manual No need to fill",
+                # "Actual Output",
+                # "% Output vs Planned\nNo need to fill",
+                # "% Output\nvs\nPlanned",
+                # "PROGRESS",
+                "LOCATION",
+                # "SECTION",
+                # "ARB/RB",
+            }.issubset(self._headers)
+
+        return True
 
     def encode_tasks(self, cur: Cursor, tasks: list[Task]) -> list[dict]:
         cur.execute(
@@ -197,12 +219,9 @@ class FileManager(ABC):
             for row in cur.fetchall()
         ]
 
-        raise NotImplementedError
-
     def map(self, item: dict) -> dict[str, Any] | None:
-        mapped: dict
         if self.fmt == FileManager.Format.bare_minimum:
-            mapped = {"priority": 1} | item
+            mapped = item | {"priority": 1}
 
         elif self.fmt == FileManager.Format.mas_recent:
             mapped = {
@@ -222,10 +241,6 @@ class FileManager(ABC):
                 "nature_of_work": item["Nautre of work & Quantum of Output Planned"],
                 "location": item["LOCATION"],
             }
-
-        else:
-            msg = "Format is None!"
-            raise CriticalLogicError(msg)
 
         # Validate the type of data
 
@@ -248,6 +263,7 @@ class FileManager(ABC):
         mapped["demanded_time_from"] = FileManager._get_time(
             str(mapped["demanded_time_from"]).strip(),
         )
+
         mapped["demanded_time_to"] = FileManager._get_time(
             str(mapped["demanded_time_to"]).strip(),
         )
@@ -257,9 +273,6 @@ class FileManager(ABC):
         return mapped
 
     def unmap(self, item: dict) -> dict:
-        if self.fmt == FileManager.Format.bare_minimum:
-            return item
-
         if self.fmt == FileManager.Format.mas_recent:
             return {
                 "DATE": item["date"],
@@ -301,8 +314,8 @@ class FileManager(ABC):
                 # "ARB/RB",
             }
 
-        msg = "Format is None!"
-        raise CriticalLogicError(msg)
+        # bare minimum
+        return item
 
     def decode(self, cur: Cursor, item: dict) -> PartialTask | None:
         mapped_item = self.map(item)
@@ -353,25 +366,32 @@ class FileManager(ABC):
             mapped_item["location"],
         )
 
-        raise NotImplementedError
+    def read(self, cur: Cursor) -> list[PartialTask]:
+        data = self._read()
+
+        taskqs = []
+        for idx, item in enumerate(data):
+            if (decoded := self.decode(cur, item)) is None:
+                logger.warning("Ignoring item on row `%d` ", idx)
+                continue
+
+            taskqs.append(decoded)
+
+        return taskqs
+
+    def write(self, cur: Cursor, tasks: list[Task]) -> None:
+        data = self.encode_tasks(cur, tasks)
+        self._write(data)
 
     @abstractmethod
-    def read(
-        self,
-        cur: Cursor,
-    ) -> list[PartialTask]: ...
+    def _read(self) -> list[dict]: ...
 
     @abstractmethod
-    def write(self, cur: Cursor, tasks: list[Task]) -> None: ...
+    def _write(self, tasks: list[dict]) -> None: ...
 
 
 class CSVManager(FileManager):
-    def read(
-        self,
-        cur: Cursor,
-    ) -> list[PartialTask]:
-        import csv
-
+    def _read(self) -> list[dict]:
         with self.src_path.open(newline="", encoding="utf-8-sig") as fd:
             reader = csv.DictReader(fd)
             data = [*reader]
@@ -381,41 +401,17 @@ class CSVManager(FileManager):
             raise InvalidFileDataError(msg)
 
         self.headers = [*data[0].keys()]
-        self.fmt = FileManager.get_file_fmt_type(self.headers)
+        return data
 
-        self.validate_headers()
-
-        taskqs = []
-        for idx, item in enumerate(data):
-            if (decoded := self.decode(cur, item)) is None:
-                logger.warning("Ignoring item on row `%d` ", idx)
-                continue
-            taskqs.append(decoded)
-
-        return taskqs
-
-    def write(
-        self,
-        cur: Cursor,
-        tasks: list[Task],
-    ) -> None:
-        import csv
-
-        data = self.encode_tasks(cur, tasks)
-
+    def _write(self, tasks: list[dict]) -> None:
         with self.dst_path.open(mode="w", newline="") as fd:
-            writer = csv.DictWriter(fd, self.headers)
+            writer = csv.DictWriter(fd, self._headers)
             writer.writeheader()
-            writer.writerows(data)
+            writer.writerows(tasks)
 
 
 class ExcelManager(FileManager):
-    def read(
-        self,
-        cur: Cursor,
-    ) -> list[PartialTask]:
-        import openpyxl
-
+    def _read(self) -> list[dict]:
         wb = openpyxl.load_workbook(self.src_path, read_only=True, data_only=True)
         sheet: openpyxl.worksheet.worksheet.Worksheet | None = wb.active  # type: ignore ()
 
@@ -426,10 +422,6 @@ class ExcelManager(FileManager):
         col_count = sheet.max_column
 
         self.headers = [str(sheet.cell(1, col + 1).value) for col in range(col_count)]
-
-        self.fmt = FileManager.get_file_fmt_type(self.headers)
-        self.validate_headers()
-
         data = [
             {
                 self.headers[i]: str(row[i].value) if row[i].value is not None else ""
@@ -439,29 +431,15 @@ class ExcelManager(FileManager):
         ]
 
         wb.close()
-        taskqs = []
-        for idx, item in enumerate(data):
-            if (decoded := self.decode(cur, item)) is None:
-                logger.warning("Ignoring item on row `%d` ", idx)
-                continue
-            taskqs.append(decoded)
+        return data
 
-        return taskqs
-
-    def write(
-        self,
-        cur: Cursor,
-        tasks: list[Task],
-    ) -> None:
-        import openpyxl
-
-        data = self.encode_tasks(cur, tasks)
+    def _write(self, tasks: list[dict]) -> None:
         wb = openpyxl.Workbook(write_only=True)
         sheet = wb.create_sheet()
 
-        sheet.append(self.headers)
-        for row in data:
-            sheet.append([row.get(heading, "") for heading in self.headers])
+        sheet.append(self._headers)
+        for row in tasks:
+            sheet.append([row.get(heading, "") for heading in self._headers])
 
         wb.save(self.dst_path.as_posix())
         wb.close()
