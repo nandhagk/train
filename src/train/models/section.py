@@ -9,9 +9,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
     from sqlite3 import Cursor, Row
 
-FALLBACK_MAP = json.loads(
-    (Path.cwd() / "tmppromaxultra" / "masection.json").read_text(),
-)
+FALLBACK_MAP = json.loads((Path.cwd() / "data" / "masection.json").read_text())
 
 
 @dataclass(frozen=True)
@@ -60,7 +58,6 @@ class Section:
                 f, _, t = name.partition("-")
                 f = f.strip()
                 t = t.strip()
-
         else:
             f, t = FALLBACK_MAP[name]
             f = f.replace(" ", "_")
