@@ -103,7 +103,9 @@ def handle_form():
                         exc_info=res.err_value,
                     )
 
-                    skipped_data.extend((idx, repr(res.err_value)) for _, idx in rows)
+                    skipped_data.extend(
+                        (idx + 1, repr(res.err_value)) for _, idx in rows
+                    )
                 else:
                     tasks.extend(res.value)
 
