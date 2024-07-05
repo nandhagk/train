@@ -44,6 +44,10 @@ def home():
 
 lock = Lock()
 
+@app.post("/template")
+def send_template():
+    """Sends the input template"""
+    return send_file((Path.cwd() / "client" / "template.xlsx").as_posix(), download_name="template.xlsx")
 
 @app.post("/request")
 def handle_form():
