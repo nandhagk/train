@@ -5,12 +5,12 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import time, timedelta
 from enum import IntEnum, auto
-from types import CellType
 from typing import TYPE_CHECKING, Any, TypeAlias
 
 import openpyxl
 import openpyxl.worksheet
 import openpyxl.worksheet._write_only
+import openpyxl.worksheet.worksheet
 import openpyxl.writer.excel
 from result import Err, Ok, Result
 
@@ -98,7 +98,7 @@ class FileManager(ABC):
 
     @staticmethod
     def get_file_fmt_type(headers: list[str]) -> Format:
-        if "LOCATION" in headers: # TODO: Make this better
+        if "LOCATION" in headers:
             return FileManager.Format.mas_recent
 
         return FileManager.Format.bare_minimum
@@ -106,7 +106,7 @@ class FileManager(ABC):
     def _validate_headers(self) -> bool:
         if self.fmt == FileManager.Format.bare_minimum:
             return {
-                "date", # Output
+                "date",  # Output
                 "department",
                 "den",
                 "nature_of_work",
@@ -117,14 +117,14 @@ class FileManager(ABC):
                 "demanded_time_from",
                 "demanded_time_to",
                 "block_demanded",
-                "permitted_time_from", # Output
-                "permitted_time_to", # Output
-                "block_permitted", # Output
+                "permitted_time_from",  # Output
+                "permitted_time_to",  # Output
+                "block_permitted",  # Output
             }.issubset(self._headers)
 
         if self.fmt == FileManager.Format.mas_recent:
             return {
-                "DATE", # Output
+                "DATE",  # Output
                 "Department",
                 "DEN",
                 "Block Section/ Yard",
@@ -135,9 +135,9 @@ class FileManager(ABC):
                 "Demanded time (From)",
                 "Demanded time (To)",
                 "Block demanded in(MINS)",
-                "Permitted time (From) No need to fill", # Output
-                "Permitted time (To) No need to fill", # Output
-                "BLOCK PERMITTED MINS", # Output
+                "Permitted time (From) No need to fill",  # Output
+                "Permitted time (To) No need to fill",  # Output
+                "BLOCK PERMITTED MINS",  # Output
                 # "Location - FROM",
                 # "Location - TO",
                 "Nautre of work & Quantum of Output Planned",
@@ -410,14 +410,21 @@ class FileManager(ABC):
             [{"row": row, "reason": reason} for row, reason in skipped_list],
             ["row", "reason"],
             self.err_path,
-            with_color_coding=False
+            with_color_coding=False,
         )
 
     @abstractmethod
     def _read(self) -> list[dict]: ...
 
     @abstractmethod
-    def _write(self, data: list[dict], headers: list[str], file: Path, with_color_coding = True) -> None: ...
+    def _write(
+        self,
+        data: list[dict],
+        headers: list[str],
+        file: Path,
+        *,
+        with_color_coding: bool = True,
+    ) -> None: ...
 
 
 class CSVManager(FileManager):
@@ -433,7 +440,14 @@ class CSVManager(FileManager):
         self.headers = [*data[0].keys()]
         return data
 
-    def _write(self, data: list[dict], headers: list[str], file: Path, with_color_coding=False) -> None:
+    def _write(
+        self,
+        data: list[dict],
+        headers: list[str],
+        file: Path,
+        *,
+        with_color_coding: bool = False,  # noqa: ARG002
+    ) -> None:
         with file.open(mode="w", newline="") as fd:
             writer = csv.DictWriter(fd, headers)
             writer.writeheader()
@@ -463,7 +477,14 @@ class ExcelManager(FileManager):
         wb.close()
         return data
 
-    def _write(self, data: list[dict], headers: list[str], file: Path, with_color_coding = True) -> None:
+    def _write(
+        self,
+        data: list[dict],
+        headers: list[str],
+        file: Path,
+        *,
+        with_color_coding: bool = True,
+    ) -> None:
         wb = openpyxl.Workbook(write_only=True)
         sheet = wb.create_sheet()
 
@@ -471,28 +492,31 @@ class ExcelManager(FileManager):
             self._write_color_coded_headers(sheet)
         else:
             sheet.append(headers)
-        
+
         for row in data:
             sheet.append([row.get(heading, "") for heading in headers])
-       
+
         wb.save(file.as_posix())
         wb.close()
 
-    def _write_color_coded_headers(self, sheet: openpyxl.worksheet._write_only.WriteOnlyWorksheet):
-        from openpyxl.cell import WriteOnlyCell, Cell
-        # from openpyxl.styles import Font
+    def _write_color_coded_headers(
+        self,
+        sheet: openpyxl.worksheet.worksheet.Worksheet,
+    ) -> None:
+        from openpyxl.cell import Cell, WriteOnlyCell
         from openpyxl.styles import PatternFill
+
         if self.fmt == FileManager.Format.bare_minimum:
             ...
 
         elif self.fmt == FileManager.Format.mas_recent:
-            OUTPUT_HEADERS = [
-                "DATE", # Output
-                "Permitted time (From) No need to fill", # Output
-                "Permitted time (To) No need to fill", # Output
-                "BLOCK PERMITTED MINS", # Output
+            OUTPUT_HEADERS = [  # noqa: N806
+                "DATE",  # Output
+                "Permitted time (From) No need to fill",  # Output
+                "Permitted time (To) No need to fill",  # Output
+                "BLOCK PERMITTED MINS",  # Output
             ]
-            INPUT_HEADERS = [
+            INPUT_HEADERS = [  # noqa: N806
                 "Department",
                 "DEN",
                 "Block Section/ Yard",
@@ -507,25 +531,26 @@ class ExcelManager(FileManager):
 
             cols: list[Cell | None] = [None for i in range(len(self.headers))]
             for output_header in OUTPUT_HEADERS:
-                
+
                 cell = WriteOnlyCell(sheet, value=output_header)
                 # cell.font = Font(name='Courier', size=36)
-                cell.fill = PatternFill(start_color ="FF00FF00", fill_type = "solid")
+                cell.fill = PatternFill(start_color="FF00FF00", fill_type="solid")
                 cols[self.headers.index(output_header)] = cell
-                
+
             for input_header in INPUT_HEADERS:
                 cell = WriteOnlyCell(sheet, value=input_header)
                 # cell.font = Font(name='Courier', size=36)
-                cell.fill = PatternFill(start_color ="FFFFFF00", fill_type = "solid")
+                cell.fill = PatternFill(start_color="FFFFFF00", fill_type="solid")
                 cols[self.headers.index(input_header)] = cell
 
-            SCAM_HEADERS = (header for header in self.headers if header not in INPUT_HEADERS and header not in OUTPUT_HEADERS )
-            for scam_header in SCAM_HEADERS: # Robus application moment
+            SCAM_HEADERS = (  # noqa: N806
+                header
+                for header in self.headers
+                if header not in INPUT_HEADERS and header not in OUTPUT_HEADERS
+            )
+            for scam_header in SCAM_HEADERS:  # Robus application moment
                 cell = WriteOnlyCell(sheet, value=scam_header)
-                # cell.font = Font(name='Courier', size=36)
-                cell.fill = PatternFill(start_color ="FFFF0000", fill_type = "solid")
+                cell.fill = PatternFill(start_color="FFFF0000", fill_type="solid")
                 cols[self.headers.index(scam_header)] = cell
-            
 
             sheet.append(cols)
-            
