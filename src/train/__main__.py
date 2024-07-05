@@ -212,7 +212,7 @@ def schedule(src: Path, dst: Path):
         taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = defaultdict(list)
         skipped_data = []
 
-        fm = FileManager.get_manager(src, dst, Path())
+        fm = FileManager.get_manager(src, dst, dst.with_suffix(".error" + dst.suffix))
         for idx, res in enumerate(fm.read(cur)):
             if isinstance(res, Err):
                 skipped_data.append((idx + 1, res.err_value))
