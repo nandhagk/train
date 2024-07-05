@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from threading import Lock
 from zipfile import ZipFile
 
-from flask import Flask, Response, g, request, send_file
+from flask import Flask, Response, g, redirect, request, send_file, send_from_directory
 from result import Err
 
 from train.db import get_db
@@ -38,16 +38,21 @@ app.teardown_appcontext(close_db)
 
 @app.get("/")
 def home():
-    """Return html."""
+    """Return home page."""
     return send_file((Path.cwd() / "client" / "index.html").as_posix())
+
+
+@app.get("/<path:path>")
+def client(path: str):
+    """Return static files."""
+    if path == "index.html":
+        return redirect("/")
+
+    return send_from_directory((Path.cwd() / "client").as_posix(), path)
 
 
 lock = Lock()
 
-@app.post("/template")
-def send_template():
-    """Sends the input template"""
-    return send_file((Path.cwd() / "client" / "template.xlsx").as_posix(), download_name="template.xlsx")
 
 @app.post("/request")
 def handle_form():
@@ -59,9 +64,9 @@ def handle_form():
         name, _, ext = f.filename.rpartition(".")
 
         with (
-            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as src,
-            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as dst,
-            NamedTemporaryFile(suffix=f".{ext}", delete_on_close=False) as err,
+            NamedTemporaryFile(suffix=f".{ext}") as src,
+            NamedTemporaryFile(suffix=f".{ext}") as dst,
+            NamedTemporaryFile(suffix=f".{ext}") as err,
         ):
             src_path = Path(src.name)
             dst_path = Path(dst.name)
@@ -74,9 +79,7 @@ def handle_form():
 
             try:
                 taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = (
-                    defaultdict(
-                        list,
-                    )
+                    defaultdict(list)
                 )
                 skipped_data: list[tuple[int, str]] = []
 
@@ -99,8 +102,9 @@ def handle_form():
                             section_id,
                             exc_info=res.err_value,
                         )
+
                         skipped_data.extend(
-                            (idx, repr(res.err_value)) for _taskq, idx in rows
+                            (idx, repr(res.err_value)) for _, idx in rows
                         )
                     else:
                         tasks.extend(res.value)
@@ -121,9 +125,4 @@ def handle_form():
                 zf.write(err_path, f"{name}_errors.{ext}")
 
             stream.seek(0)
-
-        return send_file(
-            stream,
-            as_attachment=True,
-            download_name="archive.zip",
-        )
+            return send_file(stream, as_attachment=True, download_name="output.zip")

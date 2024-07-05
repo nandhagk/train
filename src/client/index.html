@@ -20,11 +20,11 @@
         margin-bottom: 2rem;
       }
 
-      main{
+      main {
         min-height: 100vh;
         width: 50rem;
         display: grid;
-        place-items: center ;
+        place-items: center;
         padding: 2rem 5rem;
       }
     </style>
@@ -33,28 +33,36 @@
   <body class="grid place-items-center min-h-screen bg-slate-900">
     <main class="bg-slate-300">
       <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam? 
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni
+        autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam
+        quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam?
       </p>
-      <button
-          type="submit"
-          id="download-template"
-          class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 mt-4 float-right"
-        >
+      <a
+        class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 mt-4 float-right"
+        href="/template.xlsx"
+        download="true"
+      >
         <span>Download Template!</span>
-      </button>
-      <hr class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700">
+      </a>
+      <hr class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700" />
       <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam? 
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni
+        autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam
+        quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam?
       </p>
-      <br>
-      <div id="errc" class="duration-1000 top-0 transition-all -translate-y-full absolute flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800" role="alert">
+      <br />
+      <div
+        id="errc"
+        class="duration-1000 top-0 transition-all -translate-y-full absolute flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
+        role="alert"
+      >
         <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+          />
         </svg>
         <span class="sr-only">Info</span>
-        <div>
-          <span class="font-medium">ERROR!</span> <span id="error">Error vro</span>
-        </div>
+        <div><span class="font-medium">ERROR!</span> <span id="error">Error vro</span></div>
       </div>
       <form id="form" class="p-12">
         <span id="info"> Please enter a file that follows a supported format! </span>
@@ -94,7 +102,6 @@
       </form>
     </main>
     <script defer>
-      const download = document.getElementById("download-template")
       const button = document.getElementById("submit");
       const fileInput = document.getElementById("fileInput");
       const spinner = document.getElementById("spinner");
@@ -103,59 +110,62 @@
       const errc = document.getElementById("errc");
       const err = document.getElementById("error");
 
-      // TODO: https://stackoverflow.com/questions/19327749/javascript-blob-filename-without-link
-      // Refer to this to download with good file names
-      download.addEventListener("click", async (e) => {
-        e.preventDefault();
-        const resp = await fetch("/template", {
-          method: "POST",
-        });
-        
-        const blob = await resp.blob();
-        const file = window.URL.createObjectURL(blob);
-        window.location.assign(file);
-      })
-
-      button.addEventListener("click", async (e) => {
-        e.preventDefault();
-
+      const process = () => {
         buttonText.innerHTML = "Processing...";
         button.classList.add("cursor-not-allowed");
         fileInput.classList.add("cursor-not-allowed");
         button.classList.replace("bg-indigo-500", "bg-indigo-400");
         spinner.style.display = "block";
+      };
 
+      const reset = () => {
+        buttonText.innerHTML = "Submit";
+        button.classList.remove("cursor-not-allowed");
+        fileInput.classList.remove("cursor-not-allowed");
+        button.classList.replace("bg-indigo-400", "bg-indigo-500");
+        spinner.style.display = "none";
+      };
+
+      const save = (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none;";
+        a.href = url;
+        a.download = "output.zip";
+        a.click();
+
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 0);
+      };
+
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
+
+        process();
         const resp = await fetch("/request", {
           body: new FormData(form),
           method: "POST",
         });
 
         if (!resp.ok) {
-          err.innerText = (await resp.text());
+          err.innerText = await resp.text();
           errc.classList.replace("-translate-y-full", "translate-y-20");
 
           setTimeout(() => {
-            buttonText.innerHTML = "Submit";
-          button.classList.remove("cursor-not-allowed");
-          fileInput.classList.remove("cursor-not-allowed");
-          button.classList.replace("bg-indigo-400", "bg-indigo-500");
-          spinner.style.display = "none";
-          errc.classList.replace("translate-y-20", "-translate-y-full");
-          }, 4000)
+            reset();
+            errc.classList.replace("translate-y-20", "-translate-y-full");
+          }, 4000);
 
           return;
         } else {
           const blob = await resp.blob();
-          const file = window.URL.createObjectURL(blob);
-          
-          window.location.assign(file);
+          save(blob);
         }
 
-        buttonText.innerHTML = "Submit";
-        button.classList.remove("cursor-not-allowed");
-        fileInput.classList.remove("cursor-not-allowed");
-        button.classList.replace("bg-indigo-400", "bg-indigo-500");
-        spinner.style.display = "none";
+        reset();
       });
     </script>
   </body>
