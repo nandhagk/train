@@ -33,11 +33,15 @@
   </head>
   <body class="grid place-items-center min-h-screen bg-slate-900">
     <main class="bg-slate-300">
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni
-        autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam
-        quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam?
-      </p>
+      <h1 class="text-2xl font-bold">Steps</h1>
+      <ol class="list-decimal">
+        <li>Convert your list of maintenance tasks into the specified format (Follow the template).</li>
+        <li>Upload the excel file.</li>
+        <li>After a minute, the excel file will be processed and a zip file will be downloaded.</li>
+        <li>Extract the zip file. It contains an output and an error file.</li>
+        <li>The output file contains the scheduled tasks.</li>
+        <li>The error file contains the row number and reason why that particular row couldn't be processed.</li>
+      </ol>
       <a
         class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition ease-in-out duration-150 mt-4 float-right"
         href="/template.xlsx"
@@ -46,12 +50,6 @@
         <span>Download Template!</span>
       </a>
       <hr class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700" />
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Facilis magnam distinctio doloribus sapiente inventore assumenda sint quod magni
-        autem voluptates, architecto sequi consequuntur commodi eveniet adipisci iste expedita. Quaerat doloribus nisi, similique reprehenderit ipsam
-        quo est vel. Nesciunt itaque tempora, ex quaerat asperiores reiciendis, nisi dolores saepe, fugiat rerum totam?
-      </p>
-      <br />
       <div
         id="errc"
         class="duration-1000 top-0 transition-all -translate-y-full absolute flex items-center p-4 mb-4 text-sm text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
@@ -65,6 +63,7 @@
         <span class="sr-only">Info</span>
         <div><span class="font-medium">ERROR!</span> <span id="error">Error vro</span></div>
       </div>
+
       <form id="form" class="p-12">
         <span id="info"> Please enter a file that follows a supported format! </span>
         <div class="relative flex w-full max-w-sm flex-col gap-1 text-slate-700 dark:text-slate-300">
@@ -101,6 +100,17 @@
           <span id="button-text">Submit</span>
         </button>
       </form>
+      <hr class="w-48 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-700" />
+      <iframe
+        width="560"
+        height="315"
+        src="https://www.youtube.com/embed/lJIrF4YjHfQ?si=45nrd2cK_OTnp354"
+        title="YouTube video player"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
     </main>
     <script defer>
       const button = document.getElementById("submit");
