@@ -61,7 +61,7 @@ def main(ctx: click.Context, port: int, debug: bool):
     if debug:
         app.run(port=port, debug=True)
     else:
-        serve(app, port=port)
+        serve(app, port=port, url_scheme="https")
 
 
 @main.command()

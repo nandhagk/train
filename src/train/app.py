@@ -57,72 +57,70 @@ lock = Lock()
 @app.post("/request")
 def handle_form():
     """Handle form."""
-    with lock:
-        f = request.files["fileInput"]
-        assert f.filename is not None
+    f = request.files["fileInput"]
+    assert f.filename is not None
 
-        name, _, ext = f.filename.rpartition(".")
+    name, _, ext = f.filename.rpartition(".")
+    with (
+        lock,
+        NamedTemporaryFile(suffix=f".{ext}") as src,
+        NamedTemporaryFile(suffix=f".{ext}") as dst,
+        NamedTemporaryFile(suffix=f".{ext}") as err,
+    ):
+        src_path = Path(src.name)
+        dst_path = Path(dst.name)
+        err_path = Path(err.name)
 
-        with (
-            NamedTemporaryFile(suffix=f".{ext}") as src,
-            NamedTemporaryFile(suffix=f".{ext}") as dst,
-            NamedTemporaryFile(suffix=f".{ext}") as err,
-        ):
-            src_path = Path(src.name)
-            dst_path = Path(dst.name)
-            err_path = Path(err.name)
+        f.save(src_path.as_posix())
 
-            f.save(src_path.as_posix())
+        con = get_db_()
+        cur = con.cursor()
 
-            con = get_db_()
-            cur = con.cursor()
+        try:
+            taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = defaultdict(
+                list,
+            )
+            skipped_data: list[tuple[int, str]] = []
 
-            try:
-                taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = (
-                    defaultdict(list)
-                )
-                skipped_data: list[tuple[int, str]] = []
+            fm = FileManager.get_manager(src_path, dst_path, err_path)
+            for idx, res in enumerate(fm.read(cur), 1):
+                if isinstance(res, Err):
+                    skipped_data.append((idx, res.err_value))
+                    continue
 
-                fm = FileManager.get_manager(src_path, dst_path, err_path)
-                for idx, res in enumerate(fm.read(cur)):
-                    if isinstance(res, Err):
-                        skipped_data.append((idx + 1, res.err_value))
-                        continue
-                    taskq = res.value
-                    taskqs_per_section[taskq.section_id].append((taskq, idx + 1))
+                taskq = res.value
+                taskqs_per_section[taskq.section_id].append((taskq, idx))
 
-                tasks: list[Task] = []
-                for section_id, rows in taskqs_per_section.items():
-                    logger.info("Scheduling %d", section_id)
+            tasks: list[Task] = []
+            for section_id, rows in taskqs_per_section.items():
+                logger.info("Scheduling %d", section_id)
 
-                    res = Task.insert_many(cur, [taskq for taskq, _idx in rows])
-                    if isinstance(res, Err):
-                        logger.warning(
-                            "Ignoring %d",
-                            section_id,
-                            exc_info=res.err_value,
-                        )
+                res = Task.insert_many(cur, [taskq for taskq, _ in rows])
+                if isinstance(res, Err):
+                    logger.warning(
+                        "Ignoring %d",
+                        section_id,
+                        exc_info=res.err_value,
+                    )
 
-                        skipped_data.extend(
-                            (idx, repr(res.err_value)) for _, idx in rows
-                        )
-                    else:
-                        tasks.extend(res.value)
+                    skipped_data.extend((idx, repr(res.err_value)) for _, idx in rows)
+                else:
+                    tasks.extend(res.value)
 
-                fm.write(cur, tasks)
-                fm.write_error(skipped_data)
-                logger.info(
-                    "Populated database and saved output file: %s",
-                    dst_path.name,
-                )
-            except Exception as e:
-                logger.exception("Failed to populate database from file")
-                return Response(repr(e), 400)
+            fm.write(cur, tasks)
+            fm.write_error(skipped_data)
+            logger.info(
+                "Populated database and saved output file: %s",
+                dst_path.name,
+            )
+        except Exception as e:
+            logger.exception("Failed to populate database from file")
+            return Response(repr(e), 400)
 
-            stream = BytesIO()
-            with ZipFile(stream, "w") as zf:
-                zf.write(dst_path, f"{name}_output.{ext}")
-                zf.write(err_path, f"{name}_errors.{ext}")
+        stream = BytesIO()
+        with ZipFile(stream, "w") as zf:
+            zf.write(dst_path, f"{name}_output.{ext}")
+            zf.write(err_path, f"{name}_errors.{ext}")
 
-            stream.seek(0)
-            return send_file(stream, as_attachment=True, download_name="output.zip")
+        stream.seek(0)
+        return send_file(stream, as_attachment=True, download_name="output.zip")
