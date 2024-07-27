@@ -12,7 +12,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"43553": {
+"43553, 1111111": {
   "AJJ": {"arrival": null, "departure": "05:05"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "05:25", "departure": null},
@@ -26,7 +26,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
   }
-"43501": { 
+"43501, 1111111": { 
   "AJJ": {"arrival": "05:38", "departure": "05:40"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "06:05", "departure": null},
@@ -40,7 +40,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"20677": {
+"20677, 1011111": {
   "AJJ": {"arrival": null, "departure": "06:20"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "06:30"},
@@ -68,7 +68,7 @@
   "PUDI": {"arrival": null, "departure": "07:19"},
   "RU": {"arrival": "08:00", "departure": null},
 }
-"66049": {
+"66049, 1111111": {
   "AJJ": {"arrival": null, "departure": "06:25"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "06:50", "departure": null},
@@ -82,7 +82,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"22818": {
+"22818, 1000000": {
   "AJJ": {"arrival": null, "departure": "07:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "07:15"},
@@ -96,7 +96,7 @@
   "PUDI": {"arrival": null, "departure": "07:55"},
   "RU": {"arrival": null, "departure": null},
 }
-"06401": {
+"06401, 1111111": {
   "AJJ": {"arrival": null, "departure": "07:10"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "07:26", "departure": "07:28"},
@@ -110,7 +110,7 @@
   "PUDI": {"arrival": "08:36", "departure": "08:37"},
   "RU": {"arrival": "08:50", "departure": "08:55"},
 }
-"16057": {
+"16057, 1111111": {
   "AJJ": {"arrival": "07:38", "departure": "07:40"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "07:58", "departure": "08:00"},
@@ -124,7 +124,7 @@
   "PUDI": {"arrival": null, "departure": "08:54"},
   "RU": {"arrival": "09:10", "departure": "09:25"},
 }
-"22158": {
+"22158, 1111111": {
   "AJJ": {"arrival": null, "departure": "07:55"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "08:10"},
@@ -138,7 +138,7 @@
   "PUDI": {"arrival": null, "departure": "09:12"},
   "RU": {"arrival": "09:25", "departure": "09:30"},
 }
-"43503": {
+"43503, 1111111": {
   "AJJ": {"arrival": "08:03", "departure": "08:05"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "08:30", "departure": null},
@@ -152,7 +152,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"06753": {
+"06753, 1111111": {
   "AJJ": {"arrival": null, "departure": "09:15"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "09:30", "departure": "09:32"},
@@ -166,7 +166,7 @@
   "PUDI": {"arrival": "10:33", "departure": "10:34"},
   "RU": {"arrival": "11:00", "departure": "11:20"},
 }
-"43505": {
+"43505, 1111111": {
   "AJJ": {"arrival": "09:28", "departure": "09:30"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "09:55", "departure": null},
@@ -180,7 +180,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"22838/22878/18568": {
+"22838/22878/18568, 0101010": {
   "AJJ": {"arrival": null, "departure": "10:05"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "10:20"},
@@ -194,7 +194,7 @@
   "PUDI": {"arrival": null, "departure": "11:01"},
   "RU": {"arrival": "11:20", "departure": "11:30"},
 }
-"16003": {
+"16003, 0000001": {
   "AJJ": {"arrival": "10:18", "departure": "10:20"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "10:36", "departure": "10:38"},
@@ -208,7 +208,7 @@
   "PUDI": {"arrival": null, "departure": "11:23"},
   "RU": {"arrival": "11:45", "departure": "11:50"},
 }
-"12790": {
+"12790, 0001001": {
   "AJJ": {"arrival": null, "departure": "10:40"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "10:55"},
@@ -222,7 +222,7 @@
   "PUDI": {"arrival": null, "departure": "11:52"},
   "RU": {"arrival": "12:05", "departure": "12:15"},
 }
-"22503": {
+"22503, 0101101": {
   "AJJ": {"arrival": null, "departure": "11:12"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "11:24"},
@@ -236,7 +236,7 @@
   "PUDI": {"arrival": null, "departure": "12:00"},
   "RU": {"arrival": "12:25", "departure": "12:35"},
 }
-"06727": {
+"06727, 1111111": {
   "AJJ": {"arrival": "11:20", "departure": "11:25"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "11:41", "departure": "11:43"},
@@ -250,7 +250,7 @@
   "PUDI": {"arrival": null, "departure": "12:30"},
   "RU": {"arrival": "13:00", "departure": "13:10"},
 }
-"43507": {
+"43507, 1111111": {
   "AJJ": {"arrival": "11:53", "departure": "11:55"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "12:20", "departure": null},
@@ -264,7 +264,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"43509": {
+"43509, 1111111": {
   "AJJ": {"arrival": "13:38", "departure": "13:40"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "14:05", "departure": null},
@@ -278,7 +278,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"43941": {
+"43941, 1111111": {
   "AJJ": {"arrival": "14:18", "departure": "14:20"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "14:45", "departure": null},
@@ -292,7 +292,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"22160": {
+"22160, 1111111": {
   "AJJ": {"arrival": "14:28", "departure": "14:30"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "14:46", "departure": "14:48"},
@@ -306,7 +306,7 @@
   "PUDI": {"arrival": null, "departure": "15:31"},
   "RU": {"arrival": "16:05", "departure": "16:10"},
 }
-"22888": {
+"22888, 0001000": {
   "AJJ": {"arrival": null, "departure": "14:55"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "15:10"},
@@ -320,7 +320,7 @@
   "PUDI": {"arrival": null, "departure": "16:18"},
   "RU": {"arrival": "16:30", "departure": "16:40"},
 }
-"22864": {
+"22864, 0010000": {
   "AJJ": {"arrival": null, "departure": "15:36"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "15:51"},
@@ -334,7 +334,7 @@
   "PUDI": {"arrival": null, "departure": "16:29"},
   "RU": {"arrival": "16:55", "departure": "17:05"},
 }
-"12246": {
+"12246, 1101101": {
   "AJJ": {"arrival": null, "departure": "15:36"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "15:51"},
@@ -348,7 +348,7 @@
   "PUDI": {"arrival": null, "departure": "16:29"},
   "RU": {"arrival": "16:55", "departure": "17:05"},
 }
-"16053": {
+"16053, 1111111": {
   "AJJ": {"arrival": "15:42", "departure": "15:44"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "16:00", "departure": "16:02"},
@@ -362,7 +362,7 @@
   "PUDI": {"arrival": null, "departure": "16:57"},
   "RU": {"arrival": "17:10", "departure": "17:25"},
 }
-"22606": {
+"22606, 0010010": {
   "AJJ": {"arrival": null, "departure": "16:10"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "16:23", "departure": "16:25"},
@@ -376,7 +376,7 @@
   "PUDI": {"arrival": null, "departure": "17;12"},
   "RU": {"arrival": "17:30", "departure": "17:40"},
 }
-"22604": {
+"22604, 0100000": {
   "AJJ": {"arrival": null, "departure": "16:10"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "16:20"},
@@ -390,7 +390,7 @@
   "PUDI": {"arrival": null, "departure": "17:12"},
   "RU": {"arrival": "17:30", "departure": "17:40"},
 }
-"43511": {
+"43511, 1111111": {
   "AJJ": {"arrival": "16:08", "departure": "16:13"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "16:40", "departure": null},
@@ -404,7 +404,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"17314": {
+"17314, 0001010": {
   "AJJ": {"arrival": "16:58", "departure": "17:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "17:16"},
@@ -418,7 +418,7 @@
   "PUDI": {"arrival": null, "departure": "17:57"},
   "RU": {"arrival": "18:25", "departure": "18:30"},
 }
-"22180": {
+"22180, 0100000": {
   "AJJ": {"arrival": "16:58", "departure": "17:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "17:18"},
@@ -432,7 +432,7 @@
   "PUDI": {"arrival": null, "departure": "17:59"},
   "RU": {"arrival": "18:40", "departure": "18:45"},
 }
-"20953": {
+"20953, 0000100": {
   "AJJ": {"arrival": "16:58", "departure": "17:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "17:18"},
@@ -446,7 +446,7 @@
   "PUDI": {"arrival": null, "departure": "17:59"},
   "RU": {"arrival": "18:40", "departure": "18:45"},
 }
-"22919": {
+"22919, 0010000": {
   "AJJ": {"arrival": null, "departure": "17:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "17:18"},
@@ -460,7 +460,7 @@
   "PUDI": {"arrival": null, "departure": "17:59"},
   "RU": {"arrival": "18:40", "departure": "18:45"},
 }
-"43513": {
+"43513, 1111111": {
   "AJJ": {"arrival": "17:10", "departure": "17:12"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "17:40", "departure": null},
@@ -474,7 +474,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"16203": {
+"16203, 1111111": {
   "AJJ": {"arrival": "17:50", "departure": "17:52"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "18:10", "departure": "18:12"},
@@ -488,7 +488,7 @@
   "PUDI": {"arrival": null, "departure": "19:06"},
   "RU": {"arrival": "19:30", "departure": "20:05"},
 }
-"17651": {
+"17651, 1111111": {
   "AJJ": {"arrival": "18:13", "departure": "18:15"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "18:33", "departure": "18:35"},
@@ -502,7 +502,7 @@
   "PUDI": {"arrival": null, "departure": "19:32"},
   "RU": {"arrival": "20:00", "departure": "20:05"},
 }
-"12253": {
+"12253, 0000010": {
   "AJJ": {"arrival": null, "departure": "18:50"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "19:02"},
@@ -516,7 +516,7 @@
   "PUDI": {"arrival": null, "departure": "20:02"},
   "RU": {"arrival": "20:15", "departure": "20:25"},
 }
-"12164": {
+"12164, 1111111": {
   "AJJ": {"arrival": "19:28", "departure": "19:30"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "19:46", "departure": "19:48"},
@@ -530,7 +530,7 @@
   "PUDI": {"arrival": null, "departure": "20:34"},
   "RU": {"arrival": "21:00", "departure": "21:05"},
 }
-"43515": {
+"43515, 1111111": {
   "AJJ": {"arrival": "19:43", "departure": "19:45"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "20:10", "departure": null},
@@ -544,7 +544,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"16112": {
+"16112, 1111111": {
   "AJJ": {"arrival": "19:50", "departure": "20:00"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "20:20", "departure": "20:22"},
@@ -558,7 +558,7 @@
   "PUDI": {"arrival": "21:42", "departure": "21:44"},
   "RU": {"arrival": "22:10", "departure": "22:35"},
 }
-"22620/22816": {
+"22620/22816, 0010001": {
   "AJJ": {"arrival": null, "departure": "20:15"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "20:31"},
@@ -572,7 +572,7 @@
   "PUDI": {"arrival": null, "departure": "21:08"},
   "RU": {"arrival": "21:25", "departure": "21:35"},
 }
-"43943": {
+"43943, 1111111": {
   "AJJ": {"arrival": "20:15", "departure": "20:25"},
   "IPT": {"arrival": "21:00", "departure": null},
   "TRT": {"arrival": null, "departure": null},
@@ -586,7 +586,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"43517": {
+"43517, 1111111": {
   "AJJ": {"arrival": "20:55", "departure": "20:57"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "21:30", "departure": null},
@@ -600,7 +600,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"22834": {
+"22834, 0001000": {
   "AJJ": {"arrival": null, "departure": "21:18"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "21:33"},
@@ -614,7 +614,7 @@
   "PUDI": {"arrival": null, "departure": "22:13"},
   "RU": {"arrival": "22:45", "departure": "22:55"},
 }
-"16352": {
+"16352, 0001001": {
   "AJJ": {"arrival": "20:25", "departure": "21:20"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "21:48", "departure": "21:50"},
@@ -628,7 +628,7 @@
   "PUDI": {"arrival": null, "departure": "22:47"},
   "RU": {"arrival": "23:00", "departure": "23:10"},
 }
-"43519": {
+"43519, 1111111": {
   "AJJ": {"arrival": "22:18", "departure": "22:20"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "22:50", "departure": null},
@@ -642,7 +642,7 @@
   "PUDI": {"arrival": null, "departure": null},
   "RU": {"arrival": null, "departure": null},
 }
-"11018": {
+"11018, 1000000": {
   "AJJ": {"arrival": "23:48", "departure": "23:50"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "00:12"},
@@ -656,7 +656,7 @@
   "PUDI": {"arrival": null, "departure": "00:52"},
   "RU": {"arrival": "01:25", "departure": "01:35"},
 }
-"22102": {
+"22102, 0000100": {
   "AJJ": {"arrival": null, "departure": "23:48"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": "00:10", "departure": "00:12"},
@@ -670,7 +670,7 @@
   "PUDI": {"arrival": null, "departure": "00:52"},
   "RU": {"arrival": "01:25", "departure": "01:35"},
 }
-"20919": {
+"20919, 0000001": {
   "AJJ": {"arrival": null, "departure": "23:48"},
   "IPT": {"arrival": null, "departure": null},
   "TRT": {"arrival": null, "departure": "00:12"},
