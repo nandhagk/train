@@ -1,5 +1,5 @@
 "43551, 1111111": {
-  "AJJ": {"arrival": NULL, "departure": "04:00"},
+  "AJJ": {"arrival": null, "departure": "04:00"},
   "IPT": {"arrival": NULL, "departure": NULL},
   "TRT": {"arrival": "04:20", "departure": NULL},
   "POI": {"arrival": NULL, "departure": NULL},
