@@ -1,26 +1,16 @@
+DROP TABLE IF EXISTS slot;
 DROP TABLE IF EXISTS task;
-DROP TABLE IF EXISTS maintenance_window;
+DROP TABLE IF EXISTS train;
 DROP TABLE IF EXISTS section;
-DROP TABLE IF EXISTS station;
-DROP TABLE IF EXISTS block;
+DROP TABLE IF EXISTS node;
 
-CREATE TABLE block (
+CREATE TABLE node (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
+    position INTEGER NOT NULL,
 
-    UNIQUE(name)
+    UNIQUE(name, position)
 );
-
-CREATE TABLE station (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-
-    block_id INTEGER NOT NULL,
-    FOREIGN KEY(block_id) REFERENCES block(id),
-
-    UNIQUE(name)
-);
-
 
 CREATE TABLE section (
     id INTEGER PRIMARY KEY,
@@ -29,20 +19,30 @@ CREATE TABLE section (
     from_id INTEGER NOT NULL,
     to_id INTEGER NOT NULL,
 
-    FOREIGN KEY(from_id) REFERENCES station(id),
-    FOREIGN KEY(to_id) REFERENCES station(id),
+    FOREIGN KEY(from_id) REFERENCES node(id),
+    FOREIGN KEY(to_id) REFERENCES node(id),
 
     UNIQUE(from_id, to_id, line)
 );
 
-CREATE TABLE maintenance_window (
+CREATE TABLE slot (
     id INTEGER PRIMARY KEY,
 
     starts_at DATETIME NOT NULL,
     ends_at DATETIME NOT NULL,
 
     section_id INTEGER NOT NULL,
-    FOREIGN KEY(section_id) REFERENCES section(id)
+
+    task_id INTEGER,
+    train_id INTEGER,
+
+    FOREIGN KEY(task_id) REFERENCES task(id),
+    FOREIGN KEY(train_id) REFERENCES train(id),
+
+    CHECK(
+        (task_id IS NOT NULL AND train_id IS NULL)
+        OR (task_id IS NULL AND train_id IS NOT NULL)
+    )
 );
 
 CREATE TABLE task (
@@ -53,13 +53,17 @@ CREATE TABLE task (
     nature_of_work TEXT NOT NULL,
     location TEXT NOT NULL,
 
-    starts_at DATETIME NOT NULL,
-    ends_at DATETIME NOT NULL,
     preferred_starts_at TIME,
     preferred_ends_at TIME,
     requested_duration INTEGER NOT NULL,
-    priority INTEGER NOT NULL,
+    priority INTEGER NOT NULL
+);
 
-    maintenance_window_id INTEGER NOT NULL,
-    FOREIGN KEY(maintenance_window_id) REFERENCES maintenance_window(id)
+CREATE TABLE train (
+    id INTEGER PRIMARY KEY,
+
+    number TEXT NOT NULL,
+    name TEXT NOT NULL,
+
+    UNIQUE(number)
 );

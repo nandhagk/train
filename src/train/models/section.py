@@ -1,18 +1,25 @@
 from __future__ import annotations
 
-import json
-from dataclasses import dataclass
-from pathlib import Path
-from typing import TYPE_CHECKING
+from dataclasses import asdict, dataclass
+from typing import TYPE_CHECKING, TypedDict, cast
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
     from sqlite3 import Cursor, Row
 
-FALLBACK_MAP = json.loads((Path.cwd() / "data" / "masection.json").read_text())
+
+class RawPartialSection(TypedDict):
+    line: str
+
+    from_id: int
+    to_id: int
 
 
-@dataclass(frozen=True)
+class RawSection(RawPartialSection):
+    id: int
+
+
+@dataclass(frozen=True, kw_only=True)
 class PartialSection:
     line: str
 
@@ -21,12 +28,8 @@ class PartialSection:
 
 
 @dataclass(frozen=True)
-class Section:
+class Section(PartialSection):
     id: int
-    line: str
-
-    from_id: int
-    to_id: int
 
     @staticmethod
     def find_by_id(cur: Cursor, id: int) -> Section | None:
@@ -45,41 +48,24 @@ class Section:
         if row is None:
             return None
 
-        return Section.decode(row)
+        return Section.decode(cast(RawSection, row))
 
     @staticmethod
-    def find_by_name_and_line(cur: Cursor, name: str, line: str) -> Section | None:
-        if FALLBACK_MAP.get(name) is None:
-            name = name.replace(" ", "_").replace("-YD", "_YD")
-            line = line.strip()
-            if "-" not in name:
-                f = t = name
-            else:
-                f, _, t = name.partition("-")
-                f = f.strip()
-                t = t.strip()
-        else:
-            f, t = FALLBACK_MAP[name]
-            f = f.replace(" ", "_")
-            t = t.replace(" ", "_")
-
-        payload = {"f": f, "t": t, "line": line}
+    def find_by_node_and_line(
+        cur: Cursor,
+        from_id: int,
+        to_id: int,
+        line: str,
+    ) -> Section | None:
+        payload = {"from_id": from_id, "to_id": to_id, "line": line}
 
         cur.execute(
             """
             SELECT section.* FROM section
             WHERE
-                section.line = :line
-                AND section.from_id = (
-                    SELECT station.id FROM station
-                    WHERE
-                        station.name = :f
-                )
-                AND section.to_id = (
-                    SELECT station.id FROM station
-                    WHERE
-                        station.name = :t
-                )
+                section.from_id = :from_id
+                AND section.to_id = :to_id
+                AND section.line = :line
             """,
             payload,
         )
@@ -88,24 +74,24 @@ class Section:
         if row is None:
             return None
 
-        return Section.decode(row)
+        return Section.decode(cast(RawSection, row))
 
     @staticmethod
     def insert_many(cur: Cursor, sections: Iterable[PartialSection]) -> None:
-        payload = [
-            {"line": section.line, "from_id": section.from_id, "to_id": section.to_id}
-            for section in sections
-        ]
+        payload = [cast(RawPartialSection, asdict(section)) for section in sections]
 
         cur.executemany(
             """
             INSERT INTO section (line, from_id, to_id)
-            vALUES (:line, :from_id, :to_id)
-            ON CONFLICT DO NOTHING
+            VALUES (:line, :from_id, :to_id)
             """,
             payload,
         )
 
     @staticmethod
-    def decode(row: Row) -> Section:
-        return Section(row["id"], row["line"], row["from_id"], row["to_id"])
+    def decode(row: RawSection) -> Section:
+        return Section(**row)
+
+    @staticmethod
+    def clear(cur: Cursor) -> None:
+        cur.execute("DELETE FROM section")

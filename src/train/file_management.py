@@ -171,14 +171,14 @@ class FileManager(ABC):
             SELECT
                 DATE(task.starts_at),
                 (
-                    SELECT station.name FROM station
+                    SELECT node.name FROM node
                     WHERE
-                        station.id = section.from_id
+                        node.id = section.from_id
                 ),
                 (
-                    SELECT station.name FROM station
+                    SELECT node.name FROM node
                     WHERE
-                        station.id = section.to_id
+                        node.id = section.to_id
                 ),
                 block.name,
                 section.line,
@@ -193,14 +193,14 @@ class FileManager(ABC):
                 task.nature_of_work,
                 task.location
             FROM task
-            JOIN maintenance_window ON
-                maintenance_window.id = task.maintenance_window_id
+            JOIN slot ON
+                slot.id = task.slot_id
             JOIN section ON
-                section.id = maintenance_window.section_id
-            JOIN station ON
-                station.id = section.from_id
+                section.id = slot.section_id
+            JOIN node ON
+                node.id = section.from_id
             JOIN block ON
-                block.id = station.block_id
+                block.id = node.block_id
             WHERE task.id IN ({', '.join(str(task.id) for task in tasks)})
             ORDER BY
                 task.starts_at ASC

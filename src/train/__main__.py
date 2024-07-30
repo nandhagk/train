@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import json
 import logging
 from collections import defaultdict
-from datetime import datetime, time, timedelta
+from datetime import time
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -12,13 +11,9 @@ from result import Err
 from waitress import serve
 
 from train.app import app
-from train.db import get_db, utcnow
+from train.db import get_db
 from train.file_management import FileManager
 from train.logging import setup_logging
-from train.models.block import Block, PartialBlock
-from train.models.maintenance_window import MaintenanceWindow, PartialMaintenanceWindow
-from train.models.section import PartialSection, Section
-from train.models.station import PartialStation, Station
 from train.models.task import PartialTask, Task
 
 if TYPE_CHECKING:
@@ -72,132 +67,6 @@ def init(data: Path):
     cur = con.cursor()
 
     cur.executescript((Path.cwd() / "init.sql").read_text())
-
-    try:
-        blocks = json.loads(data.read_text())
-        Block.insert_many(cur, [PartialBlock(name) for name in blocks])
-
-        for block in blocks:
-            block_id = Block.find_by_name(cur, block).id  # type: ignore ()
-
-            stations: set[str] = set()
-            for section in blocks[block]:
-                section[0] = section[0].replace(" ", "_")
-                section[1] = section[1].replace(" ", "_")
-
-                stations.add(section[0])
-                stations.add(section[1])
-
-            Station.insert_many(
-                cur,
-                [PartialStation(name, block_id) for name in stations],
-            )
-
-            Section.insert_many(
-                cur,
-                [
-                    PartialSection(
-                        "UP",
-                        Station.find_by_name(cur, section[0]).id,  # type: ignore ()
-                        Station.find_by_name(cur, section[1]).id,  # type: ignore ()
-                    )
-                    for section in blocks[block]
-                ]
-                + [
-                    PartialSection(
-                        "DN",
-                        Station.find_by_name(cur, section[0]).id,  # type: ignore ()
-                        Station.find_by_name(cur, section[1]).id,  # type: ignore ()
-                    )
-                    for section in blocks[block]
-                ],
-            )
-
-        con.commit()
-        logger.info("Initialized database with dummy data from file: %s", data)
-
-    except Exception as e:
-        logger.exception("Failed to initialize database with dummy data")
-
-        msg = f"Failed to initialize database with dummy data: {e}"
-        raise click.ClickException(msg) from e
-
-
-@main.command()
-@click.argument("data", type=click.Path(exists=True, dir_okay=False, resolve_path=True))
-@click.argument("length", type=int)
-@click.option("--clear", is_flag=True, default=False)
-def create_windows(data: str, length: int, clear: bool):
-    """Populate the maintenance_window table."""
-    con = get_db()
-    cur = con.cursor()
-
-    def get_block_id(block_name: str) -> int:
-        block = Block.find_by_name(cur, block_name)
-        if block is None:
-            logger.error(
-                "Invalid time data file. Block `%s` does not exist",
-                block_name,
-            )
-            msg = f"Invalid time data file. Block `{block_name}` does not exist"
-            raise click.ClickException(msg)
-
-        return block.id
-
-    try:
-        if clear:
-            MaintenanceWindow.clear(cur)
-
-        cur.execute(
-            """
-            SELECT section.id, section.line, block_id FROM section
-            JOIN station ON
-                station.id = section.from_id
-            JOIN block ON
-                block.id = station.block_id
-            """,
-        )
-
-        ids = cur.fetchall()
-        grouped = defaultdict(list)
-
-        for section_id, line, block_id in ids:
-            grouped[(block_id, line)].append(section_id)
-
-        today = datetime.combine(utcnow().date(), time())
-        for block_data in Path(data).read_text().split("\n\n"):
-            lines = block_data.splitlines()
-            block_name = lines[0][1:]
-            for line in lines[1:]:
-                ln, st, et = line.split()
-                st = timedelta(hours=int(st[:2]), minutes=int(st[2:]))
-                et = timedelta(hours=int(et[:2]), minutes=int(et[2:]))
-
-                if et < st:
-                    et += timedelta(hours=24)
-
-                bid = get_block_id(block_name)
-                for section_id in grouped[(bid, ln)]:
-                    MaintenanceWindow.insert_many(
-                        cur,
-                        [
-                            PartialMaintenanceWindow(
-                                today + timedelta(days=days) + st,
-                                today + timedelta(days=days) + et,
-                                section_id,
-                            )
-                            for days in range(length)
-                        ],
-                    )
-
-        con.commit()
-        logger.info("Populated maintenance_window table from data file: %s", data)
-
-    except Exception as e:
-        logger.exception("Failed to populate maintenance_window table")
-
-        msg = f"Failed to populate maintenance_window table: {e}"
-        raise click.ClickException(msg) from e
 
 
 @main.command()
