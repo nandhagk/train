@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from datetime import time
+from datetime import time, datetime
 from pathlib import Path
 from time import perf_counter
 from typing import TYPE_CHECKING
@@ -12,11 +12,15 @@ from result import Err
 from waitress import serve
 
 from train.app import app
-from train.db import get_db
+from train.db import get_db, unixepoch
 from train.file_management import FileManager
 from train.logging import setup_logging
+from train.models.section import Section
 from train.models.task import PartialTask, Task
+from train.services.node import NodeService
+from train.services.section import SectionService
 from train.services.slot import SlotService
+from train.services.task import TaskService, TaskToInsert
 from train.services.train import TrainService
 
 if TYPE_CHECKING:
@@ -68,55 +72,47 @@ def init():
     con = get_db()
     cur = con.cursor()
 
-    t0 = perf_counter()
     cur.executescript((Path.cwd() / "init.sql").read_text())
-    t1 = perf_counter()
 
-    print(t1 - t0)
+    NodeService.init(cur)
+    SectionService.init(cur)
     TrainService.init(cur)
 
+    con.commit()
 
 @main.command()
-@click.argument("src", type=ClickPath(exists=True, dir_okay=False))
-@click.argument("dst", type=ClickPath(exists=False, dir_okay=False))
-def schedule(src: Path, dst: Path):
-    """Process tasks from src and dump them into dst."""
+@click.argument("p", type=int)
+@click.argument("ss", type=str)
+@click.argument("se", type=str)
+@click.argument("li", type=str)
+@click.argument("ps", type=ClickTime())
+@click.argument("pe", type=ClickTime())
+@click.argument("rd", type=ClickTime())
+@click.argument("dat", type=str)
+def insert(p: int, ss: str, se: str, li: str, ps: time, pe: time, rd: time, dat: str):
     con = get_db()
     cur = con.cursor()
 
-    try:
-        taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = defaultdict(list)
-        skipped_data = []
+    section = Section.find_by_node_name(cur, ss, se, li)
+    assert section is not None
 
-        fm = FileManager.get_manager(src, dst, dst.with_suffix(".error" + dst.suffix))
-        for idx, res in enumerate(fm.read(cur)):
-            if isinstance(res, Err):
-                skipped_data.append((idx + 1, res.err_value))
-                continue
-            taskq = res.value
-            taskqs_per_section[taskq.section_id].append((taskq, idx + 1))
+    print(TaskService.insert_one(
+        cur, 
+        section.id,
+        TaskToInsert(
+            priority=p,
+            den="DEN",
+            department="DEP",
+            location="LOC",
+            nature_of_work="NOW",
+            preferred_starts_at=ps,
+            preferred_ends_at=pe,
+            requested_date=datetime.fromisoformat(dat).date(),
+            requested_duration=unixepoch(rd)
+        )
+    ))
 
-        tasks: list[Task] = []
-        for section_id, rows in taskqs_per_section.items():
-            logger.info("Scheduling %d", section_id)
-
-            res = Task.insert_many(cur, [taskq for taskq, _idx in rows])
-            if isinstance(res, Err):
-                logger.warning("Ignoring %d", section_id, exc_info=res.err_value)
-                skipped_data.extend((idx, repr(res.err_value)) for _taskq, idx in rows)
-            else:
-                tasks.extend(res.value)
-
-        con.commit()
-        fm.write(cur, tasks)
-        fm.write_error(skipped_data)
-        logger.info("Populated database and saved output file: %s", dst)
-
-    except Exception as e:
-        logger.exception("Failed to populate database from file")
-
-        msg = f"Failed to populate database from file: {e}"
-        raise click.ClickException(msg) from e
+    con.commit()
 
 
 if __name__ == "__main__":

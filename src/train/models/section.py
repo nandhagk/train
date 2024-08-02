@@ -49,6 +49,27 @@ class Section(PartialSection):
             return None
 
         return Section.decode(cast(RawSection, row))
+    
+    @staticmethod
+    def find_by_node_name(cur: Cursor, start: str, end: str, line: str):
+        payload = {"start": start, "end": end, "line": line}
+
+        cur.execute(
+            """
+            SELECT section.* FROM section
+            WHERE
+                section.from_id = (SELECT id from node where name=:start and position=2)
+                AND section.to_id = (SELECT id from node where name=:end and position=1)
+                AND section.line = :line
+            """,
+            payload,
+        )
+
+        row: Row | None = cur.fetchone()
+        if row is None:
+            return None
+
+        return Section.decode(cast(RawSection, row))
 
     @staticmethod
     def find_one_by_node_and_line(

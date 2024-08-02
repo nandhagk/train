@@ -25,9 +25,6 @@ class RawPartialTask(TypedDict):
 class RawTask(RawPartialTask):
     id: int
 
-    starts_at: datetime
-    ends_at: datetime
-
 
 @dataclass(frozen=True, kw_only=True)
 class PartialTask:
@@ -46,9 +43,6 @@ class PartialTask:
 @dataclass(frozen=True)
 class Task(PartialTask):
     id: int
-
-    starts_at: datetime
-    ends_at: datetime
 
     @staticmethod
     def find_by_id(cur: Cursor, id: int) -> Task | None:
@@ -94,7 +88,7 @@ class Task(PartialTask):
                 :preferred_ends_at,
                 :requested_date,
                 :requested_duration
-            )
+            ) RETURNING *
             """,
             payload,
         )

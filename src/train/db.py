@@ -4,9 +4,13 @@ import sqlite3
 from datetime import UTC, date, datetime, time, timedelta
 
 
-def encode_datetime(val: datetime) -> int:
+def combine(date, time):
+    return datetime.combine(date, time, UTC)
+
+
+def encode_datetime(val: datetime) -> str:
     """Encode a `datetime.datetime`  into UNIX Timestamp."""
-    return round(val.replace(microsecond=0).timestamp())
+    return val.replace(microsecond=0).isoformat()
 
 
 def encode_timedelta(val: timedelta) -> int:
@@ -14,9 +18,18 @@ def encode_timedelta(val: timedelta) -> int:
     return round(val.total_seconds())
 
 
-def encode_time(val: time) -> int:
+def encode_date(val: date) -> str:
+    """Encode a `datetime.date`  into ISO format."""
+    return val.isoformat()
+
+
+def decode_date(raw: str) -> date:
+    """Decode a ISO format string to `datetime.date`."""
+    return datetime.fromisoformat(raw).date()
+
+def encode_time(val: time) -> str:
     """Encode a `datetime.time`  into ISO format."""
-    return round(unixepoch(val).total_seconds())
+    return val.isoformat()
 
 
 def decode_datetime(raw: str) -> datetime:
@@ -56,9 +69,11 @@ def timediff(start: time, stop: time) -> timedelta:
 sqlite3.register_adapter(datetime, encode_datetime)
 sqlite3.register_adapter(timedelta, encode_timedelta)
 sqlite3.register_adapter(time, encode_time)
+sqlite3.register_adapter(date, encode_date)
 
 sqlite3.register_converter("DATETIME", lambda raw: decode_datetime(raw.decode()))
 sqlite3.register_converter("TIME", lambda raw: decode_time(raw.decode()))
+sqlite3.register_converter("DATE", lambda raw: decode_date(raw.decode()))
 
 
 def get_db() -> sqlite3.Connection:

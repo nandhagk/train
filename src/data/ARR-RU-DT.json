@@ -643,7 +643,7 @@
     "PUDI": {"arrival": null, "departure": null},
     "RU": {"arrival": null, "departure": null}
   },
-  "11018, 00": {
+  "11018, 1000000": {
     "AJJ": {"arrival": "23:48", "departure": "23:50"},
     "IPT": {"arrival": null, "departure": null},
     "TRT": {"arrival": null, "departure": "00:12"},

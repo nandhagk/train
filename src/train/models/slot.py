@@ -155,7 +155,7 @@ class Slot(PartialSlot):
                 :section_id,
                 :task_id,
                 :train_id
-            )
+            ) RETURNING *
             """,
             payload,
         )

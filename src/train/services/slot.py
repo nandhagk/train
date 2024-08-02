@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, TypeAlias, TypedDict
 
 from result import Err, Ok, Result
 
-from train.db import utcnow
+from train.db import combine, utcnow
 from train.models.slot import PartialSlot, Slot
 
 if TYPE_CHECKING:
@@ -55,7 +55,25 @@ class TaskSlotToInsert:
     @staticmethod
     def decode(raw: RawTaskSlotToInsert) -> TaskSlotToInsert:
         return TaskSlotToInsert(**raw)
+    
+    @property
+    def preferred_range(self):
+        return combine(date.min, self.preferred_ends_at) + timedelta(days = self.preferred_ends_at < self.preferred_starts_at) - combine(date.min, self.preferred_starts_at)
 
+    def __lt__(self, other: TaskSlotToInsert):
+        if self.priority != other.priority:
+            return self.priority > other.priority
+        
+        if self.requested_duration != other.requested_duration:
+            return self.requested_duration > other.requested_duration
+        
+        if self.preferred_range != other.preferred_range:
+            return self.preferred_range < other.preferred_range
+        
+        return self.preferred_starts_at < other.preferred_starts_at
+        
+
+        
 
 class SlotService:
     @staticmethod
@@ -135,16 +153,15 @@ class SlotService:
             if starts_at.date() == slot.requested_date
             and ends_at - starts_at >= slot.requested_duration
         ]
-
         if not potential_free_slots:
             return Err(NoFreeSlotError())
 
-        preferred_starts_at = datetime.combine(
+        preferred_starts_at = combine(
             slot.requested_date,
             slot.preferred_starts_at,
         )
 
-        preferred_ends_at = datetime.combine(
+        preferred_ends_at = combine(
             slot.requested_date,
             slot.preferred_ends_at,
         )

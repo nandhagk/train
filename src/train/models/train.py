@@ -45,6 +45,25 @@ class Train(PartialTrain):
             return None
 
         return Train.decode(cast(RawTrain, row))
+    
+    @staticmethod
+    def find_by_number(cur: Cursor, number: str) -> Train | None:
+        payload = {"number": number}
+
+        cur.execute(
+            """
+            SELECT train.* FROM train
+            WHERE
+                train.number = :number
+            """,
+            payload,
+        )
+
+        row: Row | None = cur.fetchone()
+        if row is None:
+            return None
+
+        return Train.decode(cast(RawTrain, row))
 
     @staticmethod
     def find_all(cur: Cursor) -> list[Train]:
