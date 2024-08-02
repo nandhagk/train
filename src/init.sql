@@ -52,6 +52,7 @@ CREATE TABLE task (
     id INTEGER PRIMARY KEY,
 
     department TEXT NOT NULL,
+    block TEXT NOT NULL,
     den TEXT NOT NULL,
     nature_of_work TEXT NOT NULL,
     location TEXT NOT NULL,

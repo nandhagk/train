@@ -103,6 +103,7 @@ def insert(p: int, ss: str, se: str, li: str, ps: time, pe: time, rd: time, dat:
             priority=p,
             den="DEN",
             department="DEP",
+            block="BLOCK",
             location="LOC",
             nature_of_work="NOW",
             preferred_starts_at=ps,
@@ -118,6 +119,48 @@ def insert(p: int, ss: str, se: str, li: str, ps: time, pe: time, rd: time, dat:
 
     con.commit()
 
+@main.command()
+@click.argument("src", type=ClickPath(exists=True, dir_okay=False))
+@click.argument("dst", type=ClickPath(exists=False, dir_okay=False))
+def schedule(src: Path, dst: Path):
+    """Process tasks from src and dump them into dst."""
+    con = get_db()
+    cur = con.cursor()
+
+    try:
+        taskqs_per_section: dict[int, list[tuple[TaskToInsert, int]]] = defaultdict(list)
+        skipped_data: list[int] = []
+
+        fm = FileManager.get_manager(src, dst, dst.with_suffix(".error" + dst.suffix))
+        for idx, res in enumerate(fm.read(cur)):
+            if isinstance(res, Err):
+                # skipped_data.append((idx + 1, res.err_value))
+                print("This data is bad", (idx + 1, res.err_value))
+                continue
+            taskq, sid = res.value
+            taskqs_per_section[sid].append((taskq, idx + 1))
+
+        tasks: list[int] = []
+        for section_id, rows in taskqs_per_section.items():
+            logger.info("Scheduling %d", section_id)
+            res = TaskService.insert_many(cur, section_id, [tti for tti, _sid in rows])
+            
+            
+            # logger.warning("Ignoring %d", section_id, exc_info=res.err_value)
+            skipped_data.extend(res.bad_tasks)
+            tasks.extend(res.good_tasks)
+
+        Task.clear_tasks(cur, skipped_data)
+        con.commit()
+        fm.write(cur, tasks)
+        # fm.write_error(skipped_data)
+        logger.info("Populated database and saved output file: %s", dst)
+
+    except Exception as e:
+        logger.exception("Failed to populate database from file")
+
+        msg = f"Failed to populate database from file: {e}"
+        raise click.ClickException(msg) from e
 
 if __name__ == "__main__":
     main()

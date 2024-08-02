@@ -1,0 +1,1904 @@
+{
+  "43551, 1111111": {
+    "AJJ": {
+      "arrival": "04:00:00",
+      "departure": "04:00:00"
+    },
+    "IPT": {
+      "arrival": "04:10:00",
+      "departure": "04:10:00"
+    },
+    "TRT": {
+      "arrival": "04:20:00",
+      "departure": "04:20:00"
+    }
+  },
+  "43553, 1111111": {
+    "AJJ": {
+      "arrival": "05:05:00",
+      "departure": "05:05:00"
+    },
+    "IPT": {
+      "arrival": "05:15:00",
+      "departure": "05:15:00"
+    },
+    "TRT": {
+      "arrival": "05:25:00",
+      "departure": "05:25:00"
+    }
+  },
+  "43501, 1111111": {
+    "AJJ": {
+      "arrival": "05:38:00",
+      "departure": "05:40:00"
+    },
+    "IPT": {
+      "arrival": "05:52:30",
+      "departure": "05:52:30"
+    },
+    "TRT": {
+      "arrival": "06:05:00",
+      "departure": "06:05:00"
+    }
+  },
+  "20677, 1011111": {
+    "AJJ": {
+      "arrival": "06:20:00",
+      "departure": "06:20:00"
+    },
+    "IPT": {
+      "arrival": "06:25:00",
+      "departure": "06:25:00"
+    },
+    "TRT": {
+      "arrival": "06:30:00",
+      "departure": "06:30:00"
+    },
+    "POI": {
+      "arrival": "06:35:00",
+      "departure": "06:35:00"
+    },
+    "VKZ": {
+      "arrival": "06:38:00",
+      "departure": "06:38:00"
+    },
+    "NG": {
+      "arrival": "06:41:00",
+      "departure": "06:41:00"
+    },
+    "EKM": {
+      "arrival": "06:43:30",
+      "departure": "06:43:30"
+    },
+    "VGA": {
+      "arrival": "06:46:00",
+      "departure": "06:46:00"
+    },
+    "PUT": {
+      "arrival": "06:50:00",
+      "departure": "06:50:00"
+    },
+    "TDK": {
+      "arrival": "06:55:00",
+      "departure": "06:55:00"
+    },
+    "PUDI": {
+      "arrival": "07:00:00",
+      "departure": "07:00:00"
+    },
+    "RU": {
+      "arrival": "07:15:00",
+      "departure": "07:20:00"
+    }
+  },
+  "22135, 0000010": {
+    "AJJ": {
+      "arrival": "06:20:00",
+      "departure": "06:20:00"
+    },
+    "IPT": {
+      "arrival": "06:27:30",
+      "departure": "06:27:30"
+    },
+    "TRT": {
+      "arrival": "06:35:00",
+      "departure": "06:35:00"
+    },
+    "POI": {
+      "arrival": "06:42:00",
+      "departure": "06:42:00"
+    },
+    "VKZ": {
+      "arrival": "06:46:00",
+      "departure": "06:46:00"
+    },
+    "NG": {
+      "arrival": "06:50:00",
+      "departure": "06:50:00"
+    },
+    "EKM": {
+      "arrival": "06:54:00",
+      "departure": "06:54:00"
+    },
+    "VGA": {
+      "arrival": "06:58:00",
+      "departure": "06:58:00"
+    },
+    "PUT": {
+      "arrival": "07:05:00",
+      "departure": "07:05:00"
+    },
+    "TDK": {
+      "arrival": "07:12:00",
+      "departure": "07:12:00"
+    },
+    "PUDI": {
+      "arrival": "07:19:00",
+      "departure": "07:19:00"
+    },
+    "RU": {
+      "arrival": "08:00:00",
+      "departure": "08:00:00"
+    }
+  },
+  "66049, 1111111": {
+    "AJJ": {
+      "arrival": "06:25:00",
+      "departure": "06:25:00"
+    },
+    "IPT": {
+      "arrival": "06:37:30",
+      "departure": "06:37:30"
+    },
+    "TRT": {
+      "arrival": "06:50:00",
+      "departure": "06:50:00"
+    }
+  },
+  "22818, 1000000": {
+    "AJJ": {
+      "arrival": "07:00:00",
+      "departure": "07:00:00"
+    },
+    "IPT": {
+      "arrival": "07:07:30",
+      "departure": "07:07:30"
+    },
+    "TRT": {
+      "arrival": "07:15:00",
+      "departure": "07:15:00"
+    },
+    "POI": {
+      "arrival": "07:21:00",
+      "departure": "07:21:00"
+    },
+    "VKZ": {
+      "arrival": "07:25:00",
+      "departure": "07:25:00"
+    },
+    "NG": {
+      "arrival": "07:29:00",
+      "departure": "07:29:00"
+    },
+    "EKM": {
+      "arrival": "07:33:00",
+      "departure": "07:33:00"
+    },
+    "VGA": {
+      "arrival": "07:37:00",
+      "departure": "07:37:00"
+    },
+    "PUT": {
+      "arrival": "07:42:00",
+      "departure": "07:42:00"
+    },
+    "TDK": {
+      "arrival": "07:48:00",
+      "departure": "07:48:00"
+    },
+    "PUDI": {
+      "arrival": "07:55:00",
+      "departure": "07:55:00"
+    }
+  },
+  "06401, 1111111": {
+    "AJJ": {
+      "arrival": "07:10:00",
+      "departure": "07:10:00"
+    },
+    "IPT": {
+      "arrival": "07:18:00",
+      "departure": "07:18:00"
+    },
+    "TRT": {
+      "arrival": "07:26:00",
+      "departure": "07:28:00"
+    },
+    "POI": {
+      "arrival": "07:35:00",
+      "departure": "07:36:00"
+    },
+    "VKZ": {
+      "arrival": "07:41:00",
+      "departure": "07:42:00"
+    },
+    "NG": {
+      "arrival": "07:48:00",
+      "departure": "07:49:00"
+    },
+    "EKM": {
+      "arrival": "07:52:00",
+      "departure": "07:54:00"
+    },
+    "VGA": {
+      "arrival": "08:00:00",
+      "departure": "08:01:00"
+    },
+    "PUT": {
+      "arrival": "08:09:00",
+      "departure": "08:10:00"
+    },
+    "TDK": {
+      "arrival": "08:18:00",
+      "departure": "08:19:00"
+    },
+    "PUDI": {
+      "arrival": "08:36:00",
+      "departure": "08:37:00"
+    },
+    "RU": {
+      "arrival": "08:50:00",
+      "departure": "08:55:00"
+    }
+  },
+  "16057, 1111111": {
+    "AJJ": {
+      "arrival": "07:38:00",
+      "departure": "07:40:00"
+    },
+    "IPT": {
+      "arrival": "07:49:00",
+      "departure": "07:49:00"
+    },
+    "TRT": {
+      "arrival": "07:58:00",
+      "departure": "08:00:00"
+    },
+    "POI": {
+      "arrival": "08:08:00",
+      "departure": "08:08:00"
+    },
+    "VKZ": {
+      "arrival": "08:11:30",
+      "departure": "08:11:30"
+    },
+    "NG": {
+      "arrival": "08:15:00",
+      "departure": "08:15:00"
+    },
+    "EKM": {
+      "arrival": "08:17:00",
+      "departure": "08:19:00"
+    },
+    "VGA": {
+      "arrival": "08:26:00",
+      "departure": "08:26:00"
+    },
+    "PUT": {
+      "arrival": "08:33:00",
+      "departure": "08:35:00"
+    },
+    "TDK": {
+      "arrival": "08:43:00",
+      "departure": "08:43:00"
+    },
+    "PUDI": {
+      "arrival": "08:54:00",
+      "departure": "08:54:00"
+    },
+    "RU": {
+      "arrival": "09:10:00",
+      "departure": "09:25:00"
+    }
+  },
+  "22158, 1111111": {
+    "AJJ": {
+      "arrival": "07:55:00",
+      "departure": "07:55:00"
+    },
+    "IPT": {
+      "arrival": "08:02:30",
+      "departure": "08:02:30"
+    },
+    "TRT": {
+      "arrival": "08:10:00",
+      "departure": "08:10:00"
+    },
+    "POI": {
+      "arrival": "08:17:00",
+      "departure": "08:17:00"
+    },
+    "VKZ": {
+      "arrival": "08:22:30",
+      "departure": "08:22:30"
+    },
+    "NG": {
+      "arrival": "08:28:00",
+      "departure": "08:28:00"
+    },
+    "EKM": {
+      "arrival": "08:32:00",
+      "departure": "08:32:00"
+    },
+    "VGA": {
+      "arrival": "08:36:00",
+      "departure": "08:36:00"
+    },
+    "PUT": {
+      "arrival": "08:45:00",
+      "departure": "08:45:00"
+    },
+    "TDK": {
+      "arrival": "08:55:00",
+      "departure": "08:55:00"
+    },
+    "PUDI": {
+      "arrival": "09:12:00",
+      "departure": "09:12:00"
+    },
+    "RU": {
+      "arrival": "09:25:00",
+      "departure": "09:30:00"
+    }
+  },
+  "43503, 1111111": {
+    "AJJ": {
+      "arrival": "08:03:00",
+      "departure": "08:05:00"
+    },
+    "IPT": {
+      "arrival": "08:17:30",
+      "departure": "08:17:30"
+    },
+    "TRT": {
+      "arrival": "08:30:00",
+      "departure": "08:30:00"
+    }
+  },
+  "06753, 1111111": {
+    "AJJ": {
+      "arrival": "09:15:00",
+      "departure": "09:15:00"
+    },
+    "IPT": {
+      "arrival": "09:22:30",
+      "departure": "09:22:30"
+    },
+    "TRT": {
+      "arrival": "09:30:00",
+      "departure": "09:32:00"
+    },
+    "POI": {
+      "arrival": "09:40:00",
+      "departure": "09:41:00"
+    },
+    "VKZ": {
+      "arrival": "09:44:00",
+      "departure": "09:45:00"
+    },
+    "NG": {
+      "arrival": "09:51:00",
+      "departure": "09:52:00"
+    },
+    "EKM": {
+      "arrival": "09:55:00",
+      "departure": "09:57:00"
+    },
+    "VGA": {
+      "arrival": "10:04:00",
+      "departure": "10:05:00"
+    },
+    "PUT": {
+      "arrival": "10:14:00",
+      "departure": "10:16:00"
+    },
+    "TDK": {
+      "arrival": "10:23:00",
+      "departure": "10:24:00"
+    },
+    "PUDI": {
+      "arrival": "10:33:00",
+      "departure": "10:34:00"
+    },
+    "RU": {
+      "arrival": "11:00:00",
+      "departure": "11:20:00"
+    }
+  },
+  "43505, 1111111": {
+    "AJJ": {
+      "arrival": "09:28:00",
+      "departure": "09:30:00"
+    },
+    "IPT": {
+      "arrival": "09:42:30",
+      "departure": "09:42:30"
+    },
+    "TRT": {
+      "arrival": "09:55:00",
+      "departure": "09:55:00"
+    }
+  },
+  "22838/22878/18568, 0101010": {
+    "AJJ": {
+      "arrival": "10:05:00",
+      "departure": "10:05:00"
+    },
+    "IPT": {
+      "arrival": "10:12:30",
+      "departure": "10:12:30"
+    },
+    "TRT": {
+      "arrival": "10:20:00",
+      "departure": "10:20:00"
+    },
+    "POI": {
+      "arrival": "10:27:00",
+      "departure": "10:27:00"
+    },
+    "VKZ": {
+      "arrival": "10:30:30",
+      "departure": "10:30:30"
+    },
+    "NG": {
+      "arrival": "10:34:00",
+      "departure": "10:34:00"
+    },
+    "EKM": {
+      "arrival": "10:38:00",
+      "departure": "10:38:00"
+    },
+    "VGA": {
+      "arrival": "10:42:00",
+      "departure": "10:42:00"
+    },
+    "PUT": {
+      "arrival": "10:47:00",
+      "departure": "10:47:00"
+    },
+    "TDK": {
+      "arrival": "10:54:00",
+      "departure": "10:54:00"
+    },
+    "PUDI": {
+      "arrival": "11:01:00",
+      "departure": "11:01:00"
+    },
+    "RU": {
+      "arrival": "11:20:00",
+      "departure": "11:30:00"
+    }
+  },
+  "16003, 0000001": {
+    "AJJ": {
+      "arrival": "10:18:00",
+      "departure": "10:20:00"
+    },
+    "IPT": {
+      "arrival": "10:28:00",
+      "departure": "10:28:00"
+    },
+    "TRT": {
+      "arrival": "10:36:00",
+      "departure": "10:38:00"
+    },
+    "POI": {
+      "arrival": "10:45:00",
+      "departure": "10:45:00"
+    },
+    "VKZ": {
+      "arrival": "10:49:00",
+      "departure": "10:49:00"
+    },
+    "NG": {
+      "arrival": "10:53:00",
+      "departure": "10:53:00"
+    },
+    "EKM": {
+      "arrival": "10:56:30",
+      "departure": "10:56:30"
+    },
+    "VGA": {
+      "arrival": "11:00:00",
+      "departure": "11:00:00"
+    },
+    "PUT": {
+      "arrival": "11:08:00",
+      "departure": "11:10:00"
+    },
+    "TDK": {
+      "arrival": "11:17:00",
+      "departure": "11:17:00"
+    },
+    "PUDI": {
+      "arrival": "11:23:00",
+      "departure": "11:23:00"
+    },
+    "RU": {
+      "arrival": "11:45:00",
+      "departure": "11:50:00"
+    }
+  },
+  "12790, 0001001": {
+    "AJJ": {
+      "arrival": "10:40:00",
+      "departure": "10:40:00"
+    },
+    "IPT": {
+      "arrival": "10:47:30",
+      "departure": "10:47:30"
+    },
+    "TRT": {
+      "arrival": "10:55:00",
+      "departure": "10:55:00"
+    },
+    "POI": {
+      "arrival": "11:01:00",
+      "departure": "11:01:00"
+    },
+    "VKZ": {
+      "arrival": "11:05:00",
+      "departure": "11:05:00"
+    },
+    "NG": {
+      "arrival": "11:09:00",
+      "departure": "11:09:00"
+    },
+    "EKM": {
+      "arrival": "11:12:30",
+      "departure": "11:12:30"
+    },
+    "VGA": {
+      "arrival": "11:16:00",
+      "departure": "11:16:00"
+    },
+    "PUT": {
+      "arrival": "11:23:00",
+      "departure": "11:23:00"
+    },
+    "TDK": {
+      "arrival": "11:29:00",
+      "departure": "11:29:00"
+    },
+    "PUDI": {
+      "arrival": "11:52:00",
+      "departure": "11:52:00"
+    },
+    "RU": {
+      "arrival": "12:05:00",
+      "departure": "12:15:00"
+    }
+  },
+  "22503, 0101101": {
+    "AJJ": {
+      "arrival": "11:12:00",
+      "departure": "11:12:00"
+    },
+    "IPT": {
+      "arrival": "11:18:00",
+      "departure": "11:18:00"
+    },
+    "TRT": {
+      "arrival": "11:24:00",
+      "departure": "11:24:00"
+    },
+    "POI": {
+      "arrival": "11:30:00",
+      "departure": "11:30:00"
+    },
+    "VKZ": {
+      "arrival": "11:33:30",
+      "departure": "11:33:30"
+    },
+    "NG": {
+      "arrival": "11:37:00",
+      "departure": "11:37:00"
+    },
+    "EKM": {
+      "arrival": "11:40:00",
+      "departure": "11:40:00"
+    },
+    "VGA": {
+      "arrival": "11:43:00",
+      "departure": "11:43:00"
+    },
+    "PUT": {
+      "arrival": "11:48:00",
+      "departure": "11:48:00"
+    },
+    "TDK": {
+      "arrival": "11:54:00",
+      "departure": "11:54:00"
+    },
+    "PUDI": {
+      "arrival": "12:00:00",
+      "departure": "12:00:00"
+    },
+    "RU": {
+      "arrival": "12:25:00",
+      "departure": "12:35:00"
+    }
+  },
+  "06727, 1111111": {
+    "AJJ": {
+      "arrival": "11:20:00",
+      "departure": "11:25:00"
+    },
+    "IPT": {
+      "arrival": "11:33:00",
+      "departure": "11:33:00"
+    },
+    "TRT": {
+      "arrival": "11:41:00",
+      "departure": "11:43:00"
+    },
+    "POI": {
+      "arrival": "11:50:00",
+      "departure": "11:50:00"
+    },
+    "VKZ": {
+      "arrival": "11:53:30",
+      "departure": "11:53:30"
+    },
+    "NG": {
+      "arrival": "11:57:00",
+      "departure": "11:57:00"
+    },
+    "EKM": {
+      "arrival": "11:59:00",
+      "departure": "12:01:00"
+    },
+    "VGA": {
+      "arrival": "12:08:00",
+      "departure": "12:08:00"
+    },
+    "PUT": {
+      "arrival": "12:15:00",
+      "departure": "12:17:00"
+    },
+    "TDK": {
+      "arrival": "12:24:00",
+      "departure": "12:24:00"
+    },
+    "PUDI": {
+      "arrival": "12:30:00",
+      "departure": "12:30:00"
+    },
+    "RU": {
+      "arrival": "13:00:00",
+      "departure": "13:10:00"
+    }
+  },
+  "43507, 1111111": {
+    "AJJ": {
+      "arrival": "11:53:00",
+      "departure": "11:55:00"
+    },
+    "IPT": {
+      "arrival": "12:07:30",
+      "departure": "12:07:30"
+    },
+    "TRT": {
+      "arrival": "12:20:00",
+      "departure": "12:20:00"
+    }
+  },
+  "43509, 1111111": {
+    "AJJ": {
+      "arrival": "13:38:00",
+      "departure": "13:40:00"
+    },
+    "IPT": {
+      "arrival": "13:52:30",
+      "departure": "13:52:30"
+    },
+    "TRT": {
+      "arrival": "14:05:00",
+      "departure": "14:05:00"
+    }
+  },
+  "43941, 1111111": {
+    "AJJ": {
+      "arrival": "14:18:00",
+      "departure": "14:20:00"
+    },
+    "IPT": {
+      "arrival": "14:32:30",
+      "departure": "14:32:30"
+    },
+    "TRT": {
+      "arrival": "14:45:00",
+      "departure": "14:45:00"
+    }
+  },
+  "22160, 1111111": {
+    "AJJ": {
+      "arrival": "14:28:00",
+      "departure": "14:30:00"
+    },
+    "IPT": {
+      "arrival": "14:38:00",
+      "departure": "14:38:00"
+    },
+    "TRT": {
+      "arrival": "14:46:00",
+      "departure": "14:48:00"
+    },
+    "POI": {
+      "arrival": "14:55:00",
+      "departure": "14:55:00"
+    },
+    "VKZ": {
+      "arrival": "14:58:30",
+      "departure": "14:58:30"
+    },
+    "NG": {
+      "arrival": "15:02:00",
+      "departure": "15:02:00"
+    },
+    "EKM": {
+      "arrival": "15:05:30",
+      "departure": "15:05:30"
+    },
+    "VGA": {
+      "arrival": "15:09:00",
+      "departure": "15:09:00"
+    },
+    "PUT": {
+      "arrival": "15:16:00",
+      "departure": "15:18:00"
+    },
+    "TDK": {
+      "arrival": "15:25:00",
+      "departure": "15:25:00"
+    },
+    "PUDI": {
+      "arrival": "15:31:00",
+      "departure": "15:31:00"
+    },
+    "RU": {
+      "arrival": "16:05:00",
+      "departure": "16:10:00"
+    }
+  },
+  "22888, 0001000": {
+    "AJJ": {
+      "arrival": "14:55:00",
+      "departure": "14:55:00"
+    },
+    "IPT": {
+      "arrival": "15:02:30",
+      "departure": "15:02:30"
+    },
+    "TRT": {
+      "arrival": "15:10:00",
+      "departure": "15:10:00"
+    },
+    "POI": {
+      "arrival": "15:17:00",
+      "departure": "15:17:00"
+    },
+    "VKZ": {
+      "arrival": "15:21:00",
+      "departure": "15:21:00"
+    },
+    "NG": {
+      "arrival": "15:25:00",
+      "departure": "15:25:00"
+    },
+    "EKM": {
+      "arrival": "15:29:00",
+      "departure": "15:29:00"
+    },
+    "VGA": {
+      "arrival": "15:33:00",
+      "departure": "15:33:00"
+    },
+    "PUT": {
+      "arrival": "15:40:00",
+      "departure": "15:40:00"
+    },
+    "TDK": {
+      "arrival": "15:47:00",
+      "departure": "15:47:00"
+    },
+    "PUDI": {
+      "arrival": "16:18:00",
+      "departure": "16:18:00"
+    },
+    "RU": {
+      "arrival": "16:30:00",
+      "departure": "16:40:00"
+    }
+  },
+  "22864, 0010000": {
+    "AJJ": {
+      "arrival": "15:36:00",
+      "departure": "15:36:00"
+    },
+    "IPT": {
+      "arrival": "15:43:30",
+      "departure": "15:43:30"
+    },
+    "TRT": {
+      "arrival": "15:51:00",
+      "departure": "15:51:00"
+    },
+    "POI": {
+      "arrival": "15:56:00",
+      "departure": "15:56:00"
+    },
+    "VKZ": {
+      "arrival": "15:59:30",
+      "departure": "15:59:30"
+    },
+    "NG": {
+      "arrival": "16:03:00",
+      "departure": "16:03:00"
+    },
+    "EKM": {
+      "arrival": "16:06:30",
+      "departure": "16:06:30"
+    },
+    "VGA": {
+      "arrival": "16:10:00",
+      "departure": "16:10:00"
+    },
+    "PUT": {
+      "arrival": "16:17:00",
+      "departure": "16:17:00"
+    },
+    "TDK": {
+      "arrival": "16:23:00",
+      "departure": "16:23:00"
+    },
+    "PUDI": {
+      "arrival": "16:29:00",
+      "departure": "16:29:00"
+    },
+    "RU": {
+      "arrival": "16:55:00",
+      "departure": "17:05:00"
+    }
+  },
+  "12246, 1101101": {
+    "AJJ": {
+      "arrival": "15:36:00",
+      "departure": "15:36:00"
+    },
+    "IPT": {
+      "arrival": "15:43:30",
+      "departure": "15:43:30"
+    },
+    "TRT": {
+      "arrival": "15:51:00",
+      "departure": "15:51:00"
+    },
+    "POI": {
+      "arrival": "15:56:00",
+      "departure": "15:56:00"
+    },
+    "VKZ": {
+      "arrival": "15:59:30",
+      "departure": "15:59:30"
+    },
+    "NG": {
+      "arrival": "16:03:00",
+      "departure": "16:03:00"
+    },
+    "EKM": {
+      "arrival": "16:06:30",
+      "departure": "16:06:30"
+    },
+    "VGA": {
+      "arrival": "16:10:00",
+      "departure": "16:10:00"
+    },
+    "PUT": {
+      "arrival": "16:17:00",
+      "departure": "16:17:00"
+    },
+    "TDK": {
+      "arrival": "16:23:00",
+      "departure": "16:23:00"
+    },
+    "PUDI": {
+      "arrival": "16:29:00",
+      "departure": "16:29:00"
+    },
+    "RU": {
+      "arrival": "16:55:00",
+      "departure": "17:05:00"
+    }
+  },
+  "16053, 1111111": {
+    "AJJ": {
+      "arrival": "15:42:00",
+      "departure": "15:44:00"
+    },
+    "IPT": {
+      "arrival": "15:52:00",
+      "departure": "15:52:00"
+    },
+    "TRT": {
+      "arrival": "16:00:00",
+      "departure": "16:02:00"
+    },
+    "POI": {
+      "arrival": "16:10:00",
+      "departure": "16:10:00"
+    },
+    "VKZ": {
+      "arrival": "16:14:00",
+      "departure": "16:14:00"
+    },
+    "NG": {
+      "arrival": "16:18:00",
+      "departure": "16:18:00"
+    },
+    "EKM": {
+      "arrival": "16:20:00",
+      "departure": "16:22:00"
+    },
+    "VGA": {
+      "arrival": "16:29:00",
+      "departure": "16:29:00"
+    },
+    "PUT": {
+      "arrival": "16:36:00",
+      "departure": "16:38:00"
+    },
+    "TDK": {
+      "arrival": "16:45:00",
+      "departure": "16:45:00"
+    },
+    "PUDI": {
+      "arrival": "16:57:00",
+      "departure": "16:57:00"
+    },
+    "RU": {
+      "arrival": "17:10:00",
+      "departure": "17:25:00"
+    }
+  },
+  "22606, 0010010": {
+    "AJJ": {
+      "arrival": "16:10:00",
+      "departure": "16:10:00"
+    },
+    "IPT": {
+      "arrival": "16:16:30",
+      "departure": "16:16:30"
+    },
+    "TRT": {
+      "arrival": "16:23:00",
+      "departure": "16:25:00"
+    },
+    "POI": {
+      "arrival": "16:33:00",
+      "departure": "16:33:00"
+    },
+    "VKZ": {
+      "arrival": "16:37:00",
+      "departure": "16:37:00"
+    },
+    "NG": {
+      "arrival": "16:41:00",
+      "departure": "16:41:00"
+    },
+    "EKM": {
+      "arrival": "16:41:30",
+      "departure": "16:41:30"
+    },
+    "VGA": {
+      "arrival": "16:42:00",
+      "departure": "16:42:00"
+    },
+    "PUT": {
+      "arrival": "16:48:00",
+      "departure": "16:48:00"
+    },
+    "TDK": {
+      "arrival": "17:00:00",
+      "departure": "17:00:00"
+    },
+    "PUDI": {
+      "arrival": "17:12:00",
+      "departure": "17:12:00"
+    },
+    "RU": {
+      "arrival": "17:30:00",
+      "departure": "17:40:00"
+    }
+  },
+  "22604, 0100000": {
+    "AJJ": {
+      "arrival": "16:10:00",
+      "departure": "16:10:00"
+    },
+    "IPT": {
+      "arrival": "16:15:00",
+      "departure": "16:15:00"
+    },
+    "TRT": {
+      "arrival": "16:20:00",
+      "departure": "16:20:00"
+    },
+    "POI": {
+      "arrival": "16:27:00",
+      "departure": "16:27:00"
+    },
+    "VKZ": {
+      "arrival": "16:31:00",
+      "departure": "16:31:00"
+    },
+    "NG": {
+      "arrival": "16:35:00",
+      "departure": "16:35:00"
+    },
+    "EKM": {
+      "arrival": "16:38:30",
+      "departure": "16:38:30"
+    },
+    "VGA": {
+      "arrival": "16:42:00",
+      "departure": "16:42:00"
+    },
+    "PUT": {
+      "arrival": "16:48:00",
+      "departure": "16:48:00"
+    },
+    "TDK": {
+      "arrival": "17:00:00",
+      "departure": "17:00:00"
+    },
+    "PUDI": {
+      "arrival": "17:12:00",
+      "departure": "17:12:00"
+    },
+    "RU": {
+      "arrival": "17:30:00",
+      "departure": "17:40:00"
+    }
+  },
+  "43511, 1111111": {
+    "AJJ": {
+      "arrival": "16:08:00",
+      "departure": "16:13:00"
+    },
+    "IPT": {
+      "arrival": "16:26:30",
+      "departure": "16:26:30"
+    },
+    "TRT": {
+      "arrival": "16:40:00",
+      "departure": "16:40:00"
+    }
+  },
+  "17314, 0001010": {
+    "AJJ": {
+      "arrival": "16:58:00",
+      "departure": "17:00:00"
+    },
+    "IPT": {
+      "arrival": "17:08:00",
+      "departure": "17:08:00"
+    },
+    "TRT": {
+      "arrival": "17:16:00",
+      "departure": "17:16:00"
+    },
+    "POI": {
+      "arrival": "17:23:00",
+      "departure": "17:23:00"
+    },
+    "VKZ": {
+      "arrival": "17:27:00",
+      "departure": "17:27:00"
+    },
+    "NG": {
+      "arrival": "17:31:00",
+      "departure": "17:31:00"
+    },
+    "EKM": {
+      "arrival": "17:34:30",
+      "departure": "17:34:30"
+    },
+    "VGA": {
+      "arrival": "17:38:00",
+      "departure": "17:38:00"
+    },
+    "PUT": {
+      "arrival": "17:45:00",
+      "departure": "17:45:00"
+    },
+    "TDK": {
+      "arrival": "17:51:00",
+      "departure": "17:51:00"
+    },
+    "PUDI": {
+      "arrival": "17:57:00",
+      "departure": "17:57:00"
+    },
+    "RU": {
+      "arrival": "18:25:00",
+      "departure": "18:30:00"
+    }
+  },
+  "22180, 0100000": {
+    "AJJ": {
+      "arrival": "16:58:00",
+      "departure": "17:00:00"
+    },
+    "IPT": {
+      "arrival": "17:09:00",
+      "departure": "17:09:00"
+    },
+    "TRT": {
+      "arrival": "17:18:00",
+      "departure": "17:18:00"
+    },
+    "POI": {
+      "arrival": "17:25:00",
+      "departure": "17:25:00"
+    },
+    "VKZ": {
+      "arrival": "17:29:00",
+      "departure": "17:29:00"
+    },
+    "NG": {
+      "arrival": "17:33:00",
+      "departure": "17:33:00"
+    },
+    "EKM": {
+      "arrival": "17:37:00",
+      "departure": "17:37:00"
+    },
+    "VGA": {
+      "arrival": "17:41:00",
+      "departure": "17:41:00"
+    },
+    "PUT": {
+      "arrival": "17:47:00",
+      "departure": "17:47:00"
+    },
+    "TDK": {
+      "arrival": "17:53:00",
+      "departure": "17:53:00"
+    },
+    "PUDI": {
+      "arrival": "17:59:00",
+      "departure": "17:59:00"
+    },
+    "RU": {
+      "arrival": "18:40:00",
+      "departure": "18:45:00"
+    }
+  },
+  "20953, 0000100": {
+    "AJJ": {
+      "arrival": "16:58:00",
+      "departure": "17:00:00"
+    },
+    "IPT": {
+      "arrival": "17:09:00",
+      "departure": "17:09:00"
+    },
+    "TRT": {
+      "arrival": "17:18:00",
+      "departure": "17:18:00"
+    },
+    "POI": {
+      "arrival": "17:25:00",
+      "departure": "17:25:00"
+    },
+    "VKZ": {
+      "arrival": "17:29:00",
+      "departure": "17:29:00"
+    },
+    "NG": {
+      "arrival": "17:33:00",
+      "departure": "17:33:00"
+    },
+    "EKM": {
+      "arrival": "17:37:00",
+      "departure": "17:37:00"
+    },
+    "VGA": {
+      "arrival": "17:41:00",
+      "departure": "17:41:00"
+    },
+    "PUT": {
+      "arrival": "17:47:00",
+      "departure": "17:47:00"
+    },
+    "TDK": {
+      "arrival": "17:53:00",
+      "departure": "17:53:00"
+    },
+    "PUDI": {
+      "arrival": "17:59:00",
+      "departure": "17:59:00"
+    },
+    "RU": {
+      "arrival": "18:40:00",
+      "departure": "18:45:00"
+    }
+  },
+  "22919, 0010000": {
+    "AJJ": {
+      "arrival": "17:00:00",
+      "departure": "17:00:00"
+    },
+    "IPT": {
+      "arrival": "17:09:00",
+      "departure": "17:09:00"
+    },
+    "TRT": {
+      "arrival": "17:18:00",
+      "departure": "17:18:00"
+    },
+    "POI": {
+      "arrival": "17:25:00",
+      "departure": "17:25:00"
+    },
+    "VKZ": {
+      "arrival": "17:29:00",
+      "departure": "17:29:00"
+    },
+    "NG": {
+      "arrival": "17:33:00",
+      "departure": "17:33:00"
+    },
+    "EKM": {
+      "arrival": "17:37:00",
+      "departure": "17:37:00"
+    },
+    "VGA": {
+      "arrival": "17:41:00",
+      "departure": "17:41:00"
+    },
+    "PUT": {
+      "arrival": "17:47:00",
+      "departure": "17:47:00"
+    },
+    "TDK": {
+      "arrival": "17:53:00",
+      "departure": "17:53:00"
+    },
+    "PUDI": {
+      "arrival": "17:59:00",
+      "departure": "17:59:00"
+    },
+    "RU": {
+      "arrival": "18:40:00",
+      "departure": "18:45:00"
+    }
+  },
+  "43513, 1111111": {
+    "AJJ": {
+      "arrival": "17:10:00",
+      "departure": "17:12:00"
+    },
+    "IPT": {
+      "arrival": "17:26:00",
+      "departure": "17:26:00"
+    },
+    "TRT": {
+      "arrival": "17:40:00",
+      "departure": "17:40:00"
+    }
+  },
+  "16203, 1111111": {
+    "AJJ": {
+      "arrival": "17:50:00",
+      "departure": "17:52:00"
+    },
+    "IPT": {
+      "arrival": "18:01:00",
+      "departure": "18:01:00"
+    },
+    "TRT": {
+      "arrival": "18:10:00",
+      "departure": "18:12:00"
+    },
+    "POI": {
+      "arrival": "18:21:00",
+      "departure": "18:21:00"
+    },
+    "VKZ": {
+      "arrival": "18:25:00",
+      "departure": "18:25:00"
+    },
+    "NG": {
+      "arrival": "18:29:00",
+      "departure": "18:30:00"
+    },
+    "EKM": {
+      "arrival": "18:33:00",
+      "departure": "18:35:00"
+    },
+    "VGA": {
+      "arrival": "18:43:00",
+      "departure": "18:43:00"
+    },
+    "PUT": {
+      "arrival": "18:50:00",
+      "departure": "18:52:00"
+    },
+    "TDK": {
+      "arrival": "19:00:00",
+      "departure": "19:00:00"
+    },
+    "PUDI": {
+      "arrival": "19:06:00",
+      "departure": "19:06:00"
+    },
+    "RU": {
+      "arrival": "19:30:00",
+      "departure": "20:05:00"
+    }
+  },
+  "17651, 1111111": {
+    "AJJ": {
+      "arrival": "18:13:00",
+      "departure": "18:15:00"
+    },
+    "IPT": {
+      "arrival": "18:24:00",
+      "departure": "18:24:00"
+    },
+    "TRT": {
+      "arrival": "18:33:00",
+      "departure": "18:35:00"
+    },
+    "POI": {
+      "arrival": "18:44:00",
+      "departure": "18:44:00"
+    },
+    "VKZ": {
+      "arrival": "18:47:30",
+      "departure": "18:47:30"
+    },
+    "NG": {
+      "arrival": "18:51:00",
+      "departure": "18:51:00"
+    },
+    "EKM": {
+      "arrival": "18:53:00",
+      "departure": "18:55:00"
+    },
+    "VGA": {
+      "arrival": "19:02:00",
+      "departure": "19:02:00"
+    },
+    "PUT": {
+      "arrival": "19:10:00",
+      "departure": "19:12:00"
+    },
+    "TDK": {
+      "arrival": "19:19:00",
+      "departure": "19:19:00"
+    },
+    "PUDI": {
+      "arrival": "19:32:00",
+      "departure": "19:32:00"
+    },
+    "RU": {
+      "arrival": "20:00:00",
+      "departure": "20:05:00"
+    }
+  },
+  "12253, 0000010": {
+    "AJJ": {
+      "arrival": "18:50:00",
+      "departure": "18:50:00"
+    },
+    "IPT": {
+      "arrival": "18:56:00",
+      "departure": "18:56:00"
+    },
+    "TRT": {
+      "arrival": "19:02:00",
+      "departure": "19:02:00"
+    },
+    "POI": {
+      "arrival": "19:08:00",
+      "departure": "19:08:00"
+    },
+    "VKZ": {
+      "arrival": "19:11:00",
+      "departure": "19:11:00"
+    },
+    "NG": {
+      "arrival": "19:14:00",
+      "departure": "19:14:00"
+    },
+    "EKM": {
+      "arrival": "19:17:00",
+      "departure": "19:17:00"
+    },
+    "VGA": {
+      "arrival": "19:20:00",
+      "departure": "19:20:00"
+    },
+    "PUT": {
+      "arrival": "19:26:00",
+      "departure": "19:26:00"
+    },
+    "TDK": {
+      "arrival": "19:34:00",
+      "departure": "19:34:00"
+    },
+    "PUDI": {
+      "arrival": "20:02:00",
+      "departure": "20:02:00"
+    },
+    "RU": {
+      "arrival": "20:15:00",
+      "departure": "20:25:00"
+    }
+  },
+  "12164, 1111111": {
+    "AJJ": {
+      "arrival": "19:28:00",
+      "departure": "19:30:00"
+    },
+    "IPT": {
+      "arrival": "19:38:00",
+      "departure": "19:38:00"
+    },
+    "TRT": {
+      "arrival": "19:46:00",
+      "departure": "19:48:00"
+    },
+    "POI": {
+      "arrival": "19:56:00",
+      "departure": "19:56:00"
+    },
+    "VKZ": {
+      "arrival": "19:59:30",
+      "departure": "19:59:30"
+    },
+    "NG": {
+      "arrival": "20:03:00",
+      "departure": "20:03:00"
+    },
+    "EKM": {
+      "arrival": "20:07:00",
+      "departure": "20:07:00"
+    },
+    "VGA": {
+      "arrival": "20:11:00",
+      "departure": "20:11:00"
+    },
+    "PUT": {
+      "arrival": "20:18:00",
+      "departure": "20:20:00"
+    },
+    "TDK": {
+      "arrival": "20:28:00",
+      "departure": "20:28:00"
+    },
+    "PUDI": {
+      "arrival": "20:34:00",
+      "departure": "20:34:00"
+    },
+    "RU": {
+      "arrival": "21:00:00",
+      "departure": "21:05:00"
+    }
+  },
+  "43515, 1111111": {
+    "AJJ": {
+      "arrival": "19:43:00",
+      "departure": "19:45:00"
+    },
+    "IPT": {
+      "arrival": "19:57:30",
+      "departure": "19:57:30"
+    },
+    "TRT": {
+      "arrival": "20:10:00",
+      "departure": "20:10:00"
+    }
+  },
+  "16112, 1111111": {
+    "AJJ": {
+      "arrival": "19:50:00",
+      "departure": "20:00:00"
+    },
+    "IPT": {
+      "arrival": "20:10:00",
+      "departure": "20:10:00"
+    },
+    "TRT": {
+      "arrival": "20:20:00",
+      "departure": "20:22:00"
+    },
+    "POI": {
+      "arrival": "20:29:00",
+      "departure": "20:47:00"
+    },
+    "VKZ": {
+      "arrival": "20:51:00",
+      "departure": "20:53:00"
+    },
+    "NG": {
+      "arrival": "20:59:00",
+      "departure": "21:00:00"
+    },
+    "EKM": {
+      "arrival": "21:03:00",
+      "departure": "21:05:00"
+    },
+    "VGA": {
+      "arrival": "21:12:00",
+      "departure": "21:13:00"
+    },
+    "PUT": {
+      "arrival": "21:20:00",
+      "departure": "21:22:00"
+    },
+    "TDK": {
+      "arrival": "21:30:00",
+      "departure": "21:32:00"
+    },
+    "PUDI": {
+      "arrival": "21:42:00",
+      "departure": "21:44:00"
+    },
+    "RU": {
+      "arrival": "22:10:00",
+      "departure": "22:35:00"
+    }
+  },
+  "22620/22816, 0010001": {
+    "AJJ": {
+      "arrival": "20:15:00",
+      "departure": "20:15:00"
+    },
+    "IPT": {
+      "arrival": "20:23:00",
+      "departure": "20:23:00"
+    },
+    "TRT": {
+      "arrival": "20:31:00",
+      "departure": "20:31:00"
+    },
+    "POI": {
+      "arrival": "20:37:00",
+      "departure": "20:37:00"
+    },
+    "VKZ": {
+      "arrival": "20:40:30",
+      "departure": "20:40:30"
+    },
+    "NG": {
+      "arrival": "20:44:00",
+      "departure": "20:44:00"
+    },
+    "EKM": {
+      "arrival": "20:47:30",
+      "departure": "20:47:30"
+    },
+    "VGA": {
+      "arrival": "20:51:00",
+      "departure": "20:51:00"
+    },
+    "PUT": {
+      "arrival": "20:56:00",
+      "departure": "20:56:00"
+    },
+    "TDK": {
+      "arrival": "21:02:00",
+      "departure": "21:02:00"
+    },
+    "PUDI": {
+      "arrival": "21:08:00",
+      "departure": "21:08:00"
+    },
+    "RU": {
+      "arrival": "21:25:00",
+      "departure": "21:35:00"
+    }
+  },
+  "43943, 1111111": {
+    "AJJ": {
+      "arrival": "20:15:00",
+      "departure": "20:25:00"
+    },
+    "IPT": {
+      "arrival": "21:00:00",
+      "departure": "21:00:00"
+    }
+  },
+  "43517, 1111111": {
+    "AJJ": {
+      "arrival": "20:55:00",
+      "departure": "20:57:00"
+    },
+    "IPT": {
+      "arrival": "21:13:30",
+      "departure": "21:13:30"
+    },
+    "TRT": {
+      "arrival": "21:30:00",
+      "departure": "21:30:00"
+    }
+  },
+  "22834, 0001000": {
+    "AJJ": {
+      "arrival": "21:18:00",
+      "departure": "21:18:00"
+    },
+    "IPT": {
+      "arrival": "21:25:30",
+      "departure": "21:25:30"
+    },
+    "TRT": {
+      "arrival": "21:33:00",
+      "departure": "21:33:00"
+    },
+    "POI": {
+      "arrival": "21:39:00",
+      "departure": "21:39:00"
+    },
+    "VKZ": {
+      "arrival": "21:43:00",
+      "departure": "21:43:00"
+    },
+    "NG": {
+      "arrival": "21:47:00",
+      "departure": "21:47:00"
+    },
+    "EKM": {
+      "arrival": "21:51:00",
+      "departure": "21:51:00"
+    },
+    "VGA": {
+      "arrival": "21:55:00",
+      "departure": "21:55:00"
+    },
+    "PUT": {
+      "arrival": "22:01:00",
+      "departure": "22:01:00"
+    },
+    "TDK": {
+      "arrival": "22:07:00",
+      "departure": "22:07:00"
+    },
+    "PUDI": {
+      "arrival": "22:13:00",
+      "departure": "22:13:00"
+    },
+    "RU": {
+      "arrival": "22:45:00",
+      "departure": "22:55:00"
+    }
+  },
+  "16352, 0001001": {
+    "AJJ": {
+      "arrival": "20:25:00",
+      "departure": "21:20:00"
+    },
+    "IPT": {
+      "arrival": "21:34:00",
+      "departure": "21:34:00"
+    },
+    "TRT": {
+      "arrival": "21:48:00",
+      "departure": "21:50:00"
+    },
+    "POI": {
+      "arrival": "21:58:00",
+      "departure": "21:58:00"
+    },
+    "VKZ": {
+      "arrival": "22:02:00",
+      "departure": "22:02:00"
+    },
+    "NG": {
+      "arrival": "22:06:00",
+      "departure": "22:06:00"
+    },
+    "EKM": {
+      "arrival": "22:10:00",
+      "departure": "22:10:00"
+    },
+    "VGA": {
+      "arrival": "22:14:00",
+      "departure": "22:14:00"
+    },
+    "PUT": {
+      "arrival": "22:20:00",
+      "departure": "22:20:00"
+    },
+    "TDK": {
+      "arrival": "22:26:00",
+      "departure": "22:26:00"
+    },
+    "PUDI": {
+      "arrival": "22:47:00",
+      "departure": "22:47:00"
+    },
+    "RU": {
+      "arrival": "23:00:00",
+      "departure": "23:10:00"
+    }
+  },
+  "43519, 1111111": {
+    "AJJ": {
+      "arrival": "22:18:00",
+      "departure": "22:20:00"
+    },
+    "IPT": {
+      "arrival": "22:35:00",
+      "departure": "22:35:00"
+    },
+    "TRT": {
+      "arrival": "22:50:00",
+      "departure": "22:50:00"
+    }
+  },
+  "11018, 1000000": {
+    "AJJ": {
+      "arrival": "23:48:00",
+      "departure": "23:50:00"
+    },
+    "IPT": {
+      "arrival": "00:01:00",
+      "departure": "00:01:00"
+    },
+    "TRT": {
+      "arrival": "00:12:00",
+      "departure": "00:12:00"
+    },
+    "POI": {
+      "arrival": "00:20:00",
+      "departure": "00:20:00"
+    },
+    "VKZ": {
+      "arrival": "00:24:00",
+      "departure": "00:24:00"
+    },
+    "NG": {
+      "arrival": "00:28:00",
+      "departure": "00:28:00"
+    },
+    "EKM": {
+      "arrival": "00:32:00",
+      "departure": "00:32:00"
+    },
+    "VGA": {
+      "arrival": "00:36:00",
+      "departure": "00:36:00"
+    },
+    "PUT": {
+      "arrival": "00:42:00",
+      "departure": "00:42:00"
+    },
+    "TDK": {
+      "arrival": "00:49:00",
+      "departure": "00:49:00"
+    },
+    "PUDI": {
+      "arrival": "00:52:00",
+      "departure": "00:52:00"
+    },
+    "RU": {
+      "arrival": "01:25:00",
+      "departure": "01:35:00"
+    }
+  },
+  "22102, 0000100": {
+    "AJJ": {
+      "arrival": "23:48:00",
+      "departure": "23:48:00"
+    },
+    "IPT": {
+      "arrival": "23:59:00",
+      "departure": "23:59:00"
+    },
+    "TRT": {
+      "arrival": "00:10:00",
+      "departure": "00:12:00"
+    },
+    "POI": {
+      "arrival": "00:20:00",
+      "departure": "00:20:00"
+    },
+    "VKZ": {
+      "arrival": "00:24:00",
+      "departure": "00:24:00"
+    },
+    "NG": {
+      "arrival": "00:28:00",
+      "departure": "00:28:00"
+    },
+    "EKM": {
+      "arrival": "00:32:00",
+      "departure": "00:32:00"
+    },
+    "VGA": {
+      "arrival": "00:36:00",
+      "departure": "00:36:00"
+    },
+    "PUT": {
+      "arrival": "00:42:00",
+      "departure": "00:42:00"
+    },
+    "TDK": {
+      "arrival": "00:49:00",
+      "departure": "00:49:00"
+    },
+    "PUDI": {
+      "arrival": "00:52:00",
+      "departure": "00:52:00"
+    },
+    "RU": {
+      "arrival": "01:25:00",
+      "departure": "01:35:00"
+    }
+  },
+  "20919, 0000001": {
+    "AJJ": {
+      "arrival": "23:48:00",
+      "departure": "23:48:00"
+    },
+    "IPT": {
+      "arrival": "00:00:00",
+      "departure": "00:00:00"
+    },
+    "TRT": {
+      "arrival": "00:12:00",
+      "departure": "00:12:00"
+    },
+    "POI": {
+      "arrival": "00:20:00",
+      "departure": "00:20:00"
+    },
+    "VKZ": {
+      "arrival": "00:24:00",
+      "departure": "00:24:00"
+    },
+    "NG": {
+      "arrival": "00:28:00",
+      "departure": "00:28:00"
+    },
+    "EKM": {
+      "arrival": "00:32:00",
+      "departure": "00:32:00"
+    },
+    "VGA": {
+      "arrival": "00:36:00",
+      "departure": "00:36:00"
+    },
+    "PUT": {
+      "arrival": "00:42:00",
+      "departure": "00:42:00"
+    },
+    "TDK": {
+      "arrival": "00:49:00",
+      "departure": "00:49:00"
+    },
+    "PUDI": {
+      "arrival": "00:52:00",
+      "departure": "00:52:00"
+    },
+    "RU": {
+      "arrival": "01:25:00",
+      "departure": "01:35:00"
+    }
+  }
+}

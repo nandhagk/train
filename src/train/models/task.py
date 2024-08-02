@@ -13,6 +13,7 @@ class RawPartialTask(TypedDict):
     department: str
     den: str
     nature_of_work: str
+    block: str
     location: str
 
     preferred_starts_at: time
@@ -31,6 +32,7 @@ class PartialTask:
     department: str
     den: str
     nature_of_work: str
+    block: str
     location: str
 
     preferred_starts_at: time
@@ -88,6 +90,7 @@ class Task(PartialTask):
                 department,
                 den,
                 nature_of_work,
+                block,
                 location,
                 preferred_starts_at,
                 preferred_ends_at,
@@ -98,6 +101,7 @@ class Task(PartialTask):
                 :department,
                 :den,
                 :nature_of_work,
+                :block,
                 :location,
                 :preferred_starts_at,
                 :preferred_ends_at,
@@ -121,6 +125,7 @@ class Task(PartialTask):
                 department,
                 den,
                 nature_of_work,
+                block,
                 location,
                 preferred_starts_at,
                 preferred_ends_at,
@@ -131,6 +136,7 @@ class Task(PartialTask):
                 :department,
                 :den,
                 :nature_of_work,
+                :block,
                 :location,
                 :preferred_starts_at,
                 :preferred_ends_at,

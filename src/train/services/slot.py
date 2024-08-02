@@ -1,23 +1,16 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
 from heapq import heapify, heappop, heappush
 from itertools import pairwise
-from pathlib import Path
 from typing import TYPE_CHECKING, TypeAlias, TypedDict
-
-from result import Err, Ok, Result
 
 from train.db import combine, utcnow
 from train.models.slot import PartialSlot, Slot
 
 if TYPE_CHECKING:
     from sqlite3 import Cursor
-
-
-TRAIN_DATA_PATH = Path.cwd() / "data" / "ARR-RU-DT.json"
 
 
 class NoFreeSlotError(Exception):
@@ -98,12 +91,11 @@ class SlotService:
         while slots:
             slot = heappop(slots)
 
-            result = SlotService.find_interval_for_task(cur, section_id, slot)
-            if isinstance(result, Err):
-                bad_tasks.append(slot.task_id)
+            try:
+                starts_at, ends_at = SlotService.find_interval_for_task(cur, section_id, slot)
+            except NoFreeSlotError:
                 continue
 
-            starts_at, ends_at = result.ok()
             intersecting_slots = Slot.pop_intersecting_slots(
                 cur,
                 section_id,
@@ -136,7 +128,7 @@ class SlotService:
         cur: Cursor,
         section_id: int,
         slot: TaskSlotToInsert,
-    ) -> Result[Interval, NoFreeSlotError]:
+    ) -> Interval:
         fixed_slots = Slot.find_fixed_slots(
             cur,
             section_id=section_id,
@@ -151,11 +143,11 @@ class SlotService:
         potential_free_slots = [
             (starts_at, ends_at)
             for starts_at, ends_at in available_free_slots
-            if starts_at.date() == slot.requested_date
+            if starts_at.date() <= slot.requested_date <= ends_at.date()
             and ends_at - starts_at >= slot.requested_duration
         ]
         if not potential_free_slots:
-            return Err(NoFreeSlotError())
+            raise NoFreeSlotError()
 
         preferred_starts_at = combine(
             slot.requested_date,
@@ -185,5 +177,4 @@ class SlotService:
             starts_at = min(slot_ends_at - slot.requested_duration, preferred_starts_at)
 
         ends_at = starts_at + slot.requested_duration
-
-        return Ok((starts_at, ends_at))
+        return starts_at, ends_at

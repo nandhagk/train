@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 import logging
 from abc import ABC, abstractmethod
-from datetime import time, timedelta
+from datetime import date, datetime, time, timedelta
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, Any, TypeAlias
 
@@ -14,14 +15,14 @@ import openpyxl.worksheet.worksheet
 import openpyxl.writer.excel
 from result import Err, Ok, Result
 
-from train.db import decode_time, timediff
+from train.db import decode_datetime, decode_time, timediff
 from train.exceptions import (
     InvalidFileDataError,
     InvalidHeadersError,
     UnsupportedFileTypeError,
 )
 from train.models.section import Section
-from train.models.task import PartialTask, Task
+from train.services.task import TaskToInsert
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -29,6 +30,28 @@ if TYPE_CHECKING:
 
 Reason: TypeAlias = str
 
+
+@dataclass(frozen=True)
+class TaskToWriteToFile:
+    id: int
+
+    requested_date: date
+
+    department: str
+    den: str
+    nature_of_work: str
+    location: str
+
+    starts_at: datetime
+    ends_at: datetime
+
+    preferred_starts_at: time
+    preferred_ends_at: time
+    requested_duration: timedelta
+
+    priority: int
+
+    slot_id: int
 
 class FileManager(ABC):
     class Format(IntEnum):
@@ -38,7 +61,7 @@ class FileManager(ABC):
     @staticmethod
     def _get_time(raw: str) -> time | None:
         try:
-            return decode_time(raw)
+            return decode_datetime(raw).time()
         except ValueError:
             return None
 
@@ -106,7 +129,7 @@ class FileManager(ABC):
     def _validate_headers(self) -> bool:
         if self.fmt == FileManager.Format.bare_minimum:
             return {
-                "date",  # Output
+                "date", 
                 "department",
                 "den",
                 "nature_of_work",
@@ -124,7 +147,7 @@ class FileManager(ABC):
 
         if self.fmt == FileManager.Format.mas_recent:
             return {
-                "DATE",  # Output
+                "DATE",
                 "Department",
                 "DEN",
                 "Block Section/ Yard",
@@ -165,11 +188,11 @@ class FileManager(ABC):
 
         return True
 
-    def encode_tasks(self, cur: Cursor, tasks: list[Task]) -> list[dict]:
+    def encode_tasks(self, cur: Cursor, tasks: list[int]) -> list[dict]:
         cur.execute(
             f"""
             SELECT
-                DATE(task.starts_at),
+                DATE(slot.starts_at),
                 (
                     SELECT node.name FROM node
                     WHERE
@@ -180,30 +203,27 @@ class FileManager(ABC):
                     WHERE
                         node.id = section.to_id
                 ),
-                block.name,
+                task.block,
                 section.line,
                 task.preferred_starts_at,
                 task.preferred_ends_at,
                 task.requested_duration / 60,
-                TIME(task.starts_at),
-                TIME(task.ends_at),
-                task.priority,
+                TIME(slot.starts_at),
+                TIME(slot.ends_at),
+                slot.priority,
                 task.department,
                 task.den,
                 task.nature_of_work,
                 task.location
             FROM task
             JOIN slot ON
-                slot.id = task.slot_id
+                slot.task_id = task.id
             JOIN section ON
                 section.id = slot.section_id
-            JOIN node ON
-                node.id = section.from_id
-            JOIN block ON
-                block.id = node.block_id
-            WHERE task.id IN ({', '.join(str(task.id) for task in tasks)})
+            WHERE 
+                task.id IN ({', '.join(map(str, tasks))})
             ORDER BY
-                task.starts_at ASC
+                slot.starts_at ASC
             """,  # noqa: S608
         )
 
@@ -268,9 +288,16 @@ class FileManager(ABC):
             self.logger.warning("Invalid section")
             return Err("Invalid section")
 
-        # if not isinstance(mapped["corridor_block"], str):
-        #     self.logger.warning("Invalid block")
-        #     return Err("Invalid block")
+        if not isinstance(mapped["date"], str):
+            self.logger.warning("Invalid requested date")
+            return Err("Invalid block")
+            
+        try:
+            mapped["date"] = datetime.fromisoformat(mapped["date"]).date()
+        except Exception:
+            return Err("Invalid block")
+
+                
 
         if not isinstance(mapped["line"], str):
             self.logger.warning("Invalid line")
@@ -333,7 +360,7 @@ class FileManager(ABC):
         # bare minimum
         return item
 
-    def decode(self, cur: Cursor, item: dict) -> Result[PartialTask, Reason]:
+    def decode(self, cur: Cursor, item: dict) -> Result[tuple[TaskToInsert, int], Reason]:
         res = self.map(item)
         if isinstance(res, Err):
             return res
@@ -343,9 +370,11 @@ class FileManager(ABC):
         preferred_ends_at = mapped_item["demanded_time_to"]
         preferred_starts_at = mapped_item["demanded_time_from"]
 
-        section = Section.find_by_name_and_line(
+        station_a, station_b = mapped_item["block_section_or_yard"].partition("-")[::2]
+
+        section = Section.find_by_node_name(
             cur,
-            mapped_item["block_section_or_yard"],
+            station_a, station_b,
             mapped_item["line"],
         )
 
@@ -372,24 +401,26 @@ class FileManager(ABC):
             return Err("Demanded range is not complete")
 
         return Ok(
-            PartialTask(
-                mapped_item["priority"],
-                (
+            (TaskToInsert(
+                priority=mapped_item["priority"],
+                requested_duration=(
                     timedelta(minutes=mapped_item["block_demanded"])
                     if mapped_item["block_demanded"] != 0
                     else timediff(preferred_starts_at, preferred_ends_at)
                 ),
-                preferred_starts_at,
-                preferred_ends_at,
-                section.id,
-                mapped_item["department"],
-                mapped_item["den"],
-                mapped_item["nature_of_work"],
-                mapped_item["location"],
-            ),
+                block=mapped_item["block_section_or_yard"],
+                preferred_starts_at=preferred_starts_at,
+                preferred_ends_at=preferred_ends_at,
+                
+                department=mapped_item["department"],
+                den=mapped_item["den"],
+                nature_of_work=mapped_item["nature_of_work"],
+                location=mapped_item["location"],
+                requested_date=mapped_item["date"] 
+            ), section.id)
         )
 
-    def read(self, cur: Cursor) -> list[Result[PartialTask, Reason]]:
+    def read(self, cur: Cursor) -> list[Result[tuple[TaskToInsert, int], Reason]]:
         data = self._read()
 
         taskqs = []
@@ -401,9 +432,10 @@ class FileManager(ABC):
 
         return taskqs
 
-    def write(self, cur: Cursor, tasks: list[Task]) -> None:
+    def write(self, cur: Cursor, tasks: list[int]) -> None:
         data = self.encode_tasks(cur, tasks)
-        self._write(data, self.headers, self.dst_path)
+        # self._write(data, self.headers, self.dst_path)
+        pass
 
     def write_error(self, skipped_list: list[tuple[int, str]]):
         self._write(
