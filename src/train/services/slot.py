@@ -109,6 +109,7 @@ class SlotService:
                 section_id,
                 starts_at,
                 ends_at,
+                slot.priority
             )
 
             for intersecting_slot in intersecting_slots:

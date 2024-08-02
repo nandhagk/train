@@ -92,26 +92,29 @@ class Slot(PartialSlot):
         section_id: int,
         starts_at: datetime,
         ends_at: datetime,
+        priority: int
     ) -> list[TaskSlotToInsert]:
         from train.services.slot import RawTaskSlotToInsert, TaskSlotToInsert
 
-        payload = {"starts_at": starts_at, "ends_at": ends_at, "section_id": section_id}
+        payload = {"starts_at": starts_at, "ends_at": ends_at, "section_id": section_id, "priority": priority}
 
         cur.execute(
             """
             SELECT
-                slot.*,
+                slot.priority,
                 task.preferred_starts_at,
                 task.preferred_ends_at,
                 task.requested_date,
-                task.requested_duration
+                task.requested_duration,
+                slot.task_id
             FROM slot
             JOIN task
                 ON task.id = slot.task_id
             WHERE
                 slot.section_id = :section_id
-                AND slot.starts_at <= :ends_at
-                AND slot.ends_at >= :starts_at
+                AND slot.starts_at < :ends_at
+                AND slot.ends_at > :starts_at
+                AND slot.priority < :priority
             """,
             payload,
         )
@@ -126,8 +129,9 @@ class Slot(PartialSlot):
             DELETE FROM slot
             WHERE
                 slot.section_id = :section_id
-                AND slot.starts_at <= :ends_at
-                AND slot.ends_at >= :starts_at
+                AND slot.starts_at < :ends_at
+                AND slot.ends_at > :starts_at
+                AND slot.priority < :priority
             """,
             payload,
         )

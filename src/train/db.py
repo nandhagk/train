@@ -72,6 +72,7 @@ sqlite3.register_adapter(time, encode_time)
 sqlite3.register_adapter(date, encode_date)
 
 sqlite3.register_converter("DATETIME", lambda raw: decode_datetime(raw.decode()))
+sqlite3.register_converter("DURATION_INT", lambda raw: decode_timedelta(int(raw)))
 sqlite3.register_converter("TIME", lambda raw: decode_time(raw.decode()))
 sqlite3.register_converter("DATE", lambda raw: decode_date(raw.decode()))
 

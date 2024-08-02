@@ -45,6 +45,21 @@ class Task(PartialTask):
     id: int
 
     @staticmethod
+    def clear_tasks(cur: Cursor, tasks: list[int]):
+        cur.execute(
+            f"""
+            DELETE FROM task
+            WHERE
+                id IN ({', '.join(map(str, tasks))})
+            RETURNING *
+            """,
+        )
+        return [
+            Task.decode(cast(RawTask, row))
+            for row in cur.fetchall()
+        ]
+
+    @staticmethod
     def find_by_id(cur: Cursor, id: int) -> Task | None:
         payload = {"id": id}
 

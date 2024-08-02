@@ -60,7 +60,7 @@ CREATE TABLE task (
     preferred_ends_at TIME NOT NULL,
 
     requested_date DATE NOT NULL,
-    requested_duration INTEGER NOT NULL
+    requested_duration DURATION_INT NOT NULL
 );
 
 CREATE TABLE train (

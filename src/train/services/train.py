@@ -46,8 +46,6 @@ class TrainService:
             for train_data, stations in trains.items():
                 # get train_id
                 train = Train.find_by_number(cur, train_data[0])
-                if train is None:
-                    print(train_data)
                 assert train is not None
 
                 on_days = train_data[1]
@@ -57,8 +55,6 @@ class TrainService:
                     if on_days[date.weekday()] == '0': continue
                     for a, b in pairwise(stations.keys()):
                         section = find_section(a, b, line)
-                        if section is None:
-                            print(a, b, line)
                         assert section is not None
 
                         starts_at = combine(date, stations[a]['departure'])

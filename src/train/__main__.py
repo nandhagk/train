@@ -96,7 +96,7 @@ def insert(p: int, ss: str, se: str, li: str, ps: time, pe: time, rd: time, dat:
     section = Section.find_by_node_name(cur, ss, se, li)
     assert section is not None
 
-    print(TaskService.insert_one(
+    result = TaskService.insert_one(
         cur, 
         section.id,
         TaskToInsert(
@@ -110,7 +110,11 @@ def insert(p: int, ss: str, se: str, li: str, ps: time, pe: time, rd: time, dat:
             requested_date=datetime.fromisoformat(dat).date(),
             requested_duration=unixepoch(rd)
         )
-    ))
+    )
+
+    Task.clear_tasks(cur, result.bad_tasks)
+
+    print(result)
 
     con.commit()
 
