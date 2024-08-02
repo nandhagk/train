@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS node;
 
 CREATE TABLE node (
     id INTEGER PRIMARY KEY,
+
     name TEXT NOT NULL,
     position INTEGER NOT NULL,
 
@@ -14,6 +15,7 @@ CREATE TABLE node (
 
 CREATE TABLE section (
     id INTEGER PRIMARY KEY,
+
     line TEXT NOT NULL,
 
     from_id INTEGER NOT NULL,
@@ -30,12 +32,13 @@ CREATE TABLE slot (
 
     starts_at DATETIME NOT NULL,
     ends_at DATETIME NOT NULL,
+    priority INTEGER NOT NULL,
 
     section_id INTEGER NOT NULL,
-
     task_id INTEGER,
     train_id INTEGER,
 
+    FOREIGN KEY(section_id) REFERENCES section(id),
     FOREIGN KEY(task_id) REFERENCES task(id),
     FOREIGN KEY(train_id) REFERENCES train(id),
 
@@ -53,10 +56,11 @@ CREATE TABLE task (
     nature_of_work TEXT NOT NULL,
     location TEXT NOT NULL,
 
-    preferred_starts_at TIME,
-    preferred_ends_at TIME,
-    requested_duration INTEGER NOT NULL,
-    priority INTEGER NOT NULL
+    preferred_starts_at TIME NOT NULL,
+    preferred_ends_at TIME NOT NULL,
+
+    requested_date DATE NOT NULL,
+    requested_duration INTEGER NOT NULL
 );
 
 CREATE TABLE train (
@@ -67,3 +71,8 @@ CREATE TABLE train (
 
     UNIQUE(number)
 );
+
+CREATE INDEX slot_priority_ix ON slot(priority);
+CREATE INDEX slot_starts_at_ix ON slot(starts_at);
+CREATE INDEX slot_ends_at_ix ON slot(ends_at);
+

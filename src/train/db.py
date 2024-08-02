@@ -4,9 +4,9 @@ import sqlite3
 from datetime import UTC, date, datetime, time, timedelta
 
 
-def encode_datetime(val: datetime) -> str:
-    """Encode a `datetime.datetime`  into ISO format."""
-    return val.replace(microsecond=0).isoformat()
+def encode_datetime(val: datetime) -> int:
+    """Encode a `datetime.datetime`  into UNIX Timestamp."""
+    return round(val.replace(microsecond=0).timestamp())
 
 
 def encode_timedelta(val: timedelta) -> int:
@@ -14,9 +14,9 @@ def encode_timedelta(val: timedelta) -> int:
     return round(val.total_seconds())
 
 
-def encode_time(val: time) -> str:
+def encode_time(val: time) -> int:
     """Encode a `datetime.time`  into ISO format."""
-    return val.isoformat()
+    return round(unixepoch(val).total_seconds())
 
 
 def decode_datetime(raw: str) -> datetime:

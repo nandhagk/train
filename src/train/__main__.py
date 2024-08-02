@@ -4,6 +4,7 @@ import logging
 from collections import defaultdict
 from datetime import time
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 import click
@@ -15,6 +16,7 @@ from train.db import get_db
 from train.file_management import FileManager
 from train.logging import setup_logging
 from train.models.task import PartialTask, Task
+from train.services.slot import SlotService
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -60,13 +62,17 @@ def main(ctx: click.Context, port: int, debug: bool):
 
 
 @main.command()
-@click.argument("data", type=ClickPath(exists=True, dir_okay=False))
-def init(data: Path):
+def init():
     """Initiliaze the database."""
     con = get_db()
     cur = con.cursor()
 
+    t0 = perf_counter()
     cur.executescript((Path.cwd() / "init.sql").read_text())
+    t1 = perf_counter()
+
+    print(t1 - t0)
+    SlotService.init(cur)
 
 
 @main.command()

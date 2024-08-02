@@ -51,7 +51,7 @@ class Section(PartialSection):
         return Section.decode(cast(RawSection, row))
 
     @staticmethod
-    def find_by_node_and_line(
+    def find_one_by_node_and_line(
         cur: Cursor,
         from_id: int,
         to_id: int,

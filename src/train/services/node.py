@@ -16,9 +16,10 @@ NODE_DATA_PATH = Path.cwd() / "data" / "node.json"
 class NodeService:
     @staticmethod
     def init(cur: Cursor) -> None:
+        node_raw = json.loads(NODE_DATA_PATH.read_text())
         nodes = [
-            PartialNode(name=name, position=pos)
-            for name, pos in product(json.loads(NODE_DATA_PATH.read_text()), [1, 2])
+            PartialNode(name=name, position=position)
+            for name, position in product(node_raw, [1, 2])
         ]
 
         Node.insert_many(cur, nodes)

@@ -1,4 +1,68 @@
-class TaskService: ...
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, TypeAlias
+
+from train.models.task import PartialTask, Task
+from train.services.slot import NoFreeSlotError, SlotService, TaskSlotToInsert
+
+if TYPE_CHECKING:
+    from sqlite3 import Cursor
+
+
+InsertErr: TypeAlias = NoFreeSlotError
+
+
+@dataclass(frozen=True)
+class TaskToInsert(PartialTask):
+    priority: int
+
+
+@dataclass(frozen=True)
+class TaskInsertResult:
+    requested_tasks: list[int]
+    good_tasks: list[int]
+    bad_tasks: list[int]
+
+
+class TaskService:
+    @staticmethod
+    def insert_one(
+        cur: Cursor,
+        section_id: int,
+        task: TaskToInsert,
+    ) -> TaskInsertResult:
+        return TaskService.insert_many(cur, section_id, [task])
+
+    @staticmethod
+    def insert_many(
+        cur: Cursor,
+        section_id: int,
+        tasks: list[TaskToInsert],
+    ) -> TaskInsertResult:
+        # TODO: migrate to postgres which allows RETURNING with bulk inserts
+        created_tasks = [Task.insert_one(cur, task) for task in tasks]
+        good_tasks, bad_tasks = SlotService.insert_task_slots(
+            cur,
+            section_id,
+            [
+                TaskSlotToInsert(
+                    priority=task.priority,
+                    preferred_starts_at=task.preferred_starts_at,
+                    preferred_ends_at=task.preferred_ends_at,
+                    requested_date=task.requested_date,
+                    requested_duration=task.requested_duration,
+                    task_id=created_task.id,
+                )
+                for task, created_task in zip(tasks, created_tasks)
+            ],
+        )
+
+        return TaskInsertResult(
+            requested_tasks=[created_task.id for created_task in created_tasks],
+            good_tasks=good_tasks,
+            bad_tasks=bad_tasks,
+        )
 
 
 # from __future__ import annotations

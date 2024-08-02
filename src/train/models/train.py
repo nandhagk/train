@@ -47,6 +47,13 @@ class Train(PartialTrain):
         return Train.decode(cast(RawTrain, row))
 
     @staticmethod
+    def find_all(cur: Cursor) -> list[Train]:
+        cur.execute("SELECT train.* FROM train")
+
+        rows: list[Row] = cur.fetchall()
+        return [Train.decode(cast(RawTrain, row)) for row in rows]
+
+    @staticmethod
     def insert_many(cur: Cursor, trains: Iterable[PartialTrain]) -> None:
         payload = [cast(RawPartialTrain, asdict(train)) for train in trains]
 

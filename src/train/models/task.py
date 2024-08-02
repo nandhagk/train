@@ -15,20 +15,18 @@ class RawPartialTask(TypedDict):
     nature_of_work: str
     location: str
 
-    starts_at: datetime
-    ends_at: datetime
-
     preferred_starts_at: time
     preferred_ends_at: time
 
     requested_date: date
     requested_duration: timedelta
 
-    priority: int
-
 
 class RawTask(RawPartialTask):
     id: int
+
+    starts_at: datetime
+    ends_at: datetime
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -38,21 +36,19 @@ class PartialTask:
     nature_of_work: str
     location: str
 
-    starts_at: datetime
-    ends_at: datetime
-
     preferred_starts_at: time
     preferred_ends_at: time
 
     requested_date: date
     requested_duration: timedelta
 
-    priority: int
-
 
 @dataclass(frozen=True)
 class Task(PartialTask):
     id: int
+
+    starts_at: datetime
+    ends_at: datetime
 
     @staticmethod
     def find_by_id(cur: Cursor, id: int) -> Task | None:
@@ -74,6 +70,39 @@ class Task(PartialTask):
         return Task.decode(cast(RawTask, row))
 
     @staticmethod
+    def insert_one(cur: Cursor, task: PartialTask) -> Task:
+        payload = cast(RawPartialTask, asdict(task))
+
+        cur.execute(
+            """
+            INSERT INTO task (
+                department,
+                den,
+                nature_of_work,
+                location,
+                preferred_starts_at,
+                preferred_ends_at,
+                requested_date,
+                requested_duration
+            )
+            VALUES (
+                :department,
+                :den,
+                :nature_of_work,
+                :location,
+                :preferred_starts_at,
+                :preferred_ends_at,
+                :requested_date,
+                :requested_duration
+            )
+            """,
+            payload,
+        )
+
+        row: Row = cur.fetchone()
+        return Task.decode(cast(RawTask, row))
+
+    @staticmethod
     def insert_many(cur: Cursor, tasks: Iterable[PartialTask]) -> None:
         payload = [cast(RawPartialTask, asdict(task)) for task in tasks]
 
@@ -84,26 +113,20 @@ class Task(PartialTask):
                 den,
                 nature_of_work,
                 location,
-                starts_at,
-                ends_at,
                 preferred_starts_at,
                 preferred_ends_at,
                 requested_date,
-                requested_duration,
-                priority
+                requested_duration
             )
             VALUES (
                 :department,
                 :den,
                 :nature_of_work,
                 :location,
-                :starts_at,
-                :ends_at,
                 :preferred_starts_at,
                 :preferred_ends_at,
                 :requested_date,
-                :requested_duration,
-                :priority
+                :requested_duration
             )
             """,
             payload,

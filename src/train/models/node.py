@@ -47,8 +47,8 @@ class Node(PartialNode):
         return Node.decode(cast(RawNode, row))
 
     @staticmethod
-    def find_all(cur: Cursor) -> list[Node]:
-        cur.execute("SELECt node.* FROM node")
+    def find_many(cur: Cursor) -> list[Node]:
+        cur.execute("SELECT node.* FROM node")
 
         rows: list[Row] = cur.fetchall()
         return [Node.decode(cast(RawNode, row)) for row in rows]

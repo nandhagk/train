@@ -17,11 +17,10 @@ NODE_DATA_PATH = Path.cwd() / "data" / "node.json"
 class SectionService:
     @staticmethod
     def init(cur: Cursor) -> None:
-        nodes = {(node.name, node.position): node.id for node in Node.find_all(cur)}
-        node_ids = [
-            nodes[key]
-            for key in product(json.loads(NODE_DATA_PATH.read_text()), [1, 2])
-        ]
+        nodes = {(node.name, node.position): node.id for node in Node.find_many(cur)}
+
+        node_raw = json.loads(NODE_DATA_PATH.read_text())
+        node_ids = [nodes[key] for key in product(node_raw, [1, 2])]
 
         sections = chain(
             (
