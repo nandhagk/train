@@ -17,6 +17,7 @@ from train.file_management import FileManager
 from train.logging import setup_logging
 from train.models.task import PartialTask, Task
 from train.services.slot import SlotService
+from train.services.train import TrainService
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -72,7 +73,7 @@ def init():
     t1 = perf_counter()
 
     print(t1 - t0)
-    SlotService.init(cur)
+    TrainService.init(cur)
 
 
 @main.command()

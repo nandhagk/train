@@ -59,22 +59,6 @@ class TaskSlotToInsert:
 
 class SlotService:
     @staticmethod
-    def init(cur: Cursor) -> None:
-        trains = json.loads(TRAIN_DATA_PATH.read_text())
-        trains = {
-            tuple(key.split(", ")): SlotService.interpolate(value)
-            for key, value in trains.items()
-        }
-
-        # pprint(trains)
-        # slots = [
-        #     PartialSlot(name=name, position=pos)
-        #     for name, pos in json.loads(SLOT_DATA_PATH.read_text())
-        # ]
-
-        # Slot.insert_many(cur, slots)
-
-    @staticmethod
     def insert_task_slot(
         cur: Cursor,
         section_id: int,
@@ -185,6 +169,3 @@ class SlotService:
         ends_at = starts_at + slot.requested_duration
 
         return Ok((starts_at, ends_at))
-
-    @staticmethod
-    def interpolate(train): ...

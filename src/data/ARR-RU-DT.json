@@ -374,7 +374,7 @@
     "VGA": {"arrival": null, "departure": "16:42"},
     "PUT": {"arrival": null, "departure": "16:48"},
     "TDK": {"arrival": null, "departure": "17:00"},
-    "PUDI": {"arrival": null, "departure": "17;12"},
+    "PUDI": {"arrival": null, "departure": "17:12"},
     "RU": {"arrival": "17:30", "departure": "17:40"}
   },
   "22604, 0100000": {
