@@ -131,28 +131,30 @@ def schedule(src: Path, dst: Path):
         taskqs_per_section: dict[int, list[tuple[TaskToInsert, int]]] = defaultdict(list)
         skipped_data: list[int] = []
 
-        fm = FileManager.get_manager(src, dst, dst.with_suffix(".error" + dst.suffix))
-        for idx, res in enumerate(fm.read(cur)):
-            if isinstance(res, Err):
+        fm = FileManager(src.as_posix())
+        for idx, res in enumerate(fm.get_tasks(cur)):
+            if res is None:
+                print(fm._raw_data)
                 # skipped_data.append((idx + 1, res.err_value))
-                print("This data is bad", (idx + 1, res.err_value))
+                print("This data is bad", (idx + 1, res))
                 continue
-            taskq, sid = res.value
+            taskq, sid = res
             taskqs_per_section[sid].append((taskq, idx + 1))
 
         tasks: list[int] = []
         for section_id, rows in taskqs_per_section.items():
             logger.info("Scheduling %d", section_id)
             res = TaskService.insert_many(cur, section_id, [tti for tti, _sid in rows])
-            
-            
+            print(res)
             # logger.warning("Ignoring %d", section_id, exc_info=res.err_value)
             skipped_data.extend(res.bad_tasks)
             tasks.extend(res.good_tasks)
 
         Task.clear_tasks(cur, skipped_data)
         con.commit()
-        fm.write(cur, tasks)
+        if not tasks: return
+        fm.write_tasks(cur, tasks)
+        print(skipped_data)
         # fm.write_error(skipped_data)
         logger.info("Populated database and saved output file: %s", dst)
 

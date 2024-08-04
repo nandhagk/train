@@ -94,6 +94,7 @@ class SlotService:
             try:
                 starts_at, ends_at = SlotService.find_interval_for_task(cur, section_id, slot)
             except NoFreeSlotError:
+                bad_tasks.append(slot.task_id)
                 continue
 
             intersecting_slots = Slot.pop_intersecting_slots(

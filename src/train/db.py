@@ -25,7 +25,7 @@ def encode_date(val: date) -> str:
 
 def decode_date(raw: str) -> date:
     """Decode a ISO format string to `datetime.date`."""
-    return datetime.fromisoformat(raw).date()
+    return datetime.fromisoformat(str(raw)).date()
 
 def encode_time(val: time) -> str:
     """Encode a `datetime.time`  into ISO format."""
@@ -34,7 +34,7 @@ def encode_time(val: time) -> str:
 
 def decode_datetime(raw: str) -> datetime:
     """Decode a ISO format string to `datetime.datetime`."""
-    return datetime.fromisoformat(raw).replace(tzinfo=UTC)
+    return datetime.fromisoformat(str(raw)).replace(tzinfo=UTC)
 
 
 def decode_timedelta(raw: int) -> timedelta:
@@ -44,7 +44,7 @@ def decode_timedelta(raw: int) -> timedelta:
 
 def decode_time(raw: str) -> time:
     """Decode a ISO format string to `datetime.time`."""
-    return time.fromisoformat(raw)
+    return time.fromisoformat(str(raw))
 
 
 def utcnow() -> datetime:
