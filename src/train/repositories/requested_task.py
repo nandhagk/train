@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from asyncpg import Connection, Record
 
@@ -46,6 +46,23 @@ class RequestedTaskRepository:
         return [RequestedTask.decode(row) for row in rows]
 
     @staticmethod
+    async def delete_one_by_id(con: Connection, id: int) -> RequestedTask | None:
+        row: Record | None = await con.fetchrow(
+            """
+            DELETE FROM requested_task
+            WHERE
+                requested_task.id = $1
+            RETURNING *
+            """,
+            id,
+        )
+
+        if row is None:
+            return None
+
+        return RequestedTask.decode(row)
+
+    @staticmethod
     async def insert_one(
         con: Connection,
         requested_task: PartialRequestedTask,
@@ -71,6 +88,36 @@ class RequestedTaskRepository:
             RETURNING *
             """,
             *requested_task.encode()[1:],
+        )
+
+        return RequestedTask.decode(row)
+
+    @staticmethod
+    async def update_one(
+        con: Connection,
+        requested_task: RequestedTask,
+    ) -> RequestedTask:
+        row: Record = await con.fetchrow(
+            """
+            UPDATE requested_task SET
+            (
+                department,
+                den,
+                nature_of_work,
+                block,
+                location,
+                preferred_starts_at,
+                preferred_ends_at,
+                requested_date,
+                requested_duration,
+                priority,
+                section_id
+            ) = ($2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            WHERE
+                requested_task.id = $1
+            RETURNING *
+            """,
+            *requested_task.encode(),
         )
 
         return RequestedTask.decode(row)

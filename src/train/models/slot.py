@@ -7,7 +7,7 @@ from msgspec.structs import astuple
 
 
 class PartialSlot(Struct, kw_only=True, frozen=True):
-    id: None = None
+    id: int | None = None
 
     starts_at: datetime
     ends_at: datetime

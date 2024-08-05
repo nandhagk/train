@@ -7,7 +7,7 @@ from msgspec.structs import astuple
 
 
 class PartialTask(Struct, frozen=True, kw_only=True):
-    id: None = None
+    id: int | None = None
 
     department: str
     den: str

@@ -1,12 +1,12 @@
 from typing import ClassVar, TypeVar
 
 from asyncpg import Connection, Pool
-from blacksheep import Application, Content, Request, Response, get, post
+from blacksheep import Application, Content, Request, Response, delete, get, post, put
 from blacksheep.server.bindings import Binder, BoundValue
 from msgspec import Struct, ValidationError
 from msgspec.json import Decoder
 
-from train.models.requested_task import PartialRequestedTask
+from train.models.requested_task import PartialRequestedTask, RequestedTask
 from train.repositories.requested_task import RequestedTaskRepository
 from train.services.requested_task import RequestedTaskService
 from train.utils import ENCODER, pool_factory
@@ -70,8 +70,20 @@ async def health() -> Response:
     return json(HealthStatus(status="UP"))
 
 
+@get("/api/requested_task")
+async def find_all_requested_tasks(pool: Pool) -> Response:
+    async with pool.acquire() as con, con.transaction():
+        con: Connection
+        tasks = await RequestedTaskRepository.find_all(con)
+
+    return json(tasks)
+
+
 @post("/api/requested_task")
-async def request_task(pool: Pool, data: FromJSON[PartialRequestedTask]) -> Response:
+async def created_requested_task(
+    pool: Pool,
+    data: FromJSON[PartialRequestedTask],
+) -> Response:
     task = data.value
     async with pool.acquire() as con, con.transaction():
         con: Connection
@@ -80,8 +92,30 @@ async def request_task(pool: Pool, data: FromJSON[PartialRequestedTask]) -> Resp
     return json(task, status=201)
 
 
+@put("/api/requested_task")
+async def update_requested_task(
+    pool: Pool,
+    data: FromJSON[RequestedTask],
+) -> Response:
+    task = data.value
+    async with pool.acquire() as con, con.transaction():
+        con: Connection
+        await RequestedTaskRepository.update_one(con, task)
+
+    return json(task)
+
+
+@delete("/api/requested_task/{id}")
+async def remove_requested_task(pool: Pool, id: int) -> Response:
+    async with pool.acquire() as con, con.transaction():
+        con: Connection
+        task = await RequestedTaskRepository.delete_one_by_id(con, id)
+
+    return json(task)
+
+
 @post("/api/requested_task/schedule")
-async def schedule_tasks(pool: Pool, data: FromJSON[list[int]]) -> Response:
+async def schedule_requested_tasks(pool: Pool, data: FromJSON[list[int]]) -> Response:
     """Schedule list of tasks by their ids."""
     ids = data.value
     async with pool.acquire() as con, con.transaction():

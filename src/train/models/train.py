@@ -6,7 +6,7 @@ from msgspec.structs import astuple
 
 
 class PartialTrain(Struct, kw_only=True, frozen=True):
-    id: None = None
+    id: int | None = None
 
     name: str
     number: str

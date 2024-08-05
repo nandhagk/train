@@ -1,5 +1,6 @@
+from collections.abc import Iterable
 from datetime import datetime
-from typing import TYPE_CHECKING, Iterable
+from typing import TYPE_CHECKING
 
 from asyncpg import Connection, Record
 
@@ -77,8 +78,7 @@ class SlotRepository:
                 task.id = slot.task_id
                 AND slot.priority < $1
                 AND slot.section_id = $2
-                AND slot.starts_at < $4
-                AND slot.ends_at > $3
+                AND (slot.starts_at, slot.ends_at) OVERLAPS ($3, $4)
             RETURNING
                 slot.priority,
                 slot.task_id,
