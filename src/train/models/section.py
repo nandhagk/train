@@ -1,118 +1,33 @@
-from __future__ import annotations
+from typing import Self
 
-from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, TypedDict, cast
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from sqlite3 import Cursor, Row
+from asyncpg import Record
+from msgspec import Struct
+from msgspec.structs import astuple
 
 
-class RawPartialSection(TypedDict):
+class PartialSection(Struct, kw_only=True, frozen=True):
+    id: None = None
+
     line: str
 
     from_id: int
     to_id: int
 
+    def encode(self) -> tuple:
+        return astuple(self)
 
-class RawSection(RawPartialSection):
+
+class Section(Struct, kw_only=True, frozen=True):
     id: int
 
-
-@dataclass(frozen=True, kw_only=True)
-class PartialSection:
     line: str
 
     from_id: int
     to_id: int
 
+    def encode(self) -> tuple:
+        return astuple(self)
 
-@dataclass(frozen=True)
-class Section(PartialSection):
-    id: int
-
-    @staticmethod
-    def find_by_id(cur: Cursor, id: int) -> Section | None:
-        payload = {"id": id}
-
-        cur.execute(
-            """
-            SELECT section.* FROM section
-            WHERE
-                section.id = :id
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Section.decode(cast(RawSection, row))
-    
-    @staticmethod
-    def find_by_node_name(cur: Cursor, start: str, end: str, line: str):
-        payload = {"start": start, "end": end, "line": line}
-
-        cur.execute(
-            """
-            SELECT section.* FROM section
-            WHERE
-                section.from_id = (SELECT id from node where name=:start and position=2)
-                AND section.to_id = (SELECT id from node where name=:end and position=1)
-                AND section.line = :line
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Section.decode(cast(RawSection, row))
-
-    @staticmethod
-    def find_one_by_node_and_line(
-        cur: Cursor,
-        from_id: int,
-        to_id: int,
-        line: str,
-    ) -> Section | None:
-        payload = {"from_id": from_id, "to_id": to_id, "line": line}
-
-        cur.execute(
-            """
-            SELECT section.* FROM section
-            WHERE
-                section.from_id = :from_id
-                AND section.to_id = :to_id
-                AND section.line = :line
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Section.decode(cast(RawSection, row))
-
-    @staticmethod
-    def insert_many(cur: Cursor, sections: Iterable[PartialSection]) -> None:
-        payload = [cast(RawPartialSection, asdict(section)) for section in sections]
-
-        cur.executemany(
-            """
-            INSERT INTO section (line, from_id, to_id)
-            VALUES (:line, :from_id, :to_id)
-            """,
-            payload,
-        )
-
-    @staticmethod
-    def decode(row: RawSection) -> Section:
-        return Section(**row)
-
-    @staticmethod
-    def clear(cur: Cursor) -> None:
-        cur.execute("DELETE FROM section")
+    @classmethod
+    def decode(cls, row: Record) -> Self:
+        return cls(**row)

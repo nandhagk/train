@@ -1,11 +1,12 @@
 DROP TABLE IF EXISTS slot;
 DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS requested_task;
 DROP TABLE IF EXISTS train;
 DROP TABLE IF EXISTS section;
 DROP TABLE IF EXISTS node;
 
 CREATE TABLE node (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     name TEXT NOT NULL,
     position INTEGER NOT NULL,
@@ -14,7 +15,7 @@ CREATE TABLE node (
 );
 
 CREATE TABLE section (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
     line TEXT NOT NULL,
 
@@ -24,14 +25,49 @@ CREATE TABLE section (
     FOREIGN KEY(from_id) REFERENCES node(id),
     FOREIGN KEY(to_id) REFERENCES node(id),
 
-    UNIQUE(from_id, to_id, line)
+    UNIQUE(line, from_id, to_id)
+);
+
+
+CREATE TABLE task (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    department TEXT NOT NULL,
+    den TEXT NOT NULL,
+    nature_of_work TEXT NOT NULL,
+    block TEXT NOT NULL,
+    location TEXT NOT NULL,
+
+    preferred_starts_at TIME NOT NULL,
+    preferred_ends_at TIME NOT NULL,
+
+    requested_date DATE NOT NULL,
+    requested_duration INTERVAL NOT NULL
+);
+
+CREATE TABLE train (
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+    name TEXT NOT NULL,
+    number TEXT NOT NULL,
+
+    UNIQUE(number)
+);
+
+CREATE TABLE requested_task (
+    LIKE task INCLUDING ALL,
+
+    priority INTEGER NOT NULL,
+    section_id INTEGER NOT NULL,
+
+    FOREIGN KEY(section_id) REFERENCES section(id)
 );
 
 CREATE TABLE slot (
-    id INTEGER PRIMARY KEY,
+    id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
-    starts_at DATETIME NOT NULL,
-    ends_at DATETIME NOT NULL,
+    starts_at TIMESTAMPTZ NOT NULL,
+    ends_at TIMESTAMPTZ NOT NULL,
     priority INTEGER NOT NULL,
 
     section_id INTEGER NOT NULL,
@@ -46,31 +82,6 @@ CREATE TABLE slot (
         (task_id IS NOT NULL AND train_id IS NULL)
         OR (task_id IS NULL AND train_id IS NOT NULL)
     )
-);
-
-CREATE TABLE task (
-    id INTEGER PRIMARY KEY,
-
-    department TEXT NOT NULL,
-    block TEXT NOT NULL,
-    den TEXT NOT NULL,
-    nature_of_work TEXT NOT NULL,
-    location TEXT NOT NULL,
-
-    preferred_starts_at TIME NOT NULL,
-    preferred_ends_at TIME NOT NULL,
-
-    requested_date DATE NOT NULL,
-    requested_duration DURATION_INT NOT NULL
-);
-
-CREATE TABLE train (
-    id INTEGER PRIMARY KEY,
-
-    number TEXT NOT NULL,
-    name TEXT NOT NULL,
-
-    UNIQUE(number)
 );
 
 CREATE INDEX slot_priority_ix ON slot(priority);

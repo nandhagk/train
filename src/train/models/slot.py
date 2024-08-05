@@ -1,202 +1,56 @@
-from __future__ import annotations
+from datetime import datetime
+from typing import Self
 
-from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, TypedDict, cast
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from datetime import datetime
-    from sqlite3 import Cursor, Row
-
-    from train.services.slot import TaskSlotToInsert
+from asyncpg import Record
+from msgspec import Struct
+from msgspec.structs import astuple
 
 
-class RawPartialSlot(TypedDict):
+class PartialSlot(Struct, kw_only=True, frozen=True):
+    id: None = None
+
     starts_at: datetime
     ends_at: datetime
-    priority: int
 
+    priority: int
     section_id: int
 
     task_id: int | None
     train_id: int | None
 
+    def __post_init__(self: Self) -> None:
+        if (self.task_id is None) ^ (self.train_id is None):
+            return
 
-class RawSlot(RawPartialSlot):
+        msg = "Exactly one of 'task_id`' or 'train_id' must be set."
+        raise ValueError(msg)
+
+    def encode(self) -> tuple:
+        return astuple(self)
+
+
+class Slot(Struct, kw_only=True, frozen=True):
     id: int
 
-
-@dataclass(frozen=True, kw_only=True)
-class PartialSlot:
     starts_at: datetime
     ends_at: datetime
-    priority: int
 
+    priority: int
     section_id: int
 
     task_id: int | None
     train_id: int | None
 
+    def __post_init__(self: Self) -> None:
+        if (self.task_id is None) ^ (self.train_id is None):
+            return
 
-@dataclass(frozen=True)
-class Slot(PartialSlot):
-    id: int
+        msg = "Exactly one of 'task_id`' or 'train_id' must be set."
+        raise ValueError(msg)
 
-    @staticmethod
-    def find_by_id(cur: Cursor, id: int) -> Slot | None:
-        payload = {"id": id}
+    def encode(self) -> tuple:
+        return astuple(self)
 
-        cur.execute(
-            """
-            SELECT slot.* FROM slot
-            WHERE
-                slot.id = :id
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Slot.decode(cast(RawSlot, row))
-
-    @staticmethod
-    def find_fixed_slots(
-        cur: Cursor,
-        section_id: int,
-        priority: int,
-        after: datetime,
-    ) -> list[Slot]:
-        payload = {"section_id": section_id, "priority": priority, "after": after}
-
-        cur.execute(
-            """
-            SELECT slot.* FROM slot
-            WHERE
-                slot.section_id = :section_id
-                AND slot.priority >= :priority
-                AND slot.ends_at >= :after
-            ORDER BY
-                slot.starts_at ASC
-            """,
-            payload,
-        )
-
-        rows: list[Row] = cur.fetchall()
-        return [Slot.decode(cast(RawSlot, row)) for row in rows]
-
-    @staticmethod
-    def pop_intersecting_slots(
-        cur: Cursor,
-        section_id: int,
-        starts_at: datetime,
-        ends_at: datetime,
-        priority: int
-    ) -> list[TaskSlotToInsert]:
-        from train.services.slot import RawTaskSlotToInsert, TaskSlotToInsert
-
-        payload = {"starts_at": starts_at, "ends_at": ends_at, "section_id": section_id, "priority": priority}
-
-        cur.execute(
-            """
-            SELECT
-                slot.priority,
-                task.preferred_starts_at,
-                task.preferred_ends_at,
-                task.requested_date,
-                task.requested_duration,
-                slot.task_id
-            FROM slot
-            JOIN task
-                ON task.id = slot.task_id
-            WHERE
-                slot.section_id = :section_id
-                AND slot.starts_at < :ends_at
-                AND slot.ends_at > :starts_at
-                AND slot.priority < :priority
-            """,
-            payload,
-        )
-
-        rows: list[Row] = cur.fetchall()
-        slots = [
-            TaskSlotToInsert.decode(cast(RawTaskSlotToInsert, row)) for row in rows
-        ]
-
-        cur.execute(
-            """
-            DELETE FROM slot
-            WHERE
-                slot.section_id = :section_id
-                AND slot.starts_at < :ends_at
-                AND slot.ends_at > :starts_at
-                AND slot.priority < :priority
-            """,
-            payload,
-        )
-
-        return slots
-
-    @staticmethod
-    def insert_one(cur: Cursor, slot: PartialSlot) -> Slot:
-        payload = cast(RawPartialSlot, asdict(slot))
-
-        cur.execute(
-            """
-            INSERT INTO slot (
-                starts_at,
-                ends_at,
-                priority,
-                section_id,
-                task_id,
-                train_id
-            )
-            VALUES (
-                :starts_at,
-                :ends_at,
-                :priority,
-                :section_id,
-                :task_id,
-                :train_id
-            ) RETURNING *
-            """,
-            payload,
-        )
-
-        row: Row = cur.fetchone()
-        return Slot.decode(cast(RawSlot, row))
-
-    @staticmethod
-    def insert_many(cur: Cursor, slots: Iterable[PartialSlot]) -> None:
-        payload = [cast(RawPartialSlot, asdict(slot)) for slot in slots]
-
-        cur.executemany(
-            """
-            INSERT INTO slot (
-                starts_at,
-                ends_at,
-                priority,
-                section_id,
-                task_id,
-                train_id
-            )
-            VALUES (
-                :starts_at,
-                :ends_at,
-                :priority,
-                :section_id,
-                :task_id,
-                :train_id
-            )
-            """,
-            payload,
-        )
-
-    @staticmethod
-    def decode(row: RawSlot) -> Slot:
-        return Slot(**row)
-
-    @staticmethod
-    def clear(cur: Cursor) -> None:
-        cur.execute("DELETE FROM slot")
+    @classmethod
+    def decode(cls, row: Record) -> Self:
+        return cls(**row)

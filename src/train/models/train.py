@@ -1,93 +1,29 @@
-from __future__ import annotations
+from typing import Self
 
-from dataclasses import asdict, dataclass
-from typing import TYPE_CHECKING, TypedDict, cast
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
-    from sqlite3 import Cursor, Row
+from asyncpg import Record
+from msgspec import Struct
+from msgspec.structs import astuple
 
 
-class RawPartialTrain(TypedDict):
+class PartialTrain(Struct, kw_only=True, frozen=True):
+    id: None = None
+
     name: str
     number: str
 
+    def encode(self) -> tuple:
+        return astuple(self)
 
-class RawTrain(RawPartialTrain):
+
+class Train(Struct, kw_only=True, frozen=True):
     id: int
 
-
-@dataclass(frozen=True, kw_only=True)
-class PartialTrain:
     name: str
     number: str
 
+    def encode(self) -> tuple:
+        return astuple(self)
 
-@dataclass(frozen=True)
-class Train(PartialTrain):
-    id: int
-
-    @staticmethod
-    def find_by_id(cur: Cursor, id: int) -> Train | None:
-        payload = {"id": id}
-
-        cur.execute(
-            """
-            SELECT train.* FROM train
-            WHERE
-                train.id = :id
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Train.decode(cast(RawTrain, row))
-    
-    @staticmethod
-    def find_by_number(cur: Cursor, number: str) -> Train | None:
-        payload = {"number": number}
-
-        cur.execute(
-            """
-            SELECT train.* FROM train
-            WHERE
-                train.number = :number
-            """,
-            payload,
-        )
-
-        row: Row | None = cur.fetchone()
-        if row is None:
-            return None
-
-        return Train.decode(cast(RawTrain, row))
-
-    @staticmethod
-    def find_all(cur: Cursor) -> list[Train]:
-        cur.execute("SELECT train.* FROM train")
-
-        rows: list[Row] = cur.fetchall()
-        return [Train.decode(cast(RawTrain, row)) for row in rows]
-
-    @staticmethod
-    def insert_many(cur: Cursor, trains: Iterable[PartialTrain]) -> None:
-        payload = [cast(RawPartialTrain, asdict(train)) for train in trains]
-
-        cur.executemany(
-            """
-            INSERT INTO train (name, number)
-            VALUES (:name, :number)
-            """,
-            payload,
-        )
-
-    @staticmethod
-    def decode(row: RawTrain) -> Train:
-        return Train(**row)
-
-    @staticmethod
-    def clear(cur: Cursor) -> None:
-        cur.execute("DELETE FROM train")
+    @classmethod
+    def decode(cls, row: Record) -> Self:
+        return cls(**row)

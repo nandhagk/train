@@ -1,10 +1,12 @@
 from datetime import timedelta
 from typing import cast
-from .format import Format, Standard, ParseHelper
+
+from .format import Format, ParseHelper, Standard
+
 
 class MASFormat(Format):
     @staticmethod
-    def convert_from_standard(standard: Standard):
+    def convert_from_standard(standard: Standard) -> dict:
         return {
             "DATE": standard["date"].isoformat(),
             "Department": standard["department"],
@@ -16,10 +18,24 @@ class MASFormat(Format):
             # # "Block demanded in Hrs(Day or Night)",
             "Demanded time (From)": standard["demanded_time_from"].isoformat(),
             "Demanded time (To)": standard["demanded_time_to"].isoformat(),
-            "Block demanded in(MINS)": (standard["block_demanded"].seconds // 60),
-            "Permitted time (From) No need to fill": standard["permitted_time_from"].isoformat() if standard["permitted_time_from"] is not None else None,
-            "Permitted time (To) No need to fill": standard["permitted_time_to"].isoformat() if standard["permitted_time_to"] is not None else None,
-            "BLOCK PERMITTED MINS": (standard["block_permitted"].seconds // 60) if standard["block_permitted"] is not None else 0,
+            "Block demanded in(MINS)": (
+                round(standard["block_demanded"].total_seconds() / 60)
+            ),
+            "Permitted time (From) No need to fill": (
+                standard["permitted_time_from"].isoformat()
+                if standard["permitted_time_from"] is not None
+                else None
+            ),
+            "Permitted time (To) No need to fill": (
+                standard["permitted_time_to"].isoformat()
+                if standard["permitted_time_to"] is not None
+                else None
+            ),
+            "BLOCK PERMITTED MINS": (
+                (round(standard["block_permitted"].total_seconds() / 60))
+                if standard["block_permitted"] is not None
+                else 0
+            ),
             # # "Location - FROM",
             # # "Location - TO",
             "Nautre of work & Quantum of Output Planned": standard["nature_of_work"],
@@ -44,12 +60,10 @@ class MASFormat(Format):
             # "SECTION",
             # "ARB/RB",
         }
-    
+
     @staticmethod
-    def convert_to_standard(data: dict):
-        """
-        Raises either key error or value error
-        """        
+    def convert_to_standard(data: dict) -> Standard:
+        """Can raise either `KeyError` or `ValueError`."""
         mapped = {
             "priority": 1,
             "date": ParseHelper.get_date(data["DATE"]),
@@ -58,10 +72,18 @@ class MASFormat(Format):
             "line": data["UP/ DN Line"],
             "demanded_time_from": ParseHelper.get_time(data["Demanded time (From)"]),
             "demanded_time_to": ParseHelper.get_time(data["Demanded time (To)"]),
-            "block_demanded": timedelta(minutes=ParseHelper.get_int(data["Block demanded in(MINS)"])),
-            "permitted_time_from": ParseHelper.get_time(data["Permitted time (From) No need to fill"]),
-            "permitted_time_to": ParseHelper.get_time(data["Permitted time (To) No need to fill"]),
-            "block_permitted": timedelta(minutes=ParseHelper.get_int(data["BLOCK PERMITTED MINS"])),
+            "block_demanded": timedelta(
+                minutes=ParseHelper.get_int(data["Block demanded in(MINS)"]),
+            ),
+            "permitted_time_from": ParseHelper.get_time(
+                data["Permitted time (From) No need to fill"],
+            ),
+            "permitted_time_to": ParseHelper.get_time(
+                data["Permitted time (To) No need to fill"],
+            ),
+            "block_permitted": timedelta(
+                minutes=ParseHelper.get_int(data["BLOCK PERMITTED MINS"]),
+            ),
             "department": data["Department"],
             "den": data["DEN"],
             "nature_of_work": data["Nautre of work & Quantum of Output Planned"],
@@ -78,8 +100,9 @@ class MASFormat(Format):
             "location",
         ):
             if not isinstance(mapped[name], str):
-                raise ValueError(f"Invalid data! The data does not contain valid type for `{name}`")
-            
+                msg = f"Invalid data! The data does not contain valid type for `{name}`"
+                raise ValueError(msg)  # noqa: TRY004
+
         for name in (
             "date",
             "demanded_time_from",
@@ -87,5 +110,7 @@ class MASFormat(Format):
             "block_demanded",
         ):
             if mapped[name] is None:
-                raise ValueError(f"Invalid data! The data does not contain valid type for `{name}`")
+                msg = f"Invalid data! The data does not contain valid type for `{name}`"
+                raise ValueError(msg)
+
         return cast(Standard, mapped)

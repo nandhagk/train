@@ -1,128 +1,91 @@
-from __future__ import annotations
+from typing import ClassVar, TypeVar
 
-from collections import defaultdict
-from io import BytesIO
-from logging import getLogger
-from pathlib import Path
-from tempfile import NamedTemporaryFile
-from threading import Lock
-from zipfile import ZipFile
+from asyncpg import Connection, Pool
+from blacksheep import Application, Content, Request, Response, get, post
+from blacksheep.server.bindings import Binder, BoundValue
+from msgspec import Struct, ValidationError
+from msgspec.json import Decoder
 
-from flask import Flask, Response, g, redirect, request, send_file, send_from_directory
-from result import Err
+from train.models.requested_task import PartialRequestedTask
+from train.repositories.requested_task import RequestedTaskRepository
+from train.services.requested_task import RequestedTaskService
+from train.utils import ENCODER, pool_factory
 
-from train.db import get_db
-from train.file_management import FileManager
-from train.models.task import PartialTask, Task
-
-logger = getLogger(__name__)
-app = Flask("app")
+T = TypeVar("T")
 
 
-def get_db_():  # noqa: D103
-    if "db" not in g:
-        g.db = get_db()
+class FromJSON(BoundValue[T]):
+    decoders: ClassVar[dict[type, Decoder]] = {}
 
-    return g.db
+    def __class_getitem__(cls, struct: type) -> object:
+        if struct not in cls.decoders:
+            cls.decoders[struct] = Decoder(type=struct)
 
-
-def close_db(_e=None):  # noqa: D103, ANN001
-    db = g.pop("db", None)
-
-    if db is not None:
-        db.close()
+        return super().__class_getitem__(struct)  # type: ignore ()
 
 
-app.teardown_appcontext(close_db)
+class JSONBinder(Binder):
+    handle: ClassVar[type[FromJSON]] = FromJSON
+
+    async def get_value(self, request: Request):
+        data = await request.read()
+        assert data is not None
+
+        return self.handle.decoders[self.expected_type].decode(data)
 
 
-@app.get("/")
-def home():
-    """Return home page."""
-    return send_file((Path.cwd() / "client" / "index.html").as_posix())
+def json(data: object, status: int = 200) -> Response:
+    """Return json response."""
+    return Response(
+        status,
+        content=Content(b"application/json", ENCODER.encode(data)),
+    )
 
 
-@app.get("/<path:path>")
-def client(path: str):
-    """Return static files."""
-    if path == "index.html":
-        return redirect("/")
-
-    return send_from_directory((Path.cwd() / "client").as_posix(), path)
+app = Application()
 
 
-lock = Lock()
+@app.lifespan
+async def register_pool(app: Application):
+    async with pool_factory() as pool:
+        app.services.register(Pool, instance=pool)
+        yield
 
 
-@app.post("/request")
-def handle_form():
-    """Handle form."""
-    f = request.files["fileInput"]
-    assert f.filename is not None
+@app.exception_handler(ValidationError)
+async def validation_error_handler(
+    _app: Application,
+    _request: Request,
+    exc: ValidationError,
+):
+    return json({"error": str(exc)}, 400)
 
-    name, _, ext = f.filename.rpartition(".")
-    with (
-        lock,
-        NamedTemporaryFile(suffix=f".{ext}") as src,
-        NamedTemporaryFile(suffix=f".{ext}") as dst,
-        NamedTemporaryFile(suffix=f".{ext}") as err,
-    ):
-        src_path = Path(src.name)
-        dst_path = Path(dst.name)
-        err_path = Path(err.name)
 
-        f.save(src_path.as_posix())
+class HealthStatus(Struct):
+    status: str
 
-        con = get_db_()
-        cur = con.cursor()
 
-        try:
-            taskqs_per_section: dict[int, list[tuple[PartialTask, int]]] = defaultdict(
-                list,
-            )
-            skipped_data: list[tuple[int, str]] = []
+@get("/api/health")
+async def health() -> Response:
+    return json(HealthStatus(status="UP"))
 
-            fm = FileManager.get_manager(src_path, dst_path, err_path)
-            for idx, res in enumerate(fm.read(cur), 1):
-                if isinstance(res, Err):
-                    skipped_data.append((idx, res.err_value))
-                    continue
 
-                taskq = res.value
-                taskqs_per_section[taskq.section_id].append((taskq, idx))
+@post("/api/requested_task")
+async def request_task(pool: Pool, data: FromJSON[PartialRequestedTask]) -> Response:
+    task = data.value
+    async with pool.acquire() as con, con.transaction():
+        con: Connection
+        task = await RequestedTaskRepository.insert_one(con, task)
 
-            tasks: list[Task] = []
-            for section_id, rows in taskqs_per_section.items():
-                logger.info("Scheduling %d", section_id)
+    return json(task, status=201)
 
-                res = Task.insert_many(cur, [taskq for taskq, _ in rows])
-                if isinstance(res, Err):
-                    logger.warning(
-                        "Ignoring %d",
-                        section_id,
-                        exc_info=res.err_value,
-                    )
 
-                    skipped_data.extend(
-                        (idx + 1, repr(res.err_value)) for _, idx in rows
-                    )
-                else:
-                    tasks.extend(res.value)
+@post("/api/requested_task/schedule")
+async def schedule_tasks(pool: Pool, data: FromJSON[list[int]]) -> Response:
+    """Schedule list of tasks by their ids."""
+    ids = data.value
+    async with pool.acquire() as con, con.transaction():
+        con: Connection
+        await RequestedTaskService.schedule_many(con, ids)
 
-            fm.write(cur, tasks)
-            fm.write_error(skipped_data)
-            logger.info(
-                "Populated database and saved output file: %s",
-                dst_path.name,
-            )
-        except Exception as e:
-            logger.exception("Failed to populate database from file")
-            return Response(repr(e), 400)
-
-        stream = BytesIO()
-        with ZipFile(stream, "w") as zf:
-            zf.write(dst_path, f"{name}_output.{ext}")
-            zf.write(err_path, f"{name}_errors.{ext}")
-
-        stream.seek(0)
-        return send_file(stream, as_attachment=True, download_name="output.zip")
+    return json({"success": True}, status=201)

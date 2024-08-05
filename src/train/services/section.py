@@ -1,25 +1,25 @@
-from __future__ import annotations
-
-import json
 from itertools import chain, pairwise, product
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from train.models.node import Node
+from asyncpg import Connection
+from msgspec.json import decode
+
 from train.models.section import PartialSection, Section
-
-if TYPE_CHECKING:
-    from sqlite3 import Cursor
+from train.repositories.node import NodeRepository
+from train.repositories.section import SectionRepository
 
 NODE_DATA_PATH = Path.cwd() / "data" / "node.json"
 
 
 class SectionService:
     @staticmethod
-    def init(cur: Cursor) -> None:
-        nodes = {(node.name, node.position): node.id for node in Node.find_many(cur)}
+    async def init(con: Connection) -> list[Section]:
+        nodes = {
+            (node.name, node.position): node.id
+            for node in await NodeRepository.find_all(con)
+        }
 
-        node_raw = json.loads(NODE_DATA_PATH.read_text())
+        node_raw = decode(NODE_DATA_PATH.read_bytes())
         node_ids = [nodes[key] for key in product(node_raw, [1, 2])]
 
         sections = chain(
@@ -33,4 +33,4 @@ class SectionService:
             ),
         )
 
-        Section.insert_many(cur, sections)
+        return await SectionRepository.insert_many(con, sections)

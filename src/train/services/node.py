@@ -1,25 +1,22 @@
-from __future__ import annotations
-
-import json
 from itertools import product
 from pathlib import Path
-from typing import TYPE_CHECKING
+
+from asyncpg import Connection
+from msgspec.json import decode
 
 from train.models.node import Node, PartialNode
-
-if TYPE_CHECKING:
-    from sqlite3 import Cursor
+from train.repositories.node import NodeRepository
 
 NODE_DATA_PATH = Path.cwd() / "data" / "node.json"
 
 
 class NodeService:
     @staticmethod
-    def init(cur: Cursor) -> None:
-        node_raw = json.loads(NODE_DATA_PATH.read_text())
+    async def init(con: Connection) -> list[Node]:
+        node_raw = decode(NODE_DATA_PATH.read_bytes())
         nodes = [
             PartialNode(name=name, position=position)
             for name, position in product(node_raw, [1, 2])
         ]
 
-        Node.insert_many(cur, nodes)
+        return await NodeRepository.insert_many(con, nodes)

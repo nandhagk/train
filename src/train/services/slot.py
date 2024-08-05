@@ -1,16 +1,15 @@
-from __future__ import annotations
-
-from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta
+from functools import cached_property
 from heapq import heapify, heappop, heappush
 from itertools import pairwise
-from typing import TYPE_CHECKING, TypeAlias, TypedDict
+from typing import Self, TypeAlias
 
-from train.db import combine, utcnow
-from train.models.slot import PartialSlot, Slot
+from asyncpg import Connection, Record
+from msgspec import Struct
 
-if TYPE_CHECKING:
-    from sqlite3 import Cursor
+from train.models.slot import PartialSlot
+from train.repositories.slot import SlotRepository
+from train.utils import combine, now, timediff
 
 
 class NoFreeSlotError(Exception):
@@ -21,8 +20,9 @@ Interval: TypeAlias = tuple[datetime, datetime]
 InsertErr: TypeAlias = NoFreeSlotError
 
 
-class RawTaskSlotToInsert(TypedDict):
+class TaskSlotToInsert(Struct, frozen=True, kw_only=True):
     priority: int
+    task_id: int
 
     preferred_starts_at: time
     preferred_ends_at: time
@@ -30,56 +30,39 @@ class RawTaskSlotToInsert(TypedDict):
     requested_date: date
     requested_duration: timedelta
 
-    task_id: int
+    @classmethod
+    def decode(cls, row: Record) -> Self:
+        return cls(**row)
 
-
-@dataclass(frozen=True)
-class TaskSlotToInsert:
-    priority: int
-
-    preferred_starts_at: time
-    preferred_ends_at: time
-
-    requested_date: date
-    requested_duration: timedelta
-
-    task_id: int
-
-    @staticmethod
-    def decode(raw: RawTaskSlotToInsert) -> TaskSlotToInsert:
-        return TaskSlotToInsert(**raw)
-    
-    @property
+    @cached_property
     def preferred_range(self):
-        return combine(date.min, self.preferred_ends_at) + timedelta(days = self.preferred_ends_at < self.preferred_starts_at) - combine(date.min, self.preferred_starts_at)
+        return timediff(self.preferred_starts_at, self.preferred_ends_at)
 
-    def __lt__(self, other: TaskSlotToInsert):
+    def __lt__(self, other: Self) -> bool:
         if self.priority != other.priority:
             return self.priority > other.priority
-        
+
         if self.requested_duration != other.requested_duration:
             return self.requested_duration > other.requested_duration
-        
+
         if self.preferred_range != other.preferred_range:
             return self.preferred_range < other.preferred_range
-        
-        return self.preferred_starts_at < other.preferred_starts_at
-        
 
-        
+        return self.preferred_starts_at < other.preferred_starts_at
+
 
 class SlotService:
     @staticmethod
-    def insert_task_slot(
-        cur: Cursor,
+    async def insert_task_slot(
+        con: Connection,
         section_id: int,
         slot: TaskSlotToInsert,
     ) -> tuple[list[int], list[int]]:
-        return SlotService.insert_task_slots(cur, section_id, [slot])
+        return await SlotService.insert_task_slots(con, section_id, [slot])
 
     @staticmethod
-    def insert_task_slots(
-        cur: Cursor,
+    async def insert_task_slots(
+        con: Connection,
         section_id: int,
         slots: list[TaskSlotToInsert],
     ) -> tuple[list[int], list[int]]:
@@ -92,24 +75,28 @@ class SlotService:
             slot = heappop(slots)
 
             try:
-                starts_at, ends_at = SlotService.find_interval_for_task(cur, section_id, slot)
+                starts_at, ends_at = await SlotService.find_interval_for_task(
+                    con,
+                    section_id,
+                    slot,
+                )
             except NoFreeSlotError:
                 bad_tasks.append(slot.task_id)
                 continue
 
-            intersecting_slots = Slot.pop_intersecting_slots(
-                cur,
-                section_id,
-                starts_at,
-                ends_at,
-                slot.priority
+            intersecting_slots = await SlotRepository.pop_intersecting(
+                con,
+                priority=slot.priority,
+                section_id=section_id,
+                starts_at=starts_at,
+                ends_at=ends_at,
             )
 
             for intersecting_slot in intersecting_slots:
                 heappush(slots, intersecting_slot)
 
-            Slot.insert_one(
-                cur,
+            await SlotRepository.insert_one(
+                con,
                 PartialSlot(
                     starts_at=starts_at,
                     ends_at=ends_at,
@@ -125,16 +112,16 @@ class SlotService:
         return good_tasks, bad_tasks
 
     @staticmethod
-    def find_interval_for_task(
-        cur: Cursor,
+    async def find_interval_for_task(
+        con: Connection,
         section_id: int,
         slot: TaskSlotToInsert,
     ) -> Interval:
-        fixed_slots = Slot.find_fixed_slots(
-            cur,
+        fixed_slots = await SlotRepository.find_fixed(
+            con,
             section_id=section_id,
             priority=slot.priority,
-            after=utcnow() + timedelta(days=1),
+            after=now() + timedelta(days=1),
         )
 
         available_free_slots = [
@@ -148,7 +135,7 @@ class SlotService:
             and ends_at - starts_at >= slot.requested_duration
         ]
         if not potential_free_slots:
-            raise NoFreeSlotError()
+            raise NoFreeSlotError
 
         preferred_starts_at = combine(
             slot.requested_date,
