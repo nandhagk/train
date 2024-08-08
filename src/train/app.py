@@ -123,6 +123,13 @@ async def find_requested_task_by_id(
     pool: Pool,
     id: int,
 ) -> SuccessResponse[HydratedRequestedTask]:
+    """
+    Finds the requested task if it exists
+    
+    @param id: The id of the task to find
+    @body: The body
+    @response 200: dfslkadjfsldjf
+    """
     async with pool.acquire() as con, con.transaction():
         task = await RequestedTaskRepository.find_one_by_id(con, id)
 

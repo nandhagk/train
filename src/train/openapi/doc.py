@@ -3,6 +3,7 @@ from inspect import signature
 from string import Formatter
 from typing import TYPE_CHECKING, Union, get_args, get_origin
 
+import warnings
 from blacksheep import Application
 from msgspec.json import schema_components
 
@@ -10,6 +11,44 @@ from train.utils import ENCODER
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+from textwrap import dedent
+from .string_parser import StringParser
+
+def parse_docstring(handler):
+    returnValue = {
+        "summary": "",
+        "parameters": {},
+        "body": "",
+        "responses": {}
+    }
+
+    sp = StringParser(dedent(handler.__doc__ if handler.__doc__ is not None else ""))
+    
+    returnValue["summary"] = sp.consume_until(lambda c: c == "@").strip()
+    while not sp.is_done():
+        sp.skip()
+        type_of = sp.consume_until(lambda c: c == ":").strip()
+        sp.skip()
+        if type_of.startswith("param"):
+            name = type_of.split()[-1]
+            body = sp.consume_until(lambda c: c == "@").strip()
+            returnValue["parameters"][name] = body
+
+        elif type_of.startswith("body"):
+            body = sp.consume_until(lambda c: c == "@").strip()
+            returnValue["body"] = body
+
+        elif type_of.startswith("response"):
+            status = type_of.split()[-1]
+            body = sp.consume_until(lambda c: c == "@").strip()
+            returnValue["responses"][status] = body
+
+    return returnValue
+        
+
+    
+    
 
 
 def build_docs(app: Application) -> bytes:  # noqa: C901
@@ -27,6 +66,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
         for route in routes:
             handler: Callable = route.handler
             sig = signature(handler)
+            func_doc = parse_docstring(handler)
 
             responses: tuple[Response, ...]
             if get_origin(sig.return_annotation) is Union:
@@ -38,7 +78,9 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
                 continue
 
             pattern = route.pattern.decode("utf-8")
-            path = paths[pattern][method.decode("utf-8").lower()] = {}
+            path = paths[pattern][method.decode("utf-8").lower()] = {
+                "description": func_doc["summary"]
+            }
             path["parameters"] = []
             for schema in fmt.parse(pattern):
                 param_name = schema[1]
@@ -55,7 +97,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
                         "in": "path",
                         "required": True,
                         "schema": idk_what_im_doing_again[-1],
-                        "description": "",
+                        "description": func_doc["parameters"].get(param_name, ""),
                     },
                 )
 
@@ -68,7 +110,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
 
                 idk_what_im_doing.append({})
                 path["responses"][status] = {
-                    "description": "",
+                    "description": func_doc["responses"].get(status, ""),
                     "content": {
                         "application/json": {
                             "schema": idk_what_im_doing[-1],
@@ -87,7 +129,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
 
                     idk_what_im_doing.append({})
                     path["requestBody"] = {
-                        "description": "",
+                        "description": func_doc["body"],
                         "content": {
                             "application/json": {
                                 "schema": idk_what_im_doing[-1],
