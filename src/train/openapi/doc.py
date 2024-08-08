@@ -1,5 +1,6 @@
 from collections import defaultdict
 from inspect import signature
+from string import Formatter
 from typing import TYPE_CHECKING, Union, get_args, get_origin
 
 from blacksheep import Application
@@ -13,6 +14,8 @@ if TYPE_CHECKING:
 
 def build_docs(app: Application) -> bytes:  # noqa: C901
     from train.app import FromJSON, Response
+
+    fmt = Formatter()
 
     types = []
     params = []
@@ -36,20 +39,25 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
 
             pattern = route.pattern.decode("utf-8")
             path = paths[pattern][method.decode("utf-8").lower()] = {}
+            path["parameters"] = []
+            for schema in fmt.parse(pattern):
+                param_name = schema[1]
+                if param_name is None:
+                    continue
 
-            if "{" in pattern:
-                param = pattern[pattern.find("{") + 1 : pattern.find("}")]
-                params.append(sig.parameters[param].annotation)
+                param = sig.parameters[param_name].annotation
+                params.append(param)
+
                 idk_what_im_doing_again.append({})
-                path["parameters"] = [
+                path["parameters"].append(
                     {
-                        "name": param,
+                        "name": param_name,
                         "in": "path",
                         "required": True,
                         "schema": idk_what_im_doing_again[-1],
                         "description": "",
                     },
-                ]
+                )
 
             path["operationId"] = handler.__name__
 
@@ -72,35 +80,34 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
 
             for klass in sig.parameters.values():
                 annotation = klass.annotation
-                if get_origin(annotation) is not FromJSON:
-                    continue
+                origin = get_origin(annotation)
+                if origin is FromJSON:
+                    body = get_args(annotation)[0]
+                    types.append(body)
 
-                args = get_args(annotation)
-                assert len(args) == 1
-
-                body = args[0]
-                types.append(body)
-
-                idk_what_im_doing.append({})
-                path["requestBody"] = {
-                    "description": "",
-                    "content": {
-                        "application/json": {
-                            "schema": idk_what_im_doing[-1],
+                    idk_what_im_doing.append({})
+                    path["requestBody"] = {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": idk_what_im_doing[-1],
+                            },
                         },
-                    },
-                }
+                    }
 
-    stuff, param_schema = schema_components(
+    schemas, parameter_components = schema_components(
         params,
         ref_template="#/components/parameters/{name}",
     )
-    for i, p in enumerate(stuff):
-        idk_what_im_doing_again[i].update(p)
+    for i, schema in enumerate(schemas):
+        idk_what_im_doing_again[i].update(schema)
 
-    stuff, schema = schema_components(types, ref_template="#/components/schemas/{name}")
-    for i, s in enumerate(stuff):
-        idk_what_im_doing[i].update(s)
+    schemas, components = schema_components(
+        types,
+        ref_template="#/components/schemas/{name}",
+    )
+    for i, schema in enumerate(schemas):
+        idk_what_im_doing[i].update(schema)
 
     openapi = {
         "openapi": "3.1.0",
@@ -110,7 +117,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
         },
         "paths": paths,
         "servers": [],
-        "components": {"schemas": schema, "parameters": param_schema},
+        "components": {"schemas": components, "parameters": parameter_components},
     }
 
     return ENCODER.encode(openapi)

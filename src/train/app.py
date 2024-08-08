@@ -68,8 +68,15 @@ def json(data: object, status: int = 200) -> Response:
 
 
 app = Application()
+
+app.use_cors(
+    allow_methods="*",
+    allow_origins="*",
+    allow_headers="*",
+)
+
 app.serve_files(
-    "static",
+    Path.cwd() / "static",
     root_path="/api/docs/",
     extensions={".json", ".html"},
     cache_time=1,
