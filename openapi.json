@@ -1,0 +1,164 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "FTCB API", "version": "0.0.0-alpha" },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HealthStatus" } } } }
+        }
+      }
+    },
+    "/api/requested_task": {
+      "get": {
+        "operationId": "find_all_requested_tasks",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+          },
+          "404": { "description": "", "content": { "application/json": { "schema": { "type": "string" } } } }
+        }
+      },
+      "post": {
+        "operationId": "created_requested_task",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+        },
+        "requestBody": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateRequestedTask" } } } }
+      },
+      "put": {
+        "operationId": "update_requested_task",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+        },
+        "requestBody": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateRequestedTask" } } } }
+      }
+    },
+    "/api/requested_task/{id}": {
+      "get": {
+        "operationId": "find_requested_task_by_id",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+        }
+      },
+      "delete": {
+        "operationId": "remove_requested_task",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+        }
+      }
+    },
+    "/api/requested_task/schedule": {
+      "post": {
+        "operationId": "schedule_requested_tasks",
+        "responses": {
+          "200": { "description": "", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HydratedRequestedTask" } } } }
+        },
+        "requestBody": { "description": "", "content": { "application/json": { "schema": { "type": "array", "items": { "type": "integer" } } } } }
+      }
+    }
+  },
+  "servers": [],
+  "components": {
+    "schemas": {
+      "HealthStatus": { "title": "HealthStatus", "type": "object", "properties": { "status": { "type": "string" } }, "required": ["status"] },
+      "HydratedRequestedTask": {
+        "title": "HydratedRequestedTask",
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "department": { "type": "string" },
+          "den": { "type": "string" },
+          "nature_of_work": { "type": "string" },
+          "block": { "type": "string" },
+          "location": { "type": "string" },
+          "preferred_starts_at": { "type": "string" },
+          "preferred_ends_at": { "type": "string" },
+          "requested_date": { "type": "string", "format": "date" },
+          "requested_duration": { "type": "string", "format": "duration" },
+          "priority": { "type": "integer" },
+          "section_id": { "type": "integer" }
+        },
+        "required": [
+          "id",
+          "department",
+          "den",
+          "nature_of_work",
+          "block",
+          "location",
+          "preferred_starts_at",
+          "preferred_ends_at",
+          "requested_date",
+          "requested_duration",
+          "priority",
+          "section_id"
+        ]
+      },
+      "CreateRequestedTask": {
+        "title": "CreateRequestedTask",
+        "type": "object",
+        "properties": {
+          "id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "default": null },
+          "department": { "type": "string" },
+          "den": { "type": "string" },
+          "nature_of_work": { "type": "string" },
+          "block": { "type": "string" },
+          "location": { "type": "string" },
+          "preferred_starts_at": { "type": "string" },
+          "preferred_ends_at": { "type": "string" },
+          "requested_date": { "type": "string", "format": "date" },
+          "requested_duration": { "type": "string", "format": "duration" },
+          "priority": { "type": "integer" },
+          "section_id": { "type": "integer" }
+        },
+        "required": [
+          "department",
+          "den",
+          "nature_of_work",
+          "block",
+          "location",
+          "preferred_starts_at",
+          "preferred_ends_at",
+          "requested_date",
+          "requested_duration",
+          "priority",
+          "section_id"
+        ]
+      },
+      "UpdateRequestedTask": {
+        "title": "UpdateRequestedTask",
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "department": { "type": "string" },
+          "den": { "type": "string" },
+          "nature_of_work": { "type": "string" },
+          "block": { "type": "string" },
+          "location": { "type": "string" },
+          "preferred_starts_at": { "type": "string" },
+          "preferred_ends_at": { "type": "string" },
+          "requested_date": { "type": "string", "format": "date" },
+          "requested_duration": { "type": "string", "format": "duration" },
+          "priority": { "type": "integer" },
+          "section_id": { "type": "integer" }
+        },
+        "required": [
+          "id",
+          "department",
+          "den",
+          "nature_of_work",
+          "block",
+          "location",
+          "preferred_starts_at",
+          "preferred_ends_at",
+          "requested_date",
+          "requested_duration",
+          "priority",
+          "section_id"
+        ]
+      }
+    }
+  }
+}
