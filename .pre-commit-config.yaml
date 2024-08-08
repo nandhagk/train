@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-merge-conflict
       - id: check-toml
@@ -13,10 +13,10 @@ repos:
     hooks:
       - id: python-check-blanket-noqa
   - repo: https://github.com/Zac-HD/shed
-    rev: 2023.6.1
+    rev: 2024.3.1
     hooks:
       - id: shed
-        args: [--refactor, --py311-plus]
+        args: [--refactor, --py312-plus]
         types_or: [python, pyi, markdown, rst]
   - repo: local
     hooks:
@@ -28,7 +28,6 @@ repos:
         types: [python]
         additional_dependencies: ["pyright"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.292
+    rev: v0.5.6
     hooks:
       - id: ruff
-        args: [--fix]

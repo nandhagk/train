@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 from asyncpg import Connection, Record
 
@@ -52,7 +52,32 @@ class TaskRepository:
                 ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
             """,
-            *task.encode()[1:],
+            *task.encode()[1:10],
+        )
+
+        return Task.decode(row)
+
+    @staticmethod
+    async def update_one(con: Connection, task: Task) -> Task:
+        row: Record = await con.fetchrow(
+            """
+            UPDATE task SET
+            (
+                department,
+                den,
+                nature_of_work,
+                block,
+                location,
+                preferred_starts_at,
+                preferred_ends_at,
+                requested_date,
+                requested_duration
+            ) = ($2, $3, $4, $5, $6, $7, $8, $9, $10)
+            WHERE
+                task.id = $1
+            RETURNING *
+            """,
+            *task.encode()[:10],
         )
 
         return Task.decode(row)
@@ -88,7 +113,7 @@ class TaskRepository:
             )
             RETURNING *
             """,
-            [task.encode()[:10] for task in tasks],  # TaskToInsert or PartialRequested
+            [task.encode()[:10] for task in tasks],
         )
 
         return [Task.decode(row) for row in rows]

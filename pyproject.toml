@@ -40,7 +40,7 @@ precommit = "pre-commit install"
 profile = "black"
 case_sensitive = true
 
-[tool.ruff]
+[tool.ruff.lint]
 ignore = [
   # Missing Docstrings
   "D100",
@@ -67,6 +67,7 @@ ignore = [
   "FA102",
   "S101",
   "TRY002",
+  "I001",
   "A001",
   "A002",
   "A003",

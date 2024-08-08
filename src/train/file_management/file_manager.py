@@ -4,7 +4,7 @@ from pathlib import Path
 from asyncpg import Connection, Record
 
 from train.repositories.section import SectionRepository
-from train.services.task import TaskToInsert
+from train.schemas.requested_task import CreateRequestedTask
 from train.utils import timediff
 
 from .formats.format import Format
@@ -14,6 +14,7 @@ from .handlers.handler import Handler
 
 logger = getLogger(__name__)
 
+
 def get_file_handler(path: Path) -> type[Handler]:
     if path.suffix == ".xlsx":
         return ExcelHandler
@@ -21,8 +22,10 @@ def get_file_handler(path: Path) -> type[Handler]:
     msg = f"Unexpected file extension `{path.suffix}`"
     raise RuntimeError(msg)
 
+
 def get_file_format(_headers: list[str]) -> type[Format]:
     return MASFormat
+
 
 class FileManager:
     def __init__(self, file: str) -> None:
@@ -32,7 +35,7 @@ class FileManager:
         self.headers, self._raw_data = self.handler.read_dict(self.file)
         self.format = get_file_format(self.headers)
 
-    async def decode(self, con: Connection, item: dict) -> tuple[TaskToInsert, int]:
+    async def decode(self, con: Connection, item: dict) -> CreateRequestedTask:
         mapped_item = self.format.convert_to_standard(item)
 
         preferred_ends_at = mapped_item["demanded_time_to"]
@@ -74,27 +77,26 @@ class FileManager:
             logger.warning(msg)
             raise RuntimeError(msg)
 
-        return (
-            TaskToInsert(
-                priority=mapped_item["priority"],
-                requested_duration=(
-                    mapped_item["block_demanded"]
-                    if mapped_item["block_demanded"] != 0
-                    else timediff(preferred_starts_at, preferred_ends_at)
-                ),
-                block=mapped_item["block_section_or_yard"],
-                preferred_starts_at=preferred_starts_at,
-                preferred_ends_at=preferred_ends_at,
-                department=mapped_item["department"],
-                den=mapped_item["den"],
-                nature_of_work=mapped_item["nature_of_work"],
-                location=mapped_item["location"],
-                requested_date=mapped_item["date"],
-            ), section.id,
+        return CreateRequestedTask(
+            priority=mapped_item["priority"],
+            section_id=section.id,
+            requested_duration=(
+                mapped_item["block_demanded"]
+                if mapped_item["block_demanded"] != 0
+                else timediff(preferred_starts_at, preferred_ends_at)
+            ),
+            block=mapped_item["block_section_or_yard"],
+            preferred_starts_at=preferred_starts_at,
+            preferred_ends_at=preferred_ends_at,
+            department=mapped_item["department"],
+            den=mapped_item["den"],
+            nature_of_work=mapped_item["nature_of_work"],
+            location=mapped_item["location"],
+            requested_date=mapped_item["date"],
         )
 
-    async def get_tasks(self, con: Connection) -> list[tuple[TaskToInsert, int] | None]:
-        taskqs: list[tuple[TaskToInsert, int] | None] = []
+    async def get_tasks(self, con: Connection) -> list[CreateRequestedTask | None]:
+        taskqs: list[CreateRequestedTask | None] = []
         for idx, item in enumerate(self._raw_data):
             try:
                 decoded = await self.decode(con, item)
@@ -146,7 +148,7 @@ class FileManager:
             task_ids,
         )
 
-        return  [
+        return [
             self.format.convert_from_standard(
                 {
                     "priority": row["priority"],

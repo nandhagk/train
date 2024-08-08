@@ -3,10 +3,10 @@ from datetime import date, datetime, time, timedelta
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler
 from typing import Final
+from zoneinfo import ZoneInfo
 
 from asyncpg import Pool, create_pool
 from msgspec.json import Encoder
-from zoneinfo import ZoneInfo
 
 TZ: Final = ZoneInfo("Asia/Kolkata")
 ENCODER: Final = Encoder()
@@ -93,7 +93,7 @@ def setup_logging():
     logging.basicConfig(
         handlers=[
             RotatingFileHandler(
-                "tmp/train.log",
+                "train.log",
                 maxBytes=32 * 1024 * 1024,
                 backupCount=5,
             ),
