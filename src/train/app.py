@@ -26,8 +26,6 @@ from train.schemas.requested_task import (
 from train.services.requested_task import RequestedTaskService
 from train.utils import ENCODER, pool_factory
 
-T = TypeVar("T")
-
 ResponseType = TypeVar("ResponseType")
 Status = TypeVar("Status", bound=int)
 
@@ -41,7 +39,10 @@ BadRequestResponse: TypeAlias = Response[Literal[400], ResponseType]
 NotFoundResponse: TypeAlias = Response[Literal[404], ResponseType]
 
 
-class FromJSON(BoundValue[T]):
+BodyType = TypeVar("BodyType", bound=object)
+
+
+class FromJSON(BoundValue[BodyType]):
     decoders: ClassVar[dict[type, Decoder]] = {}
 
     def __class_getitem__(cls, struct: type) -> object:
@@ -82,7 +83,6 @@ app.serve_files(
     Path.cwd() / "static",
     root_path="/api/docs/",
     extensions={".yaml", ".html"},
-    cache_time=1,
 )
 
 
