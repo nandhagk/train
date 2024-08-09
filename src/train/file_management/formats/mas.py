@@ -18,8 +18,8 @@ class MASFormat(Format):
             # # "Block demanded in Hrs(Day or Night)",
             "Demanded time (From)": standard["demanded_time_from"].isoformat(),
             "Demanded time (To)": standard["demanded_time_to"].isoformat(),
-            "Block demanded in(MINS)": (
-                round(standard["block_demanded"].total_seconds() / 60)
+            "Block demanded in(MINS)": round(
+                standard["block_demanded"].total_seconds() / 60,
             ),
             "Permitted time (From) No need to fill": (
                 standard["permitted_time_from"].isoformat()
@@ -32,7 +32,7 @@ class MASFormat(Format):
                 else None
             ),
             "BLOCK PERMITTED MINS": (
-                (round(standard["block_permitted"].total_seconds() / 60))
+                round(standard["block_permitted"].total_seconds() / 60)
                 if standard["block_permitted"] is not None
                 else 0
             ),

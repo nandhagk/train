@@ -1,54 +1,47 @@
 from collections import defaultdict
+from collections.abc import Callable
 from inspect import signature
 from string import Formatter
-from typing import TYPE_CHECKING, Union, get_args, get_origin
+from textwrap import dedent
+from typing import Union, get_args, get_origin
 
-import warnings
 from blacksheep import Application
 from msgspec.json import schema_components
+from msgspec.yaml import encode
 
-from train.utils import ENCODER
-
-if TYPE_CHECKING:
-    from collections.abc import Callable
-
-from textwrap import dedent
 from .string_parser import StringParser
 
-def parse_docstring(handler):
-    returnValue = {
+
+def parse_docstring(handler: Callable):
+    ret = {
         "summary": "",
         "parameters": {},
         "body": "",
-        "responses": {}
+        "responses": {},
     }
 
-    sp = StringParser(dedent(handler.__doc__ if handler.__doc__ is not None else ""))
-    
-    returnValue["summary"] = sp.consume_until(lambda c: c == "@").strip()
+    sp = StringParser(dedent(handler.__doc__ or ""))
+
+    ret["summary"] = sp.consume_until_char("@").strip()
     while not sp.is_done():
         sp.skip()
-        type_of = sp.consume_until(lambda c: c == ":").strip()
+        type_of = sp.consume_until_char(":").strip()
         sp.skip()
         if type_of.startswith("param"):
             name = type_of.split()[-1]
-            body = sp.consume_until(lambda c: c == "@").strip()
-            returnValue["parameters"][name] = body
+            body = sp.consume_until_char("@").strip()
+            ret["parameters"][name] = body
 
         elif type_of.startswith("body"):
-            body = sp.consume_until(lambda c: c == "@").strip()
-            returnValue["body"] = body
+            body = sp.consume_until_char("@").strip()
+            ret["body"] = body
 
         elif type_of.startswith("response"):
             status = type_of.split()[-1]
-            body = sp.consume_until(lambda c: c == "@").strip()
-            returnValue["responses"][status] = body
+            body = sp.consume_until_char("@").strip()
+            ret["responses"][status] = body
 
-    return returnValue
-        
-
-    
-    
+    return ret
 
 
 def build_docs(app: Application) -> bytes:  # noqa: C901
@@ -79,7 +72,7 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
 
             pattern = route.pattern.decode("utf-8")
             path = paths[pattern][method.decode("utf-8").lower()] = {
-                "description": func_doc["summary"]
+                "description": func_doc["summary"],
             }
             path["parameters"] = []
             for schema in fmt.parse(pattern):
@@ -162,4 +155,4 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
         "components": {"schemas": components, "parameters": parameter_components},
     }
 
-    return ENCODER.encode(openapi)
+    return encode(openapi)

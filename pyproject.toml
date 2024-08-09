@@ -13,7 +13,6 @@ authors = [
 python = "^3.11"
 click = "^8.1.7"
 openpyxl = "^3.1.4"
-result = "^0.17.0"
 blacksheep = "^2.0.7"
 uvicorn = {extras = ["standard"], version = "^0.30.5"}
 msgspec = "^0.18.6"

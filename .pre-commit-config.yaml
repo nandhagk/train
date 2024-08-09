@@ -28,6 +28,14 @@ repos:
         types: [python]
         additional_dependencies: ["pyright"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.5.6
+    rev: v0.5.7
     hooks:
       - id: ruff
+  - repo: https://github.com/python-poetry/poetry
+    rev: "1.8.0"
+    hooks:
+      - id: poetry-check
+      - id: poetry-lock
+      - id: poetry-export
+        args: ["--with", "dev", "--with", "lint", "-f", "requirements.txt", "-o", "requirements.txt"]
+      - id: poetry-install

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import ClassVar, Generic, Literal, TypeVar
+from typing import ClassVar, Generic, Literal, TypeAlias, TypeVar
 
 from asyncpg import Pool
 from blacksheep import (
@@ -28,15 +28,17 @@ from train.utils import ENCODER, pool_factory
 
 T = TypeVar("T")
 
-R = TypeVar("R")
+ResponseType = TypeVar("ResponseType")
 Status = TypeVar("Status", bound=int)
 
 
-class Response(BResponse, Generic[Status, R]): ...
+class Response(BResponse, Generic[Status, ResponseType]): ...
 
 
-SuccessResponse = Response[Literal[200], R]
-NotFoundResponse = Response[Literal[404], R]
+SuccessResponse: TypeAlias = Response[Literal[200], ResponseType]
+CreatedResponse: TypeAlias = Response[Literal[201], ResponseType]
+BadRequestResponse: TypeAlias = Response[Literal[400], ResponseType]
+NotFoundResponse: TypeAlias = Response[Literal[404], ResponseType]
 
 
 class FromJSON(BoundValue[T]):
@@ -78,7 +80,7 @@ app.use_cors(
 app.serve_files(
     Path.cwd() / "static",
     root_path="/api/docs/",
-    extensions={".json", ".html"},
+    extensions={".yaml", ".html"},
     cache_time=1,
 )
 
@@ -122,13 +124,13 @@ async def find_all_requested_tasks(
 async def find_requested_task_by_id(
     pool: Pool,
     id: int,
-) -> SuccessResponse[HydratedRequestedTask]:
+) -> SuccessResponse[HydratedRequestedTask] | NotFoundResponse[str]:
     """
-    Finds the requested task if it exists
-    
+    Find the requested task if it exists.
+
     @param id: The id of the task to find
-    @body: The body
-    @response 200: dfslkadjfsldjf
+    @response 200: Requested task with id successfully found.
+    @response 404: Requested task with id not found.
     """
     async with pool.acquire() as con, con.transaction():
         task = await RequestedTaskRepository.find_one_by_id(con, id)
@@ -140,7 +142,7 @@ async def find_requested_task_by_id(
 async def created_requested_task(
     pool: Pool,
     data: FromJSON[CreateRequestedTask],
-) -> SuccessResponse[HydratedRequestedTask]:
+) -> CreatedResponse[HydratedRequestedTask]:
     task = data.value
     async with pool.acquire() as con, con.transaction():
         task = await RequestedTaskService.insert_one(con, task)
@@ -175,7 +177,7 @@ async def remove_requested_task(
 async def schedule_requested_tasks(
     pool: Pool,
     data: FromJSON[list[int]],
-) -> SuccessResponse[HydratedRequestedTask]:
+) -> CreatedResponse[HydratedRequestedTask]:
     """Schedule list of tasks by their ids."""
     ids = data.value
     async with pool.acquire() as con, con.transaction():
@@ -184,4 +186,4 @@ async def schedule_requested_tasks(
     return json({"success": True}, status=201)
 
 
-(Path.cwd() / "static" / "openapi.json").write_bytes(build_docs(app))
+(Path.cwd() / "static" / "openapi.yaml").write_bytes(build_docs(app))
