@@ -8,7 +8,6 @@ class StringParser:
 
     def is_done(self):
         """Return true if the stream has been read fully."""
-        """Return true if the stream has been read fully."""
         return self.i >= len(self.string)
 
     def peek(self):
@@ -21,11 +20,6 @@ class StringParser:
         return self.string[self.i]
 
     def peeks(self):
-        """
-        Return the next character in the stream.
-
-        Return None if the stream is done.
-        """
         """Provide the next character in the stream (if it exists)."""
         return self.peek() if not self.is_done() else None
 

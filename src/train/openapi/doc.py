@@ -2,7 +2,7 @@ from collections import defaultdict
 from inspect import signature
 from pathlib import Path
 from string import Formatter
-from typing import TYPE_CHECKING, Union, get_args, get_origin
+from typing import TYPE_CHECKING, Any, Union, get_args, get_origin
 
 from blacksheep import Application
 from msgspec.json import schema_components
@@ -14,28 +14,54 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
+def unwrap_union_type(t: type) -> tuple[Any, ...]:
+    """Unwrap the type if it was a union and provide results as a tuple."""
+    if get_origin(t) is Union:
+        return get_args(t)
+
+    return (t,)
+
+
+def clean(dirty: dict) -> dict:
+    """Clean up stuff ig."""
+    cleaned = {}
+    for k, v in dirty.items():
+        cleaned_value = v
+        if isinstance(cleaned_value, dict):
+            cleaned_value = clean(cleaned_value)
+        elif (
+            isinstance(cleaned_value, list)
+            and cleaned_value
+            and isinstance(cleaned_value[0], dict)
+        ):
+            cleaned_value = [clean(x) for x in cleaned_value]
+
+        if cleaned_value in ("", [], {}):
+            continue
+
+        cleaned[k] = cleaned_value
+
+    return cleaned
+
+
+async def build_docs(app: Application) -> None:  # noqa: C901
     from train.app import FromJSON, Response
 
     fmt = Formatter()
 
     types = []
     params = []
-    idk_what_im_doing: list[dict] = []
-    idk_what_im_doing_again: list[dict] = []
+    body_and_response_schemas: list[dict] = []
+    parameter_schemas: list[dict] = []
 
     paths = defaultdict(dict)
     for method, routes in app.router.routes.items():
         for route in routes:
             handler: Callable = route.handler
             sig = signature(handler)
-            func_doc = parse_docstring(handler.__doc__ or "")
-            responses: tuple[Response, ...]
 
-            if get_origin(sig.return_annotation) is Union:
-                responses = get_args(sig.return_annotation)
-            else:
-                responses = (sig.return_annotation,)
+            func_doc = parse_docstring(handler.__doc__ or "")
+            responses: tuple[Response, ...] = unwrap_union_type(sig.return_annotation)
 
             if not all(get_origin(res) is Response for res in responses):
                 continue
@@ -45,21 +71,23 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
                 "description": func_doc["summary"],
                 "parameters": [],
             }
-            for schema in fmt.parse(pattern):
-                param_name = schema[1]
+
+            # Add parameter data (the data sent in the url)
+            for _, param_name, _, _ in fmt.parse(pattern):
                 if param_name is None:
                     continue
 
-                param = sig.parameters[param_name].annotation
-                params.append(param)
+                # Since it has to be a simple type (like str or int),
+                # no additional handling is required
+                params.append(sig.parameters[param_name].annotation)
 
-                idk_what_im_doing_again.append({})
+                parameter_schemas.append({})
                 path["parameters"].append(
                     {
                         "name": param_name,
                         "in": "path",
                         "required": True,
-                        "schema": idk_what_im_doing_again[-1],
+                        "schema": parameter_schemas[-1],
                         "description": func_doc["parameters"].get(param_name, ""),
                     },
                 )
@@ -71,12 +99,12 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
                 status, klass = get_args(response)
                 status = str(get_args(status)[0])
 
-                idk_what_im_doing.append({})
+                body_and_response_schemas.append({})
                 path["responses"][status] = {
                     "description": func_doc["responses"].get(status, ""),
                     "content": {
                         "application/json": {
-                            "schema": idk_what_im_doing[-1],
+                            "schema": body_and_response_schemas[-1],
                         },
                     },
                 }
@@ -86,33 +114,36 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
             for klass in sig.parameters.values():
                 annotation = klass.annotation
                 origin = get_origin(annotation)
-                if origin is FromJSON:
-                    body = get_args(annotation)[0]
-                    types.append(body)
 
-                    idk_what_im_doing.append({})
-                    path["requestBody"] = {
-                        "description": func_doc["body"],
-                        "content": {
-                            "application/json": {
-                                "schema": idk_what_im_doing[-1],
-                            },
+                if origin is not FromJSON:
+                    continue
+
+                body = get_args(annotation)[0]
+                types.append(body)
+
+                body_and_response_schemas.append({})
+                path["requestBody"] = {
+                    "description": func_doc["body"],
+                    "content": {
+                        "application/json": {
+                            "schema": body_and_response_schemas[-1],
                         },
-                    }
+                    },
+                }
 
     schemas, parameter_components = schema_components(
         params,
         ref_template="#/components/parameters/{name}",
     )
     for i, schema in enumerate(schemas):
-        idk_what_im_doing_again[i].update(schema)
+        parameter_schemas[i].update(schema)
 
     schemas, components = schema_components(
         types,
         ref_template="#/components/schemas/{name}",
     )
     for i, schema in enumerate(schemas):
-        idk_what_im_doing[i].update(schema)
+        body_and_response_schemas[i].update(schema)
 
     openapi = {
         "openapi": "3.1.0",
@@ -124,23 +155,6 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
         "servers": [],
         "components": {"schemas": components, "parameters": parameter_components},
     }
-
-    def clean(s: dict) -> dict:
-        """Clean up stuff ig."""
-        t = {}
-        for k, v in s.items():
-            r = v
-            if isinstance(r, dict):
-                r = clean(r)
-            elif isinstance(r, list) and r and isinstance(r[0], dict):
-                r = [clean(x) for x in r]
-
-            if r in ("", [], {}):
-                continue
-
-            t[k] = r
-
-        return t
 
     (Path.cwd() / "static" / "openapi.yaml").write_bytes(encode(clean(openapi)))
 
