@@ -37,5 +37,5 @@ repos:
       - id: poetry-check
       - id: poetry-lock
       - id: poetry-export
-        args: ["--with", "dev", "--with", "lint", "-f", "requirements.txt", "-o", "requirements.txt"]
+        args: ["--without-hashes", "-f", "requirements.txt", "-o", "requirements.txt"]
       - id: poetry-install

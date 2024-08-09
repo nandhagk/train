@@ -1,6 +1,7 @@
 from collections import defaultdict
 from collections.abc import Callable
 from inspect import signature
+from pathlib import Path
 from string import Formatter
 from textwrap import dedent
 from typing import Union, get_args, get_origin
@@ -44,7 +45,7 @@ def parse_docstring(handler: Callable):
     return ret
 
 
-def build_docs(app: Application) -> bytes:  # noqa: C901
+async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
     from train.app import FromJSON, Response
 
     fmt = Formatter()
@@ -155,4 +156,25 @@ def build_docs(app: Application) -> bytes:  # noqa: C901
         "components": {"schemas": components, "parameters": parameter_components},
     }
 
-    return encode(openapi)
+    def clean(s: dict) -> dict:
+        """Clean up stuff ig."""
+        t = {}
+        for k, v in s.items():
+            r = v
+            if isinstance(r, dict):
+                r = clean(r)
+            elif isinstance(r, list) and r and isinstance(r[0], dict):
+                r = [clean(x) for x in r]
+
+            if r in ("", [], {}):
+                continue
+
+            t[k] = r
+
+        return t
+
+    (Path.cwd() / "static" / "openapi.yaml").write_bytes(encode(clean(openapi)))
+
+
+def bind_app(app: Application) -> None:
+    app.on_start += build_docs

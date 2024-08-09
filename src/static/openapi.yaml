@@ -5,24 +5,18 @@ info:
 paths:
   /api/health:
     get:
-      description: ''
-      parameters: []
       operationId: health
       responses:
         '200':
-          description: ''
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
   /api/requested_task:
     get:
-      description: ''
-      parameters: []
       operationId: find_all_requested_tasks
       responses:
         '200':
-          description: ''
           content:
             application/json:
               schema:
@@ -30,41 +24,32 @@ paths:
                 items:
                   $ref: '#/components/schemas/HydratedRequestedTask'
         '404':
-          description: ''
           content:
             application/json:
               schema:
                 type: string
     post:
-      description: ''
-      parameters: []
       operationId: created_requested_task
       responses:
         '201':
-          description: ''
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HydratedRequestedTask'
       requestBody:
-        description: ''
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateRequestedTask'
     put:
-      description: ''
-      parameters: []
       operationId: update_requested_task
       responses:
         '200':
-          description: ''
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HydratedRequestedTask'
       requestBody:
-        description: ''
         content:
           application/json:
             schema:
@@ -94,18 +79,15 @@ paths:
               schema:
                 type: string
     delete:
-      description: ''
       parameters:
       - name: id
         in: path
         required: true
         schema:
           type: integer
-        description: ''
       operationId: remove_requested_task
       responses:
         '200':
-          description: ''
           content:
             application/json:
               schema:
@@ -113,24 +95,20 @@ paths:
   /api/requested_task/schedule:
     post:
       description: Schedule list of tasks by their ids.
-      parameters: []
       operationId: schedule_requested_tasks
       responses:
         '201':
-          description: ''
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HydratedRequestedTask'
       requestBody:
-        description: ''
         content:
           application/json:
             schema:
               type: array
               items:
                 type: integer
-servers: []
 components:
   schemas:
     HealthStatus:
@@ -272,4 +250,3 @@ components:
       - requested_duration
       - priority
       - section_id
-  parameters: {}

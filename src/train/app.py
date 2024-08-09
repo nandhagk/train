@@ -16,7 +16,7 @@ from blacksheep.server.bindings import Binder, BoundValue
 from msgspec import Struct, ValidationError
 from msgspec.json import Decoder
 
-from train.openapi.doc import build_docs
+from train.openapi.doc import bind_app
 from train.repositories.requested_task import RequestedTaskRepository
 from train.schemas.requested_task import (
     CreateRequestedTask,
@@ -70,6 +70,7 @@ def json(data: object, status: int = 200) -> Response:
 
 
 app = Application()
+bind_app(app)
 
 app.use_cors(
     allow_methods="*",
@@ -184,6 +185,3 @@ async def schedule_requested_tasks(
         await RequestedTaskService.schedule_many(con, ids)
 
     return json({"success": True}, status=201)
-
-
-(Path.cwd() / "static" / "openapi.yaml").write_bytes(build_docs(app))
