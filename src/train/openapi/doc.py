@@ -1,48 +1,17 @@
 from collections import defaultdict
-from collections.abc import Callable
 from inspect import signature
 from pathlib import Path
 from string import Formatter
-from textwrap import dedent
-from typing import Union, get_args, get_origin
+from typing import TYPE_CHECKING, Union, get_args, get_origin
 
 from blacksheep import Application
 from msgspec.json import schema_components
 from msgspec.yaml import encode
 
-from .string_parser import StringParser
+from .docstring_parser import parse_docstring
 
-
-def parse_docstring(handler: Callable):
-    ret = {
-        "summary": "",
-        "parameters": {},
-        "body": "",
-        "responses": {},
-    }
-
-    sp = StringParser(dedent(handler.__doc__ or ""))
-
-    ret["summary"] = sp.consume_until_char("@").strip()
-    while not sp.is_done():
-        sp.skip()
-        type_of = sp.consume_until_char(":").strip()
-        sp.skip()
-        if type_of.startswith("param"):
-            name = type_of.split()[-1]
-            body = sp.consume_until_char("@").strip()
-            ret["parameters"][name] = body
-
-        elif type_of.startswith("body"):
-            body = sp.consume_until_char("@").strip()
-            ret["body"] = body
-
-        elif type_of.startswith("response"):
-            status = type_of.split()[-1]
-            body = sp.consume_until_char("@").strip()
-            ret["responses"][status] = body
-
-    return ret
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
@@ -60,9 +29,9 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
         for route in routes:
             handler: Callable = route.handler
             sig = signature(handler)
-            func_doc = parse_docstring(handler)
-
+            func_doc = parse_docstring(handler.__doc__ or "")
             responses: tuple[Response, ...]
+
             if get_origin(sig.return_annotation) is Union:
                 responses = get_args(sig.return_annotation)
             else:
@@ -74,8 +43,8 @@ async def build_docs(app: Application) -> None:  # noqa: C901, PLR0915
             pattern = route.pattern.decode("utf-8")
             path = paths[pattern][method.decode("utf-8").lower()] = {
                 "description": func_doc["summary"],
+                "parameters": [],
             }
-            path["parameters"] = []
             for schema in fmt.parse(pattern):
                 param_name = schema[1]
                 if param_name is None:

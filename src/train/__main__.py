@@ -1,4 +1,5 @@
 import logging
+import sys
 from datetime import time
 from os import PathLike
 from pathlib import Path
@@ -7,10 +8,10 @@ from typing import TYPE_CHECKING
 import click
 import uvicorn
 
-try:
-    from uvloop import run
-except ImportError:
+if sys.platform == "win32":
     from asyncio import run
+else:
+    from uvloop import run
 
 from train.app import app
 from train.services.node import NodeService

@@ -154,9 +154,9 @@ class FileManager:
                     "priority": row["priority"],
                     "date": row["requested_date"].date(),
                     "block_section_or_yard": (
-                        f"{row["from"].replace("_", " ")}"
+                        f"{row['from'].replace('_', ' ')}"
                         if row["from"] == row["to"]
-                        else f"{row["from"]}-{row["to"]}"
+                        else f"{row['from']}-{row['to']}"
                     ),
                     "corridor_block": row["block"],
                     "line": row["line"],
