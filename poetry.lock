@@ -139,7 +139,7 @@ description = "Fast web framework for Python asyncio"
 optional = false
 python-versions = ">=3.7"
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
 certifi = ">=2022.9.24"
@@ -154,10 +154,8 @@ full = ["PyJWT (>=2.6.0,<2.7.0)", "cryptography (>=38.0.1,<41.1.0)", "websockets
 jinja = ["Jinja2 (>=3.1.2,<3.2.0)"]
 
 [package.source]
-type = "git"
-url = "https://github.com/nandhagk/BlackSheep"
-reference = "HEAD"
-resolved_reference = "848974261053267bfa5d608e12510204db4790b8"
+type = "directory"
+url = "../BlackSheep"
 
 [[package]]
 name = "certifi"
@@ -1142,4 +1140,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b33f474136f54be989e265350b64a669890bf087fe194a505f9c141666f817c9"
+content-hash = "a8b25a809df7c7acc433f336e1f2a7bff5bc509d1fa52ad490e758d95384e50b"

@@ -1,4 +1,5 @@
 {
   "venv": "train-i_PvsaOm-py3.12",
-  "venvPath": "/home/nandhagk/.cache/pypoetry/virtualenvs"
+  "venvPath": "/home/nandhagk/.cache/pypoetry/virtualenvs",
+  "extraPaths": ["../BlackSheep"]
 }

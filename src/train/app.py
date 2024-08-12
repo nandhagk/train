@@ -81,7 +81,7 @@ app.use_cors(
 
 app.serve_files(
     Path.cwd() / "static",
-    root_path="/api/docs/",
+    root_path="/api/docs",
     extensions={".yaml", ".html"},
 )
 

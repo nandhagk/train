@@ -58,8 +58,8 @@ class TaskRepository:
         return Task.decode(row)
 
     @staticmethod
-    async def update_one(con: Connection, task: Task) -> Task:
-        row: Record = await con.fetchrow(
+    async def update_one(con: Connection, task: Task) -> Task | None:
+        row: Record | None = await con.fetchrow(
             """
             UPDATE task SET
             (
@@ -79,6 +79,9 @@ class TaskRepository:
             """,
             *task.encode()[:10],
         )
+
+        if row is None:
+            return None
 
         return Task.decode(row)
 
