@@ -100,9 +100,9 @@ class RequestedTaskRepository:
             """
             WITH r AS (
                 INSERT INTO requested_task
-                    (id, priority, section_id)
+                    (priority, section_id)
                 VALUES
-                    ($1, $2, $3)
+                    ($1, $2)
                 RETURNING *
             )
             SELECT
@@ -113,7 +113,7 @@ class RequestedTaskRepository:
             JOIN task
                 ON r.id = task.id
             """,
-            *requested_task.encode(),
+            *requested_task.encode()[1:],
         )
 
         return HydratedRequestedTask.decode(row)
