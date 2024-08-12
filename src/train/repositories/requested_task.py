@@ -122,8 +122,8 @@ class RequestedTaskRepository:
     async def update_one(
         con: Connection,
         requested_task: RequestedTask,
-    ) -> HydratedRequestedTask:
-        row: Record = await con.fetchrow(
+    ) -> HydratedRequestedTask | None:
+        row: Record | None = await con.fetchrow(
             """
             WITH r AS (
                 UPDATE requested_task SET
@@ -142,6 +142,9 @@ class RequestedTaskRepository:
             """,
             *requested_task.encode(),
         )
+
+        if row is None:
+            return None
 
         return HydratedRequestedTask.decode(row)
 

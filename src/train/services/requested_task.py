@@ -34,12 +34,12 @@ class RequestedTaskService:
     async def update_one(
         con: Connection,
         requested_task: UpdateRequestedTask,
-    ) -> HydratedRequestedTask:
-        task = await TaskRepository.update_one(con, requested_task)
+    ) -> HydratedRequestedTask | None:
+        await TaskRepository.update_one(con, requested_task)
         return await RequestedTaskRepository.update_one(
             con,
             RequestedTask(
-                id=task.id,
+                id=requested_task.id,
                 priority=requested_task.priority,
                 section_id=requested_task.section_id,
             ),
