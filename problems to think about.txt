@@ -1,0 +1,6 @@
+Now if we delete slots....
+We have to query for its task to delete!!
+
+Maybe then slots have multiple section ids?
+
+Perhaps then we have a delete intersecting slot tasks!
