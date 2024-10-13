@@ -804,13 +804,13 @@ files = [
 
 [[package]]
 name = "shed"
-version = "2024.3.1"
+version = "2024.10.1"
 description = "`shed` canonicalises Python code."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "shed-2024.3.1-py3-none-any.whl", hash = "sha256:b226d108c29064164061da40ae890b56dd047c2591b4b4ff878ac8335b8afd8f"},
-    {file = "shed-2024.3.1.tar.gz", hash = "sha256:fa2d171645c7823281fa5a8fbddcb8f78687573196b392c98bf0e1c27b4c2e90"},
+    {file = "shed-2024.10.1-py3-none-any.whl", hash = "sha256:fb8a76de5661f3aa33fca620660d8bc2cb16c6a83cc355a3e4eb2c138df01d96"},
+    {file = "shed-2024.10.1.tar.gz", hash = "sha256:094aa2f78fd5e307ba7ac31ee65caf501e552dca3ec70632234f8af62ca0c761"},
 ]
 
 [package.dependencies]
@@ -872,13 +872,13 @@ files = [
 
 [[package]]
 name = "uvicorn"
-version = "0.31.0"
+version = "0.31.1"
 description = "The lightning-fast ASGI server."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "uvicorn-0.31.0-py3-none-any.whl", hash = "sha256:cac7be4dd4d891c363cd942160a7b02e69150dcbc7a36be04d5f4af4b17c8ced"},
-    {file = "uvicorn-0.31.0.tar.gz", hash = "sha256:13bc21373d103859f68fe739608e2eb054a816dea79189bc3ca08ea89a275906"},
+    {file = "uvicorn-0.31.1-py3-none-any.whl", hash = "sha256:adc42d9cac80cf3e51af97c1851648066841e7cfb6993a4ca8de29ac1548ed41"},
+    {file = "uvicorn-0.31.1.tar.gz", hash = "sha256:f5167919867b161b7bcaf32646c6a94cdbd4c3aa2eb5c17d36bb9aa5cfd8c493"},
 ]
 
 [package.dependencies]
