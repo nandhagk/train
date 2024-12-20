@@ -14,12 +14,13 @@ import {
 } from "@/components/ui/sidebar"
 import { useState } from "react"
 
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router"
 
 import { TaskRequestForm } from "./form"
 
 export default function Page() {
-  const [title, setTitle] = useState([]);
+
+  const [title] = useState([]);
   console.log(title);
   return (
     <SidebarProvider>
@@ -47,7 +48,7 @@ export default function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4">
         <BrowserRouter>
           <Routes>
-            <Route index path="/schedule/task" element={<TaskRequestForm setTitle={setTitle}/>} />
+            <Route index path="/schedule/task" element={<TaskRequestForm/>} />
           </Routes>
         </BrowserRouter>
         </div>

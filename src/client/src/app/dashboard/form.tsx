@@ -22,8 +22,7 @@ const formSchema = z.object({
   }),
 })
 
-export function TaskRequestForm({setTitle}) {
-    setTitle(["Maintenance", "Request Task"])
+export function TaskRequestForm() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {

@@ -29,6 +29,7 @@ const data = {
         {
           title: "Schedule Task",
           url: "/schedule/schedule",
+          isActive: false,
         },
       ],
     },
@@ -39,6 +40,7 @@ const data = {
         {
           title: "Schedule",
           url: "#",
+          isActive: false,
         }
       ],
     },
