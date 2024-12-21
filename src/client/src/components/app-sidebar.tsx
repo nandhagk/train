@@ -19,16 +19,16 @@ const data = {
   versions: ["0.0.0"],
   navMain: [
     {
-      title: "Schedule Maintenance",
+      title: "Task Management",
       items: [
         {
           title: "Request Task",
           isActive: true,
-          url: "/schedule/task",
+          url: "/task/request",
         },
         {
           title: "Schedule Task",
-          url: "/schedule/schedule",
+          url: "/task/schedule",
           isActive: false,
         },
       ],
@@ -38,8 +38,8 @@ const data = {
       url: "#",
       items: [
         {
-          title: "Schedule",
-          url: "#",
+          title: "Slots",
+          url: "/view/scheduled_tasks",
           isActive: false,
         }
       ],
