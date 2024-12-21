@@ -1,5 +1,5 @@
-from src.train.models.slot import Slot
-from src.train.models.task import Task
+from train.models.slot import Slot
+from train.models.task import Task
 
 
 class HydratedTask(Task, frozen=True, kw_only=True):

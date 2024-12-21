@@ -16,15 +16,15 @@ from blacksheep.server.bindings import Binder, BoundValue
 from msgspec import Struct, ValidationError
 from msgspec.json import Decoder
 
-from src.train.repositories.task import TaskRepository
-from src.train.schemas.task import HydratedTask
 from train.openapi.doc import bind_app
 from train.repositories.requested_task import RequestedTaskRepository
+from train.repositories.task import TaskRepository
 from train.schemas.requested_task import (
     CreateRequestedTask,
     HydratedRequestedTask,
     UpdateRequestedTask,
 )
+from train.schemas.task import HydratedTask
 from train.services.requested_task import RequestedTaskService
 from train.utils import ENCODER, pool_factory
 
