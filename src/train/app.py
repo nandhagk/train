@@ -16,6 +16,8 @@ from blacksheep.server.bindings import Binder, BoundValue
 from msgspec import Struct, ValidationError
 from msgspec.json import Decoder
 
+from src.train.repositories.task import TaskRepository
+from src.train.schemas.task import HydratedTask
 from train.openapi.doc import bind_app
 from train.repositories.requested_task import RequestedTaskRepository
 from train.schemas.requested_task import (
@@ -114,7 +116,7 @@ async def health() -> SuccessResponse[HealthStatus]:
 @get("/api/requested_task")
 async def find_all_requested_tasks(
     pool: Pool,
-) -> SuccessResponse[list[HydratedRequestedTask]] | NotFoundResponse[str]:
+) -> SuccessResponse[list[HydratedRequestedTask]]:
     async with pool.acquire() as con, con.transaction():
         tasks = await RequestedTaskRepository.find_all(con)
 
@@ -185,3 +187,13 @@ async def schedule_requested_tasks(
         await RequestedTaskService.schedule_many(con, ids)
 
     return json({"success": True}, status=201)
+
+
+@get("/api/scheduled_task")
+async def find_all_scheduled_tasks(
+    pool: Pool,
+) -> SuccessResponse[list[HydratedTask]]:
+    async with pool.acquire() as con, con.transaction():
+        tasks = await TaskRepository.find_all_scheduled(con)
+
+    return json(tasks)

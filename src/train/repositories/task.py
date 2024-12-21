@@ -1,7 +1,11 @@
+from collections import defaultdict
 from collections.abc import Iterable
 
 from asyncpg import Connection, Record
 
+from src.train.models.slot import Slot
+from src.train.schemas.requested_task import HydratedRequestedTask
+from src.train.schemas.task import HydratedTask
 from train.models.task import PartialTask, Task
 
 
@@ -31,6 +35,40 @@ class TaskRepository:
         )
 
         return [Task.decode(row) for row in rows]
+
+    @staticmethod
+    async def find_all_scheduled(con: Connection) -> list[HydratedTask]:
+        rows: list[Record] = await con.fetch(
+            """
+            SELECT
+                task.*,
+                requested_task.priority,
+                requested_task.section_id
+            FROM task
+            JOIN requested_task
+                ON task.id = requested_task.id
+            """,
+        )
+
+        tasks = [HydratedRequestedTask.decode(row) for row in rows]
+
+        rows: list[Record] = await con.fetch(
+            """
+            SELECT slot.* FROM slot
+            WHERE task_id IS NOT NULL
+            """,
+        )
+
+        slots = [Slot.decode(row) for row in rows]
+        slots_by_task = defaultdict(list)
+        for slot in slots:
+            slots_by_task[slot.task_id].append(slot)
+
+        return [
+            HydratedTask.decode((*task.encode(), slots_by_task[task.id]))
+            for task in tasks
+            if task.id in slots_by_task
+        ]
 
     @staticmethod
     async def insert_one(con: Connection, task: PartialTask) -> Task:
