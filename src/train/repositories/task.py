@@ -3,10 +3,10 @@ from collections.abc import Iterable
 
 from asyncpg import Connection, Record
 
-from src.train.models.slot import Slot
-from src.train.schemas.requested_task import HydratedRequestedTask
-from src.train.schemas.task import HydratedTask
+from train.models.slot import Slot
 from train.models.task import PartialTask, Task
+from train.schemas.requested_task import HydratedRequestedTask
+from train.schemas.task import HydratedTask
 
 
 class TaskRepository:
