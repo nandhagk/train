@@ -65,7 +65,7 @@ class RequestedTaskRepository:
             WHERE NOT EXISTS (
                 SELECT 1 FROM slot
                 WHERE
-                    slot.train_id = task.id
+                    slot.task_id = task.id
             )
             """,
         )
@@ -77,24 +77,21 @@ class RequestedTaskRepository:
         con: Connection,
         id: int,
     ) -> HydratedRequestedTask | None:
-        row: Record | None = await con.fetchrow(
+        requested_task = await RequestedTaskRepository.find_one_by_id(con, id)
+
+        if requested_task is None:
+            return None
+
+        await con.execute(
             """
-            DELETE FROM requested_task
-            USING task
+            DELETE FROM task
             WHERE
                 task.id = $1
-            RETURNING
-                task.*,
-                requested_task.priority,
-                requested_task.section_id
             """,
             id,
         )
 
-        if row is None:
-            return None
-
-        return HydratedRequestedTask.decode(row)
+        return requested_task
 
     @staticmethod
     async def insert_one(

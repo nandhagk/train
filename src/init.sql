@@ -78,7 +78,7 @@ CREATE TABLE slot (
 );
 
 CREATE TABLE requested_task (
-    id INTEGER PRIMARY KEY REFERENCES task(id),
+    id INTEGER PRIMARY KEY REFERENCES task(id) ON DELETE CASCADE,
 
     priority INTEGER NOT NULL,
     section_id INTEGER NOT NULL,

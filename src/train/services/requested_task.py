@@ -49,11 +49,13 @@ class RequestedTaskService:
     async def schedule_many(con: Connection, ids: list[int]) -> None:
         requested_tasks = await RequestedTaskRepository.find_many_by_ids(con, ids)
 
-        task_map: defaultdict[int, list[HydratedRequestedTask]] = defaultdict(list)
+        tasks_by_section: defaultdict[int, list[HydratedRequestedTask]] = defaultdict(
+            list,
+        )
         for task in requested_tasks:
-            task_map[task.section_id].append(task)
+            tasks_by_section[task.section_id].append(task)
 
-        for section_id, tasks in task_map.items():
+        for section_id, tasks in tasks_by_section.items():
             await RequestedTaskService.schedule_many_by_section(con, section_id, tasks)
 
     @staticmethod

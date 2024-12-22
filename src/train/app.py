@@ -138,6 +138,9 @@ async def find_requested_task_by_id(
     async with pool.acquire() as con, con.transaction():
         task = await RequestedTaskRepository.find_one_by_id(con, id)
 
+    if task is None:
+        return json({"message": "Not Found"}, status=404)
+
     return json(task)
 
 

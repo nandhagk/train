@@ -2,6 +2,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 
 from asyncpg import Connection, Record
+from msgspec.structs import asdict
 
 from train.models.slot import Slot
 from train.models.task import PartialTask, Task
@@ -65,7 +66,7 @@ class TaskRepository:
             slots_by_task[slot.task_id].append(slot)
 
         return [
-            HydratedTask.decode((*task.encode(), slots_by_task[task.id]))
+            HydratedTask(**asdict(task), slots=slots_by_task[task.id])
             for task in tasks
             if task.id in slots_by_task
         ]
