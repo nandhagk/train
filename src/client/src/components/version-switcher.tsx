@@ -23,7 +23,7 @@ export function VersionSwitcher() {
                 <GalleryVerticalEnd className="size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none">
-                <span className="font-semibold">Train</span>
+                <span className="font-semibold">FTCB</span>
               </div>
             </SidebarMenuButton>
 
