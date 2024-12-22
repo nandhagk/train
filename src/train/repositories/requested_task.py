@@ -62,6 +62,11 @@ class RequestedTaskRepository:
             FROM requested_task
             JOIN task
                 ON task.id = requested_task.id
+            WHERE NOT EXISTS (
+                SELECT 1 FROM slot
+                WHERE
+                    slot.train_id = task.id
+            )
             """,
         )
 
