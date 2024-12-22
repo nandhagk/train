@@ -15,7 +15,7 @@ click = "^8.1.7"
 openpyxl = "^3.1.4"
 blacksheep = {git = "https://github.com/nandhagk/BlackSheep"}
 # blacksheep = {path = "../BlackSheep", develop = true}
-uvicorn = {extras = ["standard"], version = "^0.33.0"}
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
 msgspec = "^0.18.6"
 asyncpg = "^0.30.0"
 
