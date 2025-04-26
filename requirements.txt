@@ -2,7 +2,7 @@ anyio==4.9.0 ; python_version >= "3.11" and python_version < "4.0"
 async-timeout==4.0.3 ; python_version >= "3.11" and python_version < "3.12.0"
 asyncpg==0.30.0 ; python_version >= "3.11" and python_version < "4.0"
 blacksheep @ git+https://github.com/nandhagk/BlackSheep@05e4907815cf9137d78c332b4a677d5f3ea0dbc2 ; python_version >= "3.11" and python_version < "4.0"
-certifi==2024.12.14 ; python_version >= "3.11" and python_version < "4.0"
+certifi==2025.4.26 ; python_version >= "3.11" and python_version < "4.0"
 charset-normalizer==3.4.1 ; python_version >= "3.11" and python_version < "4.0"
 click==8.1.8 ; python_version >= "3.11" and python_version < "4.0"
 colorama==0.4.6 ; python_version >= "3.11" and python_version < "4.0" and (platform_system == "Windows" or sys_platform == "win32")
